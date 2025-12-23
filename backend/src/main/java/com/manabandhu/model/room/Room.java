@@ -1,65 +1,76 @@
 package com.manabandhu.model.room;
 
-import com.manabandhu.model.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "rooms")
 @EntityListeners(AuditingEntityListener.class)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Room {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 2000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
-    private String address;
-
-    private String city;
+    private String location;
 
     @Column(nullable = false)
-    private Double rent;
-
-    private LocalDate availableFrom;
+    private BigDecimal rent;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoomType roomType;
+    private RoomType type;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoomStatus status = RoomStatus.AVAILABLE;
+    private String postedBy;
+
+    @Column
+    private String contactInfo;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public enum RoomType {
-        SINGLE, SHARED, STUDIO, APARTMENT
+        PRIVATE_ROOM, SHARED_ROOM, STUDIO, APARTMENT
     }
 
-    public enum RoomStatus {
-        AVAILABLE, RENTED, UNAVAILABLE
-    }
+    // Constructors, getters, setters
+    public Room() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public BigDecimal getRent() { return rent; }
+    public void setRent(BigDecimal rent) { this.rent = rent; }
+
+    public RoomType getType() { return type; }
+    public void setType(RoomType type) { this.type = type; }
+
+    public String getPostedBy() { return postedBy; }
+    public void setPostedBy(String postedBy) { this.postedBy = postedBy; }
+
+    public String getContactInfo() { return contactInfo; }
+    public void setContactInfo(String contactInfo) { this.contactInfo = contactInfo; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

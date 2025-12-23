@@ -1,36 +1,24 @@
 package com.manabandhu.model.ride;
 
-import com.manabandhu.model.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "rides")
 @EntityListeners(AuditingEntityListener.class)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Ride {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "driver_id", nullable = false)
-    private User driver;
+    @Column(nullable = false)
+    private String fromLocation;
 
     @Column(nullable = false)
-    private String origin;
-
-    @Column(nullable = false)
-    private String destination;
+    private String toLocation;
 
     @Column(nullable = false)
     private LocalDateTime departureTime;
@@ -38,19 +26,52 @@ public class Ride {
     @Column(nullable = false)
     private Integer availableSeats;
 
-    private Double pricePerSeat;
+    @Column
+    private BigDecimal pricePerSeat;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RideStatus status = RideStatus.PENDING;
+    private String driverId;
 
-    private String notes;
+    @Column
+    private String contactInfo;
+
+    @Column
+    private String description;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public enum RideStatus {
-        PENDING, ACTIVE, COMPLETED, CANCELLED
-    }
+    // Constructors, getters, setters
+    public Ride() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getFromLocation() { return fromLocation; }
+    public void setFromLocation(String fromLocation) { this.fromLocation = fromLocation; }
+
+    public String getToLocation() { return toLocation; }
+    public void setToLocation(String toLocation) { this.toLocation = toLocation; }
+
+    public LocalDateTime getDepartureTime() { return departureTime; }
+    public void setDepartureTime(LocalDateTime departureTime) { this.departureTime = departureTime; }
+
+    public Integer getAvailableSeats() { return availableSeats; }
+    public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
+
+    public BigDecimal getPricePerSeat() { return pricePerSeat; }
+    public void setPricePerSeat(BigDecimal pricePerSeat) { this.pricePerSeat = pricePerSeat; }
+
+    public String getDriverId() { return driverId; }
+    public void setDriverId(String driverId) { this.driverId = driverId; }
+
+    public String getContactInfo() { return contactInfo; }
+    public void setContactInfo(String contactInfo) { this.contactInfo = contactInfo; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
