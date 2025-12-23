@@ -66,12 +66,12 @@ export default function AuthIndex() {
 
   const handleEmailSignUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/login");
+    router.push("/(auth)/signup");
   };
 
   const handlePhoneSignUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/login");
+    router.push("/(auth)/verify-phone");
   };
 
   const handleFacebookSignIn = () => {

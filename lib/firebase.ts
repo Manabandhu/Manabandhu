@@ -8,6 +8,8 @@ import {
   signInWithCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
   signOut as firebaseSignOut,
   User as FirebaseUser,
 } from "firebase/auth";
@@ -84,6 +86,16 @@ export const signInWithEmail = async (email: string, password: string) => {
 export const signUpWithEmail = async (email: string, password: string) => {
   if (!auth) throw new Error("Firebase Auth not initialized");
   return createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const resetPassword = async (email: string) => {
+  if (!auth) throw new Error("Firebase Auth not initialized");
+  return sendPasswordResetEmail(auth, email);
+};
+
+export const confirmPasswordReset = async (oobCode: string, newPassword: string) => {
+  if (!auth) throw new Error("Firebase Auth not initialized");
+  return firebaseConfirmPasswordReset(auth, oobCode, newPassword);
 };
 
 export const signOut = async () => {
