@@ -21,6 +21,7 @@ import { profileSchema, ProfileInput } from "@/lib/validators";
 import * as Haptics from "expo-haptics";
 import { COUNTRY_LIST, DEFAULT_COUNTRY } from "@/constants/countryCodes";
 import { GRADIENTS } from "@/constants/colors";
+import { onboardingApi } from "@/lib/api";
 
 const purposes = [
   { value: "student", label: "Student" },
@@ -64,34 +65,20 @@ export default function WelcomeScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Map purposes to role (use first selected purpose as primary role)
       const role = selectedPurposes[0] || "visitor";
       
-      // Update form with role
       const formData = {
         ...data,
         role: role as "student" | "worker" | "visitor",
       };
 
-      // Save to Firestore
-      const { db, getCurrentUser } = await import("../../lib/firebase");
-      const { doc, setDoc } = await import("firebase/firestore");
-      const user = getCurrentUser();
-
-      if (user) {
-        await setDoc(
-          doc(db, "users", user.uid),
-          {
-            displayName: formData.displayName,
-            country: formData.country,
-            city: formData.city,
-            role: formData.role,
-            purposes: selectedPurposes,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
-      }
+      await onboardingApi.updateOnboarding({
+        displayName: formData.displayName,
+        country: formData.country,
+        city: formData.city,
+        role: formData.role,
+        purposes: selectedPurposes,
+      });
 
       router.push("/(onboarding)/goals");
     } catch (error) {

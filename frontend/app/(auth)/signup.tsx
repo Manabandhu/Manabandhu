@@ -20,14 +20,15 @@ import { Logo } from "@/components/ui/Logo";
 import { UserIcon, EmailIcon, LockIcon, EyeIcon, EyeOffIcon } from "@/components/ui/Icons";
 import { GluestackCheckbox } from "@/components/ui/gluestack-index";
 import { GluestackButton } from "@/components/ui/gluestack-index";
-import { signUpWithEmail } from "@/lib/firebase";
-import { useAuthStore } from "@/store/auth.store";
+import { authApi } from "@/lib/api";
 import { GRADIENTS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail, sanitizeText, sanitizePhone } from "@/lib/sanitize";
+import { signInWithCustomToken } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 const { width } = Dimensions.get("window");
 
@@ -81,20 +82,20 @@ export default function SignupScreen() {
       const sanitizedName = sanitizeText(data.fullName, 100);
       const sanitizedPhone = sanitizePhone(data.phoneNumber);
       
-      const result = await signUpWithEmail(sanitizedEmail, data.password);
-      if (result.user) {
-        // Update user profile with name
-        const { updateProfile } = await import("firebase/auth");
-        await updateProfile(result.user, { displayName: sanitizedName });
+      const response = await authApi.signup({
+        name: sanitizedName,
+        email: sanitizedEmail,
+        password: data.password,
+      });
 
-        // Auth state listener will hydrate the store; just navigate to profile completion
+      if (response.idToken) {
+        await signInWithCustomToken(auth, response.idToken);
         router.push(ROUTES.auth.profile);
       }
     } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const appError = normalizeError(error);
       logger.error("Signup error", { email: data.email }, error);
-      // Could show error toast here with appError.userMessage
     } finally {
       setLoading(false);
     }

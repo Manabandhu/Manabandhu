@@ -21,6 +21,7 @@ import {
 import { GluestackSwitch } from "@/components/ui/gluestack-index";
 import { GluestackButton } from "@/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
+import { onboardingApi } from "@/lib/api";
 
 interface PriorityItem {
   id: string;
@@ -83,30 +84,15 @@ export default function NotificationsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      // Save priorities to Firestore
-      const { db, getCurrentUser } = await import("../../lib/firebase");
-      const { doc, setDoc } = await import("firebase/firestore");
-      const user = getCurrentUser();
+      const enabledPriorities = priorities
+        .filter((p) => p.enabled)
+        .map((p) => p.id);
 
-      if (user) {
-        const enabledPriorities = priorities
-          .filter((p) => p.enabled)
-          .map((p) => p.id);
-
-        await setDoc(
-          doc(db, "users", user.uid),
-          {
-            homepagePriorities: priorities.map((p) => ({
-              id: p.id,
-              enabled: p.enabled,
-            })),
-            enabledPriorities,
-            onboardingCompleted: true,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
-      }
+      await onboardingApi.updateOnboarding({
+        homepagePriorities: priorities.map((p) => p.id),
+        enabledPriorities,
+        onboardingCompleted: true,
+      });
 
       router.replace("/(onboarding)/done");
     } catch (error) {

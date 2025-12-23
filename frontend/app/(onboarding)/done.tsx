@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/Icons";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
-import { doc, setDoc } from "firebase/firestore";
-import { db, getCurrentUser } from "@/lib/firebase";
+import { onboardingApi } from "@/lib/api";
 import Svg, { Circle, Polyline } from "react-native-svg";
 
 const tips = [
@@ -58,16 +57,10 @@ export default function DoneScreen() {
   useEffect(() => {
     const completeOnboarding = async () => {
       try {
-        const user = getCurrentUser();
-        if (user) {
-          await setDoc(
-            doc(db, "users", user.uid),
-            { onboardingCompleted: true, updatedAt: new Date().toISOString() },
-            { merge: true }
-          );
-          await updateUserProfile({ onboardingCompleted: true });
-          setOnboardingCompleted(true);
-        }
+        await onboardingApi.updateOnboarding({
+          onboardingCompleted: true,
+        });
+        setOnboardingCompleted(true);
       } catch (error) {
         console.error("Error completing onboarding:", error);
       }

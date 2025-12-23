@@ -29,6 +29,7 @@ import {
 import { GluestackButton } from "@/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants/colors";
+import { onboardingApi } from "@/lib/api";
 
 const interests = [
   { id: "jobs_career", title: "Jobs & Career", icon: BriefcaseIcon },
@@ -64,21 +65,9 @@ export default function GoalsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Save interests to Firestore
-      const { db, getCurrentUser } = await import("../../lib/firebase");
-      const { doc, setDoc } = await import("firebase/firestore");
-      const user = getCurrentUser();
-
-      if (user) {
-        await setDoc(
-          doc(db, "users", user.uid),
-          {
-            interests: selectedInterests,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
-      }
+      await onboardingApi.updateOnboarding({
+        interests: selectedInterests,
+      });
 
       router.push("/(onboarding)/location");
     } catch (error) {
