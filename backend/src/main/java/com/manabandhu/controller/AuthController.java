@@ -6,6 +6,9 @@ import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.manabandhu.dto.*;
 import com.manabandhu.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "APIs for user authentication")
 public class AuthController {
 
     private final UserService userService;
@@ -25,6 +29,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
+    @Operation(summary = "User signup", description = "Create a new user account with Firebase authentication")
+    @ApiResponse(responseCode = "201", description = "User created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid signup data or user already exists")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         try {
             UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest()
@@ -57,6 +64,9 @@ public class AuthController {
     }
 
     @PostMapping("/verify-token")
+    @Operation(summary = "Verify Firebase token", description = "Verify Firebase ID token and return user information")
+    @ApiResponse(responseCode = "200", description = "Token verified successfully")
+    @ApiResponse(responseCode = "401", description = "Invalid or expired token")
     public ResponseEntity<?> verifyToken(@RequestBody Map<String, String> payload) {
         try {
             String idToken = payload.get("idToken");

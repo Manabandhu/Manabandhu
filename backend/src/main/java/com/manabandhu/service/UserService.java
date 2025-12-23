@@ -23,7 +23,13 @@ public class UserService {
     @Cacheable(value = "users", key = "#firebaseUid")
     public UserDTO getUserByFirebaseUid(String firebaseUid) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            .orElseGet(() -> {
+                // Create a basic user record for Firebase authenticated users
+                User newUser = new User();
+                newUser.setFirebaseUid(firebaseUid);
+                newUser.setOnboardingCompleted(false);
+                return userRepository.save(newUser);
+            });
         return mapToDTO(user);
     }
 
@@ -66,7 +72,16 @@ public class UserService {
     @CacheEvict(value = "users", key = "#firebaseUid")
     public UserDTO updateOnboarding(String firebaseUid, OnboardingRequest request) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            .orElseGet(() -> {
+                // Create user if doesn't exist (for Firebase authenticated users)
+                User newUser = new User();
+                newUser.setFirebaseUid(firebaseUid);
+                newUser.setName(request.getDisplayName());
+                newUser.setCountry(request.getCountry());
+                newUser.setCity(request.getCity());
+                newUser.setRole(request.getRole());
+                return newUser;
+            });
         
         if (request.getDisplayName() != null) user.setName(request.getDisplayName());
         if (request.getCountry() != null) user.setCountry(request.getCountry());
