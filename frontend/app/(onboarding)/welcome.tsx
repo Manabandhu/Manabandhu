@@ -40,6 +40,7 @@ export default function WelcomeScreen() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -54,14 +55,27 @@ export default function WelcomeScreen() {
 
   const togglePurpose = (purpose: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedPurposes((prev) =>
-      prev.includes(purpose)
-        ? prev.filter((p) => p !== purpose)
-        : [...prev, purpose]
-    );
+    const newPurposes = selectedPurposes.includes(purpose)
+      ? selectedPurposes.filter((p) => p !== purpose)
+      : [...selectedPurposes, purpose];
+    
+    setSelectedPurposes(newPurposes);
+    
+    // Update the role field based on the first selected purpose
+    if (newPurposes.length > 0) {
+      const roleMapping: Record<string, "student" | "worker" | "visitor"> = {
+        student: "student",
+        professional: "worker",
+        family_member: "visitor",
+        tourist: "visitor"
+      };
+      const role = roleMapping[newPurposes[0]] || "visitor";
+      setValue("role", role);
+    }
   };
 
   const handleContinue = async (data: ProfileInput) => {
+    console.log('handleContinue called with data:', data);
     try {
       console.log('Form data:', data);
       console.log('Selected purposes:', selectedPurposes);
@@ -315,7 +329,27 @@ export default function WelcomeScreen() {
             <Text style={styles.skipLink}>Skip for now</Text>
           </TouchableOpacity>
           <GluestackButton
-            onPress={handleSubmit(handleContinue)}
+            onPress={() => {
+              console.log('Button clicked!');
+              console.log('Form valid:', isFormValid);
+              console.log('Form values:', {
+                displayName: watch('displayName'),
+                country: watch('country'),
+                city: watch('city'),
+                purposes: selectedPurposes
+              });
+              console.log('Form errors:', errors);
+              const submitHandler = handleSubmit(
+                (data) => {
+                  console.log('Form submission successful, calling handleContinue');
+                  handleContinue(data);
+                },
+                (errors) => {
+                  console.log('Form validation failed:', errors);
+                }
+              );
+              submitHandler();
+            }}
             isDisabled={!isFormValid}
             fullWidth
           >

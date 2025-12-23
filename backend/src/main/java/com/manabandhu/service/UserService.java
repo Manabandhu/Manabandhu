@@ -20,7 +20,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Cacheable(value = "users", key = "#firebaseUid")
+    // @Cacheable(value = "users", key = "#firebaseUid")
     public UserDTO getUserByFirebaseUid(String firebaseUid) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
             .orElseGet(() -> {
@@ -34,7 +34,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#request.firebaseUid")
+    // @CacheEvict(value = "users", key = "#request.firebaseUid")
     public UserDTO createUser(CreateUserRequest request) {
         User user = new User();
         user.setFirebaseUid(request.getFirebaseUid());
@@ -51,7 +51,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#firebaseUid")
+    // @CacheEvict(value = "users", key = "#firebaseUid")
     public UserDTO updateUser(String firebaseUid, CreateUserRequest request) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -69,7 +69,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#firebaseUid")
+    // @CacheEvict(value = "users", key = "#firebaseUid")
     public UserDTO updateOnboarding(String firebaseUid, OnboardingRequest request) {
         User user = userRepository.findByFirebaseUid(firebaseUid)
             .orElseGet(() -> {
