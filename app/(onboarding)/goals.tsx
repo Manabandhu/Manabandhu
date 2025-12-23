@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/Icons";
 import { Button } from "@/components/ui/Button";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants/colors";
 
 const interests = [
   { id: "jobs_career", title: "Jobs & Career", icon: BriefcaseIcon },
@@ -102,7 +103,7 @@ export default function GoalsScreen() {
       >
         {/* Hero Header */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroHeader}

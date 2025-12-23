@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth.store";
 import { LinearGradient } from "expo-linear-gradient";
+import { GRADIENTS } from "@/constants/colors";
+import { ROUTES } from "@/constants/routes";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -11,15 +13,12 @@ export default function HomeScreen() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace("/(auth)");
+    router.replace(ROUTES.auth.root);
   };
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
-      <LinearGradient
-        colors={["#6366f1", "#4f46e5"]}
-        className="pt-16 pb-8 px-6"
-      >
+      <LinearGradient colors={GRADIENTS.primaryShort} className="pt-16 pb-8 px-6">
         <Text className="text-3xl font-bold text-white mb-2">
           Welcome back!
         </Text>

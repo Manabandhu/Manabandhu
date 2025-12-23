@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { requestLocationPermission } from "@/lib/permissions";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants/colors";
 import Svg, { Rect, Line, Path, Circle, G } from "react-native-svg";
 
 const benefits = [
@@ -89,7 +90,7 @@ export default function LocationScreen() {
       >
         {/* Hero Header */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroHeader}

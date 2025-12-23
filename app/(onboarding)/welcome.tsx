@@ -19,24 +19,8 @@ import { UserIcon, GlobeIcon, ChevronDownIcon, CheckIcon } from "@/components/ui
 import { Button } from "@/components/ui/Button";
 import { profileSchema, ProfileInput } from "@/lib/validators";
 import * as Haptics from "expo-haptics";
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "India",
-  "Germany",
-  "France",
-  "Japan",
-  "China",
-  "Brazil",
-  "Mexico",
-  "Spain",
-  "Italy",
-  "South Korea",
-  "Singapore",
-];
+import { COUNTRY_LIST, DEFAULT_COUNTRY } from "@/constants/countryCodes";
+import { GRADIENTS } from "@/constants/colors";
 
 const purposes = [
   { value: "student", label: "Student" },
@@ -59,7 +43,7 @@ export default function WelcomeScreen() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       displayName: "",
-      country: "",
+      country: DEFAULT_COUNTRY,
       city: "",
       role: undefined,
     },
@@ -135,7 +119,7 @@ export default function WelcomeScreen() {
       >
         {/* Hero Header */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroHeader}
@@ -541,7 +525,7 @@ const CountryModal: React.FC<CountryModalProps> = ({
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.modalList}>
-            {countries.map((countryName) => (
+            {COUNTRY_LIST.map((countryName) => (
               <TouchableOpacity
                 key={countryName}
                 style={[
