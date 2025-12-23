@@ -1,5 +1,7 @@
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
+
 export const API = {
-  baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || "https://api.manabandhu.com",
+  baseUrl: API_BASE_URL,
 } as const;
 
 

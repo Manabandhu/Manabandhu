@@ -11,8 +11,3 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     Page<Room> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<Room> findByTypeOrderByCreatedAtDesc(Room.RoomType type, Pageable pageable);
 }
-
-@Repository
-interface RideRepository extends JpaRepository<com.manabandhu.model.ride.Ride, Long> {
-    Page<com.manabandhu.model.ride.Ride> findAllByOrderByDepartureTimeAsc(Pageable pageable);
-}
