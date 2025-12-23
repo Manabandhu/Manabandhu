@@ -1,9 +1,11 @@
 import React from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { openMapsDirections } from "@/lib/maps";
 
 export default function RoomDetail() {
   const router = useRouter();
+  const address = "855 Mission St, San Francisco, CA";
 
   return (
     <ScrollView className="flex-1 bg-white dark:bg-gray-900">
@@ -32,18 +34,30 @@ export default function RoomDetail() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4"
-          onPress={() => router.push("/(tabs)/rooms/map")}
-        >
-          <Text className="text-gray-900 dark:text-white font-semibold">View on map</Text>
-          <Text className="text-gray-600 dark:text-gray-400 text-sm">
-            Map placeholder (Google/Apple Maps)
-          </Text>
-        </TouchableOpacity>
+        <View className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 space-y-2">
+          <View>
+            <Text className="text-gray-900 dark:text-white font-semibold">Location</Text>
+            <Text className="text-gray-600 dark:text-gray-400 text-sm">{address}</Text>
+          </View>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              className="flex-1 bg-white dark:bg-gray-900 rounded-lg py-2 border border-gray-200 dark:border-gray-700"
+              onPress={() => router.push("/(tabs)/rooms/map")}
+            >
+              <Text className="text-gray-900 dark:text-white text-center font-semibold">
+                View nearby
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 bg-blue-600 rounded-lg py-2"
+              onPress={() => openMapsDirections(address)}
+            >
+              <Text className="text-white text-center font-semibold">Open in Maps</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 }
-
 
