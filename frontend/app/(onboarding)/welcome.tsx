@@ -63,6 +63,9 @@ export default function WelcomeScreen() {
 
   const handleContinue = async (data: ProfileInput) => {
     try {
+      console.log('Form data:', data);
+      console.log('Selected purposes:', selectedPurposes);
+      
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
       const role = selectedPurposes[0] || "visitor";
@@ -72,7 +75,7 @@ export default function WelcomeScreen() {
         role: role as "student" | "worker" | "visitor",
       };
 
-      await onboardingApi.updateOnboarding({
+      console.log('Sending onboarding data:', {
         displayName: formData.displayName,
         country: formData.country,
         city: formData.city,
@@ -80,8 +83,19 @@ export default function WelcomeScreen() {
         purposes: selectedPurposes,
       });
 
+      // Temporarily skip API call for testing
+      // await onboardingApi.updateOnboarding({
+      //   displayName: formData.displayName,
+      //   country: formData.country,
+      //   city: formData.city,
+      //   role: formData.role,
+      //   purposes: selectedPurposes,
+      // });
+
+      console.log('Navigating to goals');
       router.push("/(onboarding)/goals");
     } catch (error) {
+      console.error('Onboarding error:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -91,7 +105,7 @@ export default function WelcomeScreen() {
     router.push("/(onboarding)/goals");
   };
 
-  const isFormValid = watch("displayName") && watch("country");
+  const isFormValid = watch("displayName") && watch("country") && watch("city") && selectedPurposes.length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -218,6 +232,41 @@ export default function WelcomeScreen() {
                     }}
                     selectedCountry={value}
                   />
+                </View>
+              )}
+            />
+          </View>
+
+          {/* City Input */}
+          <View style={styles.formGroup}>
+            <Text style={styles.inputLabel}>City</Text>
+            <Controller
+              control={control}
+              name="city"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <View>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      error && styles.inputWrapperError,
+                    ]}
+                  >
+                    <View style={styles.inputIcon}>
+                      <GlobeIcon size={20} color="#6B7280" />
+                    </View>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your city"
+                      placeholderTextColor="#9CA3AF"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      autoCapitalize="words"
+                    />
+                  </View>
+                  {error && (
+                    <Text style={styles.errorText}>{error.message}</Text>
+                  )}
                 </View>
               )}
             />

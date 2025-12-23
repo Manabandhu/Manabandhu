@@ -58,7 +58,7 @@ export default function TabsLayout() {
         />
         
         <Tabs.Screen 
-          name="chat" 
+          name="chat/index" 
           options={{
             title: "Chat",
             tabBarIcon: ({ color, size }) => <MessageIcon size={size} color={color} />,
@@ -85,7 +85,7 @@ export default function TabsLayout() {
         />
         
         <Tabs.Screen 
-          name="community" 
+          name="community/index" 
           options={{
             title: "Community",
             tabBarIcon: ({ color, size }) => <UsersIcon size={size} color={color} />,
@@ -93,19 +93,12 @@ export default function TabsLayout() {
         />
         
         <Tabs.Screen 
-          name="profile" 
+          name="profile/index" 
           options={{
             title: "Profile",
             tabBarIcon: ({ color, size }) => <UserIcon size={size} color={color} />,
           }}
         />
-
-        <Tabs.Screen name="rooms" options={{ href: null }} />
-        <Tabs.Screen name="rides" options={{ href: null }} />
-        <Tabs.Screen name="jobs" options={{ href: null }} />
-        <Tabs.Screen name="expenses" options={{ href: null }} />
-        <Tabs.Screen name="utilities" options={{ href: null }} />
-        <Tabs.Screen name="admin" options={{ href: null }} />
       </Tabs>
 
       <Modal
@@ -150,10 +143,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.3)",
     elevation: 8,
   },
   modalOverlay: {
