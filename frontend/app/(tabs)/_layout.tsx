@@ -26,8 +26,8 @@ export default function TabsLayout() {
     { icon: RoomIcon, label: "Rooms", route: "/rooms" },
     { icon: CarIcon, label: "Rides", route: "/rides" },
     { icon: CreditCardIcon, label: "Expenses", route: "/expenses" },
-    { icon: UsersIcon, label: "Community", route: "/community" },
     { icon: SettingsIcon, label: "Utilities", route: "/utilities" },
+    { icon: UserIcon, label: "Admin", route: "/admin" },
   ];
 
   const handleExploreOptionPress = (route: string) => {
@@ -58,7 +58,7 @@ export default function TabsLayout() {
         />
         
         <Tabs.Screen 
-          name="chat/index" 
+          name="chat" 
           options={{
             title: "Chat",
             tabBarIcon: ({ color, size }) => <MessageIcon size={size} color={color} />,
@@ -85,22 +85,22 @@ export default function TabsLayout() {
         />
         
         <Tabs.Screen 
-          name="community/index" 
+          name="community" 
           options={{
             title: "Community",
             tabBarIcon: ({ color, size }) => <UsersIcon size={size} color={color} />,
           }}
         />
         
-        {/* Hide all nested routes from tab bar */}
-        <Tabs.Screen name="jobs" options={{ href: null }} />
-        <Tabs.Screen name="rooms" options={{ href: null }} />
-        <Tabs.Screen name="rides" options={{ href: null }} />
-        <Tabs.Screen name="expenses" options={{ href: null }} />
-        <Tabs.Screen name="utilities" options={{ href: null }} />
-        <Tabs.Screen name="admin" options={{ href: null }} />
-        <Tabs.Screen name="chat/conversation" options={{ href: null }} />
-        <Tabs.Screen name="community/create-post" options={{ href: null }} />
+        <Tabs.Screen 
+          name="profile" 
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => <UserIcon size={size} color={color} />,
+          }}
+        />
+        
+
       </Tabs>
 
       <Modal
