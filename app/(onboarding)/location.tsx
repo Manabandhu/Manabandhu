@@ -82,7 +82,7 @@ export default function LocationScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
-      style={{ backgroundColor: "#F2F2F2" }}
+      style={{ backgroundColor: "#F9FAFB" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -194,6 +194,9 @@ export default function LocationScreen() {
 
         {/* Bottom CTA */}
         <View style={styles.bottomCta}>
+          <Text style={styles.ctaNote}>
+            You can update location permissions anytime in Settings.
+          </Text>
           <View style={styles.buttonContainer}>
             <Button
               title="Enable Location"
@@ -274,7 +277,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 24,
     paddingHorizontal: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9FAFB",
     flex: 1,
   },
   illustrationContainer: {
@@ -322,8 +325,15 @@ const styles = StyleSheet.create({
   bottomCta: {
     paddingHorizontal: 20,
     paddingBottom: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9FAFB",
     gap: 16,
+  },
+  ctaNote: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
+    textAlign: "center",
+    marginBottom: 4,
   },
   buttonContainer: {
     gap: 12,

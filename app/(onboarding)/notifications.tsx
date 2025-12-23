@@ -125,7 +125,7 @@ export default function NotificationsScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
-      style={{ backgroundColor: "#F2F2F2" }}
+      style={{ backgroundColor: "#F9FAFB" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -170,7 +170,12 @@ export default function NotificationsScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Set Your Priorities</Text>
             <Text style={styles.sectionSubtitle}>
-              Drag to reorder or toggle to set as priority
+              Toggle the sections you want to see first on your homepage
+            </Text>
+            <Text style={styles.sectionHelper}>
+              {enabledPriorities.length > 0
+                ? `${enabledPriorities.length} enabled`
+                : "Pick at least one to get tailored updates"}
             </Text>
           </View>
 
@@ -180,13 +185,6 @@ export default function NotificationsScreen() {
               const IconComponent = priority.icon;
               return (
                 <View key={priority.id} style={styles.priorityCard}>
-                  {/* Drag Handle */}
-                  <View style={styles.dragHandle}>
-                    <View style={styles.dragLine} />
-                    <View style={styles.dragLine} />
-                    <View style={styles.dragLine} />
-                  </View>
-
                   {/* Icon */}
                   <LinearGradient
                     colors={priority.gradient}
@@ -353,7 +351,7 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 24,
     paddingHorizontal: 24,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F9FAFB",
     flex: 1,
   },
   sectionHeader: {
@@ -370,6 +368,12 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#6B7280",
   },
+  sectionHelper: {
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
   priorityCards: {
     gap: 16,
     marginBottom: 32,
@@ -380,16 +384,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
-    gap: 12,
-  },
-  dragHandle: {
-    gap: 4,
-  },
-  dragLine: {
-    width: 20,
-    height: 3,
-    backgroundColor: "#D1D5DB",
-    borderRadius: 1.5,
+    gap: 16,
   },
   cardIcon: {
     width: 48,
