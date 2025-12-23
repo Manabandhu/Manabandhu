@@ -30,11 +30,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     bundler: "metro",
-    build: {
-      babel: {
-        include: ["**/*"],
-      },
-    },
   },
   plugins: [
     "expo-router",

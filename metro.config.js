@@ -7,8 +7,7 @@ const config = getDefaultConfig(__dirname);
 config.resolver = {
   ...config.resolver,
   sourceExts: [...config.resolver.sourceExts, "mjs", "cjs"],
-  unstable_enablePackageExports: true,
-  unstable_conditionNames: ["browser", "require", "react-native"],
+  unstable_enablePackageExports: false,
 };
 
 config.transformer = {
@@ -16,15 +15,19 @@ config.transformer = {
   getTransformOptions: async () => ({
     transform: {
       experimentalImportSupport: false,
-      inlineRequires: true,
+      inlineRequires: false,
     },
   }),
-  unstable_allowRequireContext: true,
 };
 
-// Web-specific configuration
-if (process.env.EXPO_PUBLIC_PLATFORM === "web" || process.env.NODE_ENV === "development") {
-  config.resolver.platforms = ["web", "native", "ios", "android"];
+// Add polyfill for web builds
+if (process.env.EXPO_PLATFORM === "web") {
+  config.serializer = {
+    ...config.serializer,
+    getPolyfills: () => [
+      require.resolve("./polyfills/import-meta.js"),
+    ],
+  };
 }
 
 module.exports = withNativeWind(config, { input: "./global.css" });

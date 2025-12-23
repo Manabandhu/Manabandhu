@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Platform } from "react-native";
 
 interface AuthState {
   user: User | null;
@@ -20,14 +21,43 @@ interface AuthState {
   signOut: () => Promise<void>;
 }
 
+// Web-compatible storage fallback
+const webStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(name);
+    }
+    return null;
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(name, value);
+    }
+  },
+  removeItem: async (name: string): Promise<void> => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(name);
+    }
+  },
+};
+
 const secureStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    if (Platform.OS === "web") {
+      return webStorage.getItem(name);
+    }
     return await SecureStore.getItemAsync(name);
   },
   setItem: async (name: string, value: string): Promise<void> => {
+    if (Platform.OS === "web") {
+      return webStorage.setItem(name, value);
+    }
     await SecureStore.setItemAsync(name, value);
   },
   removeItem: async (name: string): Promise<void> => {
+    if (Platform.OS === "web") {
+      return webStorage.removeItem(name);
+    }
     await SecureStore.deleteItemAsync(name);
   },
 };
