@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { View, TextInput, Text, StyleSheet } from "react-native";
+import { View, TextInput, Text, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } from "react-native";
 
 interface OTPInputProps {
   length?: number;
@@ -15,6 +15,8 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   onChange,
   error,
   reset = false,
+  accessibilityLabel,
+  testID,
 }) => {
   const [otp, setOtp] = useState<string[]>(Array(length).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -73,7 +75,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     }
   };
 
-  const handleKeyPress = (e: any, index: number) => {
+  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
     if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
       setFocusedIndex(index - 1);
@@ -95,8 +97,12 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   };
 
   return (
-    <View>
-      <View style={styles.container}>
+    <View accessibilityLabel={accessibilityLabel || "OTP input"} testID={testID}>
+      <View 
+        style={styles.container}
+        accessibilityLabel={accessibilityLabel || `Enter ${length} digit verification code`}
+        accessibilityRole="none"
+      >
         {Array.from({ length }).map((_, index) => {
           const isFilled = otp[index].length > 0;
           const isFocused = focusedIndex === index;
@@ -120,6 +126,9 @@ export const OTPInput: React.FC<OTPInputProps> = ({
               keyboardType="number-pad"
               maxLength={1}
               selectTextOnFocus
+              accessibilityLabel={`Digit ${index + 1} of ${length}`}
+              accessibilityRole="textbox"
+              testID={testID ? `${testID}-${index}` : undefined}
             />
           );
         })}

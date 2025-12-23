@@ -24,6 +24,9 @@ import * as Haptics from "expo-haptics";
 import { ROUTES } from "@/constants/routes";
 import { GRADIENTS } from "@/constants";
 import { navigateAfterAuth } from "@/lib/navigation";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { sanitizeEmail } from "@/lib/sanitize";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -42,16 +45,19 @@ export default function LoginScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const result = await signInWithEmail(data.email, data.password);
+      const sanitizedEmail = sanitizeEmail(data.email);
+      const result = await signInWithEmail(sanitizedEmail, data.password);
       const user = result.user;
 
       if (user) {
         await navigateAfterAuth();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Login failed", { email: data.email }, error);
       form.setError("password", {
-        message: error.message || "Invalid email or password",
+        message: appError.userMessage || getFirebaseErrorMessage(error),
       });
     } finally {
       setLoading(false);
@@ -64,8 +70,11 @@ export default function LoginScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await signInWithGoogle();
       await navigateAfterAuth();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Google sign-in failed", {}, error);
+      // Could show error toast here
     } finally {
       setLoading(false);
     }
@@ -77,8 +86,11 @@ export default function LoginScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await signInWithApple();
       await navigateAfterAuth();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Apple sign-in failed", {}, error);
+      // Could show error toast here
     } finally {
       setLoading(false);
     }

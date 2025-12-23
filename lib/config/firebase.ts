@@ -1,10 +1,17 @@
 import { ENV } from "@/constants/env";
 
+// Validate that required Firebase config values exist
+if (!ENV.firebase.apiKey || !ENV.firebase.authDomain || !ENV.firebase.projectId) {
+  throw new Error(
+    "Firebase configuration is incomplete. Please check your environment variables."
+  );
+}
+
 export const firebaseConfig = {
-  apiKey: ENV.firebase.apiKey || "demo-api-key",
-  authDomain: ENV.firebase.authDomain || "demo-project.firebaseapp.com",
-  projectId: ENV.firebase.projectId || "demo-project",
-  storageBucket: ENV.firebase.storageBucket || "demo-project.appspot.com",
-  messagingSenderId: ENV.firebase.messagingSenderId || "123456789",
-  appId: ENV.firebase.appId || "1:123456789:web:abcdef",
+  apiKey: ENV.firebase.apiKey,
+  authDomain: ENV.firebase.authDomain,
+  projectId: ENV.firebase.projectId,
+  storageBucket: ENV.firebase.storageBucket,
+  messagingSenderId: ENV.firebase.messagingSenderId,
+  appId: ENV.firebase.appId,
 };

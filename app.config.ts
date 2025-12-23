@@ -38,7 +38,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-apple-authentication",
       {
-        appleTeamId: "YOUR_APPLE_TEAM_ID",
+        appleTeamId: process.env.EXPO_PUBLIC_APPLE_TEAM_ID || undefined,
       },
     ],
     "@react-native-google-signin/google-signin",

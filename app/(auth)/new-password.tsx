@@ -20,6 +20,8 @@ import { confirmPasswordReset } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 
 interface PasswordRequirement {
   id: string;
@@ -109,10 +111,12 @@ export default function NewPasswordScreen() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace(ROUTES.auth.passwordResetSuccess);
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Password reset failed", { oobCode: params.oobCode }, error);
       form.setError("password", {
-        message: error.message || "Failed to reset password",
+        message: appError.userMessage || getFirebaseErrorMessage(error),
       });
     } finally {
       setLoading(false);

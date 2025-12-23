@@ -35,3 +35,4 @@ export const Card: React.FC<CardProps> = ({
   return <View className={baseClasses}>{children}</View>;
 };
 
+

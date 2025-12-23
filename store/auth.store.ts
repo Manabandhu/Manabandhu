@@ -8,17 +8,23 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Platform } from "react-native";
 
+// Cache for user documents to avoid redundant Firestore reads
+const userDocCache = new Map<string, { data: User; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   onboardingCompleted: boolean;
+  unsubscribe: (() => void) | null;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setOnboardingCompleted: (completed: boolean) => void;
   initializeAuth: () => Promise<void>;
   updateUserProfile: (updates: Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
+  cleanup: () => void;
 }
 
 // Web-compatible storage fallback
@@ -63,11 +69,29 @@ const secureStorage = {
 };
 
 const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => {
-  const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+  const uid = firebaseUser.uid;
+  
+  // Check cache first
+  const cached = userDocCache.get(uid);
+  const now = Date.now();
+  
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    // Return cached data but update with latest Firebase user data
+    return {
+      ...cached.data,
+      email: firebaseUser.email || cached.data.email,
+      phoneNumber: firebaseUser.phoneNumber || cached.data.phoneNumber,
+      displayName: firebaseUser.displayName || cached.data.displayName,
+      photoURL: firebaseUser.photoURL || cached.data.photoURL,
+    };
+  }
+
+  // Fetch from Firestore
+  const userDoc = await getDoc(doc(db, "users", uid));
   const userData = userDoc.data();
 
-  return {
-    uid: firebaseUser.uid,
+  const user: User = {
+    uid,
     email: firebaseUser.email || undefined,
     phoneNumber: firebaseUser.phoneNumber || undefined,
     displayName: firebaseUser.displayName || userData?.displayName || undefined,
@@ -79,6 +103,11 @@ const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => 
     createdAt: userData?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
+  // Update cache
+  userDocCache.set(uid, { data: user, timestamp: now });
+
+  return user;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -88,6 +117,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: true,
       isAuthenticated: false,
       onboardingCompleted: false,
+      unsubscribe: null,
 
       setUser: (user) =>
         set({
@@ -107,15 +137,22 @@ export const useAuthStore = create<AuthState>()(
         })),
 
       initializeAuth: async () => {
+        // Clean up any existing listener
+        const { unsubscribe: existingUnsubscribe } = get();
+        if (existingUnsubscribe) {
+          existingUnsubscribe();
+        }
+
         set({ isLoading: true });
 
         return new Promise<void>((resolve) => {
           if (!auth) {
-            set({ isLoading: false, isAuthenticated: false, user: null });
+            set({ isLoading: false, isAuthenticated: false, user: null, unsubscribe: null });
             resolve();
             return;
           }
 
+          let isResolved = false;
           const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
               try {
@@ -125,9 +162,10 @@ export const useAuthStore = create<AuthState>()(
                   isAuthenticated: true,
                   isLoading: false,
                   onboardingCompleted: user.onboardingCompleted,
+                  unsubscribe,
                 });
               } catch (error) {
-                set({ isLoading: false, isAuthenticated: false, user: null });
+                set({ isLoading: false, isAuthenticated: false, user: null, unsubscribe });
               }
             } else {
               set({
@@ -135,12 +173,25 @@ export const useAuthStore = create<AuthState>()(
                 isAuthenticated: false,
                 isLoading: false,
                 onboardingCompleted: false,
+                unsubscribe,
               });
             }
-            unsubscribe();
+            
+            // Only resolve once on initial auth state check
+            if (!isResolved) {
+              isResolved = true;
             resolve();
+            }
           });
         });
+      },
+
+      cleanup: () => {
+        const { unsubscribe } = get();
+        if (unsubscribe) {
+          unsubscribe();
+          set({ unsubscribe: null });
+        }
       },
 
       updateUserProfile: async (updates) => {
@@ -150,6 +201,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           const updatedUser = { ...user, ...updates, updatedAt: new Date().toISOString() };
           await setDoc(doc(db, "users", user.uid), updatedUser, { merge: true });
+          
+          // Update cache
+          userDocCache.set(user.uid, { data: updatedUser, timestamp: Date.now() });
+          
           set({ user: updatedUser });
         } catch (error) {
           throw error;
@@ -158,11 +213,14 @@ export const useAuthStore = create<AuthState>()(
 
       signOut: async () => {
         const { signOut: firebaseSignOut } = await import("@/lib/firebase");
+        const { cleanup } = get();
+        cleanup();
         await firebaseSignOut();
         set({
           user: null,
           isAuthenticated: false,
           onboardingCompleted: false,
+          unsubscribe: null,
         });
       },
     }),
