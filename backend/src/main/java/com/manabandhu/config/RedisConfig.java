@@ -10,10 +10,8 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.net.URI;
-import java.time.Duration;
 
 @Configuration
 public class RedisConfig {
@@ -36,15 +34,8 @@ public class RedisConfig {
             }
         }
         
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(10);
-        poolConfig.setMaxIdle(5);
-        poolConfig.setMinIdle(1);
-        
         JedisClientConfiguration clientConfig = JedisClientConfiguration.builder()
             .useSsl()
-            .usePooling()
-            .poolConfig(poolConfig)
             .build();
         
         return new JedisConnectionFactory(config, clientConfig);
