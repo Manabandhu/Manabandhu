@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Button } from "./Button";
+import { View, Text, StyleSheet } from "react-native";
+import { GluestackButton } from "./gluestack-index";
 
 interface Props {
   children: ReactNode;
@@ -74,12 +74,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 )}
               </View>
             )}
-            <Button
-              title="Try Again"
+            <GluestackButton
               onPress={this.handleReset}
               variant="primary"
               className="mt-4"
-            />
+            >
+              Try Again
+            </GluestackButton>
           </View>
         </View>
       );

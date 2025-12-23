@@ -13,9 +13,9 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
 import { loginSchema, LoginInput } from "@/lib/validators";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { GluestackInput } from "@/components/ui/gluestack-index";
+import { GluestackButton } from "@/components/ui/gluestack-index";
+import { GluestackCheckbox } from "@/components/ui/gluestack-index";
 import { Logo } from "@/components/ui/Logo";
 import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/components/ui/Icons";
 import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/firebase";
@@ -150,7 +150,7 @@ export default function LoginScreen() {
               control={form.control}
               name="email"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <Input
+                <GluestackInput
                   label="Email"
                   placeholder="Email address"
                   value={value}
@@ -161,7 +161,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoComplete="email"
                   floatingLabel
-                  leftIcon={<EmailIcon size={20} color="#6B7280" />}
+                  leftElement={<EmailIcon size={20} color="#6B7280" />}
                 />
               )}
             />
@@ -171,7 +171,7 @@ export default function LoginScreen() {
               control={form.control}
               name="password"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <Input
+                <GluestackInput
                   label="Password"
                   placeholder="Password"
                   value={value}
@@ -182,8 +182,8 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoComplete="password"
                   floatingLabel
-                  leftIcon={<LockIcon size={20} color="#6B7280" />}
-                  rightIcon={
+                  leftElement={<LockIcon size={20} color="#6B7280" />}
+                  rightElement={
                     <TouchableOpacity
                       onPress={() => {
                         setShowPassword(!showPassword);
@@ -203,10 +203,10 @@ export default function LoginScreen() {
 
             {/* Options Row */}
             <View style={styles.optionsRow}>
-              <Checkbox
-                checked={rememberMe}
-                onToggle={() => {
-                  setRememberMe(!rememberMe);
+              <GluestackCheckbox
+                isChecked={rememberMe}
+                onChange={(checked) => {
+                  setRememberMe(checked);
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
                 label={<Text style={styles.rememberText}>Remember me</Text>}
@@ -217,13 +217,14 @@ export default function LoginScreen() {
             </View>
 
             {/* Sign In Button */}
-            <Button
-              title="Sign in"
+            <GluestackButton
               onPress={form.handleSubmit(handleSubmit)}
-              loading={loading}
+              isLoading={loading}
               fullWidth
               className="mt-2"
-            />
+            >
+              Sign in
+            </GluestackButton>
 
             {/* Divider */}
             <View style={styles.divider}>

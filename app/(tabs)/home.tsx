@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
@@ -347,12 +347,13 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <Button
-            title="Sign Out"
+          <GluestackButton
             onPress={handleSignOut}
             variant="outline"
             fullWidth
-          />
+          >
+            Sign Out
+          </GluestackButton>
         </View>
       </ScrollView>
     </SafeAreaView>
