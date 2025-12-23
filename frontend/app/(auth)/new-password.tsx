@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { resetPasswordSchema, ResetPasswordInput } from "@/lib/validators";
 import { Logo } from "@/components/ui/Logo";
 import { LockIcon, EyeIcon, EyeOffIcon, CheckIcon } from "@/components/ui/Icons";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { confirmPasswordReset } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
@@ -307,34 +308,17 @@ export default function NewPasswordScreen() {
             )}
 
             {/* Reset Password Button */}
-            <TouchableOpacity
-              style={[
-                styles.resetButton,
-                (!isFormValid || loading) && styles.resetButtonDisabled,
-              ]}
-              onPress={form.handleSubmit(handleSubmit)}
-              disabled={!isFormValid || loading}
-            >
-              <LinearGradient
-                colors={
-                  isFormValid && !loading
-                    ? ["#4F46E5", "#6366F1"]
-                    : ["#D1D5DB", "#D1D5DB"]
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.resetButtonGradient}
+            <View style={styles.primaryAction}>
+              <GluestackButton
+                onPress={form.handleSubmit(handleSubmit)}
+                isDisabled={!isFormValid || loading}
+                isLoading={loading}
+                fullWidth
+                size="lg"
               >
-                <Text
-                  style={[
-                    styles.resetButtonText,
-                    (!isFormValid || loading) && styles.resetButtonTextDisabled,
-                  ]}
-                >
-                  {loading ? "Resetting..." : "Reset Password"}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                Reset Password
+              </GluestackButton>
+            </View>
 
             {/* Footer */}
             <TouchableOpacity onPress={handleBackToSignIn} style={styles.footer}>
@@ -507,27 +491,8 @@ const styles = StyleSheet.create({
     color: "#EF4444",
     marginBottom: 16,
   },
-  resetButton: {
-    height: 52,
-    borderRadius: 14,
-    overflow: "hidden",
+  primaryAction: {
     marginBottom: 24,
-  },
-  resetButtonDisabled: {
-    opacity: 0.7,
-  },
-  resetButtonGradient: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  resetButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  resetButtonTextDisabled: {
-    color: "#FFFFFF",
   },
   footer: {
     alignItems: "center",
@@ -539,4 +504,3 @@ const styles = StyleSheet.create({
     color: "#4B5563",
   },
 });
-

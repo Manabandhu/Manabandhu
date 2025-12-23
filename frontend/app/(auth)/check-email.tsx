@@ -16,7 +16,8 @@ import { EmailIcon } from "@/components/ui/Icons";
 import { resetPassword } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { GluestackButton } from "@/components/ui/gluestack-index";
+import { normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { TIMING } from "@/constants/timing";
@@ -144,20 +145,9 @@ export default function CheckEmailScreen() {
 
             {/* Open Email App Button */}
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleOpenEmailApp}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={["#4F46E5", "#6366F1"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.primaryButtonGradient}
-                >
-                  <Text style={styles.primaryButtonText}>Open Email App</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+              <GluestackButton onPress={handleOpenEmailApp} fullWidth size="lg">
+                Open Email App
+              </GluestackButton>
             </View>
 
             {/* Resend Email Button */}
@@ -286,26 +276,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  primaryButton: {
     width: "85%",
     maxWidth: 294,
-    height: 52,
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  primaryButtonGradient: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    alignSelf: "center",
+    marginBottom: 16,
   },
   resendButton: {
     width: "85%",
@@ -350,4 +324,3 @@ const styles = StyleSheet.create({
     color: "#4F46E5",
   },
 });
-
