@@ -21,6 +21,8 @@ import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, App
 import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
+import { ROUTES } from "@/constants/routes";
+import { navigateAfterAuth } from "@/lib/navigation";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -43,19 +45,7 @@ export default function LoginScreen() {
       const user = result.user;
 
       if (user) {
-        const { db, getCurrentUser } = await import("@/lib/firebase");
-        const { doc, getDoc } = await import("firebase/firestore");
-        const currentUser = getCurrentUser();
-
-        if (currentUser) {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-
-          if (!userDoc.exists()) {
-            router.replace("/(auth)/profile");
-          } else {
-            router.replace("/(onboarding)/welcome");
-          }
-        }
+        await navigateAfterAuth();
       }
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -72,18 +62,7 @@ export default function LoginScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await signInWithGoogle();
-      const { db, getCurrentUser } = await import("@/lib/firebase");
-      const { doc, getDoc } = await import("firebase/firestore");
-      const user = getCurrentUser();
-
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists()) {
-          router.replace("/(auth)/profile");
-        } else {
-          router.replace("/(onboarding)/welcome");
-        }
-      }
+      await navigateAfterAuth();
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -96,18 +75,7 @@ export default function LoginScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await signInWithApple();
-      const { db, getCurrentUser } = await import("@/lib/firebase");
-      const { doc, getDoc } = await import("firebase/firestore");
-      const user = getCurrentUser();
-
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists()) {
-          router.replace("/(auth)/profile");
-        } else {
-          router.replace("/(onboarding)/welcome");
-        }
-      }
+      await navigateAfterAuth();
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -122,12 +90,12 @@ export default function LoginScreen() {
 
   const handlePhoneSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/verify-phone");
+    router.push(ROUTES.auth.verifyPhone);
   };
 
   const handleForgotPassword = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/reset-password");
+    router.push(ROUTES.auth.resetPassword);
   };
 
   return (
@@ -300,7 +268,7 @@ export default function LoginScreen() {
               <TouchableOpacity
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push("/(auth)/signup");
+                  router.push(ROUTES.auth.signup);
                 }}
               >
                 <Text style={styles.signupLink}>Sign up</Text>

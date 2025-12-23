@@ -18,6 +18,7 @@ import { Logo } from "@/components/ui/Logo";
 import { verifyOTP } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
+import { navigateAfterAuth } from "@/lib/navigation";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -107,19 +108,7 @@ export default function OTPScreen() {
 
       // Redirect after showing success
       setTimeout(async () => {
-        const { db, getCurrentUser } = await import("@/lib/firebase");
-        const { doc, getDoc } = await import("firebase/firestore");
-        const user = getCurrentUser();
-
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-
-          if (!userDoc.exists()) {
-            router.replace("/(auth)/profile");
-          } else {
-            router.replace("/(onboarding)/welcome");
-          }
-        }
+        await navigateAfterAuth();
       }, 2000);
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
