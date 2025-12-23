@@ -11,6 +11,15 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="home" />
+      <Tabs.Screen name="rooms" />
+      <Tabs.Screen name="rides" />
+      <Tabs.Screen name="jobs" />
+      <Tabs.Screen name="community" />
+      <Tabs.Screen name="chat" />
+      <Tabs.Screen name="expenses" />
+      <Tabs.Screen name="utilities" />
+      <Tabs.Screen name="profile" />
+      <Tabs.Screen name="admin" />
     </Tabs>
   );
 }
