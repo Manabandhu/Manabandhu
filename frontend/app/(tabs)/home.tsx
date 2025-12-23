@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -26,6 +26,92 @@ export default function HomeScreen() {
   const { user, signOut } = useAuthStore();
   const [location, setLocation] = useState("San Francisco, CA");
   const [search, setSearch] = useState("");
+  const [marketLoading, setMarketLoading] = useState(true);
+  const [marketError, setMarketError] = useState<string | null>(null);
+  const [weather, setWeather] = useState<{ temperature: number; description: string } | null>(null);
+  const [currencyRates, setCurrencyRates] = useState<{ [key: string]: number } | null>(null);
+  const [metals, setMetals] = useState<{ gold: number; silver: number } | null>(null);
+
+  const weatherDescription = (code: number) => {
+    const lookup: Record<number, string> = {
+      0: "Clear",
+      1: "Mainly clear",
+      2: "Partly cloudy",
+      3: "Overcast",
+      45: "Fog",
+      48: "Rime fog",
+      51: "Light drizzle",
+      53: "Drizzle",
+      55: "Heavy drizzle",
+      61: "Light rain",
+      63: "Rain",
+      65: "Heavy rain",
+      71: "Light snow",
+      73: "Snow",
+      75: "Heavy snow",
+      80: "Rain showers",
+      81: "Showers",
+      82: "Heavy showers",
+      95: "Thunderstorm",
+    };
+    return lookup[code] ?? "Weather update";
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMarketData = async () => {
+      setMarketLoading(true);
+      setMarketError(null);
+      try {
+        const weatherUrl =
+          "https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit";
+        const currencyUrl =
+          "https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,INR,NPR";
+        const metalsUrl = "https://api.metals.live/v1/spot";
+
+        const [weatherRes, currencyRes, metalsRes] = await Promise.all([
+          fetch(weatherUrl),
+          fetch(currencyUrl),
+          fetch(metalsUrl),
+        ]);
+
+        if (!weatherRes.ok || !currencyRes.ok || !metalsRes.ok) {
+          throw new Error("Failed to fetch live data");
+        }
+
+        const weatherData = await weatherRes.json();
+        const currencyData = await currencyRes.json();
+        const metalsData = await metalsRes.json();
+
+        if (isMounted) {
+          setWeather({
+            temperature: weatherData?.current?.temperature_2m,
+            description: weatherDescription(weatherData?.current?.weather_code),
+          });
+          setCurrencyRates(currencyData?.rates ?? null);
+          setMetals({
+            gold: metalsData?.[0]?.gold,
+            silver: metalsData?.[0]?.silver,
+          });
+        }
+      } catch (error) {
+        if (isMounted) {
+          setMarketError("Unable to load live updates.");
+        }
+      } finally {
+        if (isMounted) {
+          setMarketLoading(false);
+        }
+      }
+    };
+
+    fetchMarketData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const featureCards = useMemo(
     () => [
@@ -209,6 +295,55 @@ export default function HomeScreen() {
         </LinearGradient>
 
         <View className="px-4 mt-6 gap-5">
+          <View className="bg-white rounded-2xl p-5 shadow-sm">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-xl font-bold text-gray-900">Live updates</Text>
+              <Text className="text-xs text-gray-500">Open source feeds</Text>
+            </View>
+            {marketLoading ? (
+              <Text className="text-sm text-gray-500">Loading live data...</Text>
+            ) : marketError ? (
+              <Text className="text-sm text-red-500">{marketError}</Text>
+            ) : (
+              <View className="gap-4">
+                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                  <Text className="text-xs text-gray-500">Weather • San Francisco</Text>
+                  <Text className="text-base font-semibold text-gray-900 mt-1">
+                    {weather?.temperature != null ? `${Math.round(weather.temperature)}°F` : "--"}
+                    {"  "}
+                    <Text className="text-sm font-normal text-gray-600">
+                      {weather?.description ?? "—"}
+                    </Text>
+                  </Text>
+                </View>
+                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                  <Text className="text-xs text-gray-500">Currency (USD)</Text>
+                  <View className="flex-row flex-wrap gap-3 mt-2">
+                    {currencyRates ? (
+                      Object.entries(currencyRates).map(([code, rate]) => (
+                        <View key={code} className="bg-white rounded-full px-3 py-1 border border-gray-200">
+                          <Text className="text-xs font-semibold text-gray-700">
+                            {code} {rate.toFixed(2)}
+                          </Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text className="text-sm text-gray-500">--</Text>
+                    )}
+                  </View>
+                </View>
+                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                  <Text className="text-xs text-gray-500">Metals (USD/oz)</Text>
+                  <Text className="text-sm text-gray-700 mt-1">
+                    Gold: {metals?.gold != null ? `$${metals.gold.toFixed(2)}` : "--"}
+                    {"  "}•{"  "}
+                    Silver: {metals?.silver != null ? `$${metals.silver.toFixed(2)}` : "--"}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+
           <View className="bg-white rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-xl font-bold text-gray-900">Explore ManaBandhu</Text>
