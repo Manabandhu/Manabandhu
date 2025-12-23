@@ -7,6 +7,8 @@ interface OTPInputProps {
   onChange?: (otp: string) => void;
   error?: string;
   reset?: boolean;
+  accessibilityLabel?: string;
+  testID?: string;
 }
 
 export const OTPInput: React.FC<OTPInputProps> = ({
@@ -101,7 +103,6 @@ export const OTPInput: React.FC<OTPInputProps> = ({
       <View 
         style={styles.container}
         accessibilityLabel={accessibilityLabel || `Enter ${length} digit verification code`}
-        accessibilityRole="none"
       >
         {Array.from({ length }).map((_, index) => {
           const isFilled = otp[index].length > 0;
@@ -111,7 +112,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
           return (
             <TextInput
               key={index}
-              ref={(ref) => (inputRefs.current[index] = ref)}
+              ref={(ref) => { inputRefs.current[index] = ref; }}
               style={[
                 styles.input,
                 isFilled && styles.inputFilled,
@@ -127,7 +128,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
               maxLength={1}
               selectTextOnFocus
               accessibilityLabel={`Digit ${index + 1} of ${length}`}
-              accessibilityRole="textbox"
+              
               testID={testID ? `${testID}-${index}` : undefined}
             />
           );

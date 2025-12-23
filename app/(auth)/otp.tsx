@@ -32,7 +32,7 @@ export default function OTPScreen() {
     emailLink?: string;
   }>();
   const [loading, setLoading] = useState(false);
-  const [resendTimer, setResendTimer] = useState(TIMING.OTP_RESEND_COOLDOWN);
+  const [resendTimer, setResendTimer] = useState<number>(TIMING.OTP_RESEND_COOLDOWN);
   const [canResend, setCanResend] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [otpValue, setOtpValue] = useState("");
@@ -40,12 +40,16 @@ export default function OTPScreen() {
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setResendTimer((prev: any) => prev - 1), 1000);
+      setCanResend(false);
+    } else {
+      setCanResend(true);
     }
-    setCanResend(true);
-    return undefined;
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [resendTimer]);
 
   useEffect(() => {
@@ -136,8 +140,8 @@ export default function OTPScreen() {
       setCanResend(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      if (params.phoneNumber) {
-        const { sendOTP } = await import("@/lib/firebase");
+        if (params.phoneNumber) {
+        const { sendOTP } = await import("../../lib/firebase.js");
         const id = await sendOTP(params.phoneNumber, null);
         router.setParams({ verificationId: id });
       }

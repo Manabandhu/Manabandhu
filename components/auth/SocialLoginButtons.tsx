@@ -1,8 +1,6 @@
 import React from "react";
-import { View, Text, Platform, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/components/ui/Icons";
-import { COLORS } from "@/constants";
 
 const { width } = Dimensions.get("window");
 const buttonWidth = (width - 60) / 2; // 2 columns with 20px padding on each side and 20px gap
@@ -34,15 +32,17 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         <GoogleIcon size={24} />
       </TouchableOpacity>
 
-      {/* Facebook Button - Top Right */}
-      <TouchableOpacity
-        onPress={onFacebookPress}
-        disabled={loading}
-        activeOpacity={0.8}
-        style={[styles.socialButton, styles.facebookButton]}
-      >
-        <FacebookIcon size={24} color="#ffffff" />
-      </TouchableOpacity>
+      {/* Facebook Button - Top Right (only show if handler provided) */}
+      {onFacebookPress ? (
+        <TouchableOpacity
+          onPress={onFacebookPress}
+          disabled={loading}
+          activeOpacity={0.8}
+          style={[styles.socialButton, styles.facebookButton]}
+        >
+          <FacebookIcon size={24} color="#ffffff" />
+        </TouchableOpacity>
+      ) : null}
 
       {/* Apple Button - Bottom Left */}
       <TouchableOpacity

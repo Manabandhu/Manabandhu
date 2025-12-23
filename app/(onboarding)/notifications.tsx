@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       // Save priorities to Firestore
-      const { db, getCurrentUser } = await import("@/lib/firebase");
+      const { db, getCurrentUser } = await import("../../lib/firebase.js");
       const { doc, setDoc } = await import("firebase/firestore");
       const user = getCurrentUser();
 
@@ -187,7 +187,7 @@ export default function NotificationsScreen() {
                 <View key={priority.id} style={styles.priorityCard}>
                   {/* Icon */}
                   <LinearGradient
-                    colors={priority.gradient}
+                    colors={priority.gradient as any}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.cardIcon}
@@ -227,11 +227,11 @@ export default function NotificationsScreen() {
                   return (
                     <View key={priority.id} style={styles.previewItem}>
                       <LinearGradient
-                        colors={priority.gradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.previewItemIcon}
-                      >
+                            colors={priority.gradient as any}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.previewItemIcon}
+                          >
                         <IconComponent size={16} color="#FFFFFF" />
                       </LinearGradient>
                       <View style={styles.previewItemText}>

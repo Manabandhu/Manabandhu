@@ -15,7 +15,6 @@ import * as Haptics from "expo-haptics";
 export default function AuthIndex() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const {} = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -57,10 +56,7 @@ export default function AuthIndex() {
     router.push(ROUTES.auth.verifyPhone);
   };
 
-  const handleFacebookSignIn = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Implement Facebook sign in
-  };
+  // Facebook sign-in not wired yet; hide button in UI instead of showing a TODO
 
   return (
     <KeyboardAvoidingView
@@ -127,7 +123,6 @@ export default function AuthIndex() {
             <SocialLoginButtons
               onGooglePress={async () => handleGoogleSignIn()}
               onApplePress={async () => handleAppleSignIn()}
-              onFacebookPress={async () => handleFacebookSignIn()}
               onPhonePress={async () => handlePhoneSignUp()}
               loading={loading}
             />
