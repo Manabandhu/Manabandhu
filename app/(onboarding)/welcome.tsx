@@ -110,7 +110,7 @@ export default function WelcomeScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
-      style={{ backgroundColor: "#F2F2F2" }}
+      style={{ backgroundColor: "#F9FAFB" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -128,11 +128,11 @@ export default function WelcomeScreen() {
             <Logo size={70} color="#FFFFFF" />
             
             {/* Progress Bar */}
-            <View style={styles.progressWrapper}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressStep, styles.progressStepActive]} />
-                <View style={styles.progressStep} />
-                <View style={styles.progressStep} />
+          <View style={styles.progressWrapper}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressStep, styles.progressStepActive]} />
+              <View style={styles.progressStep} />
+              <View style={styles.progressStep} />
                 <View style={styles.progressStep} />
               </View>
               <Text style={styles.progressText}>Step 1 of 4</Text>
@@ -141,6 +141,9 @@ export default function WelcomeScreen() {
             <Text style={styles.heroTitle}>Welcome to ManaBandhu!</Text>
             <Text style={styles.heroSubtitle}>
               Let's personalize your experience
+            </Text>
+            <Text style={styles.heroHelper}>
+              A few quick questions help us surface the right local support.
             </Text>
           </View>
         </LinearGradient>
@@ -238,6 +241,11 @@ export default function WelcomeScreen() {
             <Text style={styles.purposeLabel}>
               I am here as a (select all that apply)
             </Text>
+            <Text style={styles.purposeHelper}>
+              {selectedPurposes.length > 0
+                ? `${selectedPurposes.length} selected`
+                : "Pick at least one so we can tailor suggestions"}
+            </Text>
             <View style={styles.purposeGrid}>
               {purposes.map((purpose) => {
                 const isSelected = selectedPurposes.includes(purpose.value);
@@ -312,7 +320,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   progressStepActive: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#FFFFFF",
   },
   progressText: {
     fontSize: 13,
@@ -334,11 +342,18 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
   },
+  heroHelper: {
+    marginTop: 8,
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.85)",
+    textAlign: "center",
+    lineHeight: 18,
+  },
   contentArea: {
     paddingTop: 32,
     paddingBottom: 24,
     paddingHorizontal: 20,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F9FAFB",
     flex: 1,
   },
   formGroup: {
@@ -393,6 +408,12 @@ const styles = StyleSheet.create({
     color: "#374151",
     marginBottom: 12,
   },
+  purposeHelper: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: -4,
+    marginBottom: 10,
+  },
   purposeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -428,7 +449,7 @@ const styles = StyleSheet.create({
   bottomCta: {
     paddingHorizontal: 20,
     paddingBottom: 24,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F9FAFB",
     gap: 16,
   },
   skipLink: {

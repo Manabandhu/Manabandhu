@@ -95,7 +95,7 @@ export default function GoalsScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
-      style={{ backgroundColor: "#F2F2F2" }}
+      style={{ backgroundColor: "#F9FAFB" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -129,6 +129,15 @@ export default function GoalsScreen() {
 
         {/* Content Area */}
         <View style={styles.contentArea}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Tell us what to prioritize</Text>
+            <Text style={styles.sectionSubtitle}>
+              {selectedInterests.length > 0
+                ? `${selectedInterests.length} selected`
+                : "Pick a few so we can personalize your homepage"}
+            </Text>
+          </View>
+
           <View style={styles.interestGrid}>
             {interests.map((interest) => {
               const IconComponent = interest.icon;
@@ -238,8 +247,22 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 24,
     paddingHorizontal: 20,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F9FAFB",
     flex: 1,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+    gap: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#6B7280",
   },
   interestGrid: {
     flexDirection: "row",
@@ -289,7 +312,7 @@ const styles = StyleSheet.create({
   bottomCta: {
     paddingHorizontal: 20,
     paddingBottom: 24,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F9FAFB",
     gap: 16,
   },
   skipLink: {
