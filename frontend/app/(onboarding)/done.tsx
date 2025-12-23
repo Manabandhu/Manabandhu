@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   Animated,
 } from "react-native";
@@ -15,6 +14,7 @@ import {
   UsersIcon,
   BellIcon,
 } from "@/components/ui/Icons";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 import { onboardingApi } from "@/lib/api";
@@ -224,20 +224,12 @@ export default function DoneScreen() {
         <Animated.View
           style={[styles.ctaContainer, { opacity: buttonsOpacity }]}
         >
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleExplore}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.primaryButtonText}>Explore ManaBandhu</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleTour}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.secondaryButtonText}>Take a Quick Tour</Text>
-          </TouchableOpacity>
+          <GluestackButton onPress={handleExplore} fullWidth size="lg">
+            Explore ManaBandhu
+          </GluestackButton>
+          <GluestackButton onPress={handleTour} fullWidth size="lg" variant="outline">
+            Take a Quick Tour
+          </GluestackButton>
         </Animated.View>
       </ScrollView>
     </LinearGradient>
@@ -358,33 +350,5 @@ const styles = StyleSheet.create({
   ctaContainer: {
     width: "100%",
     gap: 16,
-  },
-  primaryButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#4F46E5",
-  },
-  secondaryButton: {
-    width: "100%",
-    height: 52,
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.6)",
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#FFFFFF",
   },
 });

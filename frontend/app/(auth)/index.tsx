@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { Logo } from "@/components/ui/Logo";
 import { EmailIcon } from "@/components/ui/Icons";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants";
@@ -96,21 +97,16 @@ export default function AuthIndex() {
             <Text style={styles.sectionHeader}>Get Started</Text>
 
             {/* Email Sign Up Button */}
-            <TouchableOpacity
-              onPress={handleEmailSignUp}
-              activeOpacity={0.8}
-              style={styles.emailButton}
-            >
-              <LinearGradient
-                colors={["#6366f1", "#4f46e5"]}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.emailButtonGradient}
+            <View style={styles.primaryAction}>
+              <GluestackButton
+                onPress={handleEmailSignUp}
+                fullWidth
+                size="lg"
+                leftIcon={<EmailIcon size={20} color="#f9fafb" />}
               >
-                <EmailIcon size={20} color="#f9fafb" />
-                <Text style={styles.emailButtonText}>Sign up with Email</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                Sign up with Email
+              </GluestackButton>
+            </View>
 
             {/* Divider */}
             <View style={styles.divider}>
@@ -237,24 +233,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
   },
-  emailButton: {
-    borderRadius: 16,
-    overflow: "hidden",
+  primaryAction: {
     marginBottom: 16,
-  },
-  emailButtonGradient: {
-    height: 44,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-  },
-  emailButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#f9fafb",
-    fontFamily: "Arial",
   },
   divider: {
     flexDirection: "row",

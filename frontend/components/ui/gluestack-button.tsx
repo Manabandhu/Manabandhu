@@ -9,6 +9,8 @@ export interface GluestackButtonProps {
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   isDisabled?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   className?: string;
   fullWidth?: boolean;
   accessibilityLabel?: string;
@@ -22,6 +24,8 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
   size = "md",
   isLoading = false,
   isDisabled = false,
+  leftIcon,
+  rightIcon,
   fullWidth = false,
   className = "",
   accessibilityLabel,
@@ -43,6 +47,42 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
   };
 
   const disabled = isDisabled || isLoading;
+  const iconWrapperStyle: ViewStyle = {
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
+  const renderIcon = (icon: React.ReactNode, position: "left" | "right") =>
+    icon ? (
+      <View style={[iconWrapperStyle, position === "left" ? { marginRight: 8 } : { marginLeft: 8 }]}>
+        {icon}
+      </View>
+    ) : null;
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <ActivityIndicator color={disabled ? "#9ca3af" : textStyle.color} />;
+    }
+
+    const label =
+      typeof children === "string" || typeof children === "number" ? (
+        <Text style={[textStyle, disabled && { color: "#9ca3af" }]}>{children}</Text>
+      ) : (
+        children
+      );
+
+    if (leftIcon || rightIcon) {
+      return (
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+          {renderIcon(leftIcon, "left")}
+          {label}
+          {renderIcon(rightIcon, "right")}
+        </View>
+      );
+    }
+
+    return label;
+  };
 
   if (variant === "primary") {
     return (
@@ -83,11 +123,7 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
             }}
           />
         )}
-        {isLoading ? (
-          <ActivityIndicator color={disabled ? "#9ca3af" : "#ffffff"} />
-        ) : (
-          <Text style={[textStyle, disabled && { color: "#9ca3af" }]}>{children}</Text>
-        )}
+        {renderContent()}
       </Pressable>
     );
   }
@@ -107,11 +143,7 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
         accessibilityRole="button"
         testID={testID}
       >
-        {isLoading ? (
-          <ActivityIndicator color="#ffffff" />
-        ) : (
-          <Text style={textStyle}>{children}</Text>
-        )}
+        {renderContent()}
       </Pressable>
     );
   }
@@ -135,11 +167,7 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
         accessibilityRole="button"
         testID={testID}
       >
-        {isLoading ? (
-          <ActivityIndicator color="#6366f1" />
-        ) : (
-          <Text style={textStyle}>{children}</Text>
-        )}
+        {renderContent()}
       </Pressable>
     );
   }
@@ -158,12 +186,7 @@ export const GluestackButton: React.FC<GluestackButtonProps> = ({
       accessibilityRole="button"
       testID={testID}
     >
-      {isLoading ? (
-        <ActivityIndicator color="#6366f1" />
-      ) : (
-        <Text style={textStyle}>{children}</Text>
-      )}
+      {renderContent()}
     </Pressable>
   );
 };
-
