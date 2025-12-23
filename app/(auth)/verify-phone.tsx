@@ -20,6 +20,7 @@ import { PhoneIcon } from "@/components/ui/Icons";
 import { Button } from "@/components/ui/Button";
 import { sendOTP } from "@/lib/firebase";
 import { COLORS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Line, Polyline } from "react-native-svg";
 
@@ -94,9 +95,9 @@ export default function VerifyPhoneScreen() {
       
       const fullPhoneNumber = `${data.countryCode}${data.phoneNumber}`;
       const verificationId = await sendOTP(fullPhoneNumber, null);
-      
+
       router.push({
-        pathname: "/(auth)/otp",
+        pathname: ROUTES.auth.otp,
         params: { verificationId, phoneNumber: fullPhoneNumber },
       });
     } catch (error: any) {
@@ -203,12 +204,12 @@ export default function VerifyPhoneScreen() {
               onPress={handleSubmit(onSubmit)}
               loading={loading}
               fullWidth
-              className={styles.sendButton}
+              className="mb-6"
             />
 
             {/* Alternative Link */}
             <TouchableOpacity
-              onPress={() => router.push("/(auth)/login")}
+              onPress={() => router.push(ROUTES.auth.login)}
               style={styles.alternativeLink}
             >
               <Text style={styles.alternativeLinkText}>Use email instead</Text>
