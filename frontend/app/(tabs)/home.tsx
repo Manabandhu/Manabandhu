@@ -68,7 +68,7 @@ export default function HomeScreen() {
           "https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit";
         const currencyUrl =
           "https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,INR,NPR";
-        const metalsUrl = "https://api.metals.live/v1/spot";
+        const metalsUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/metals/spot`;
 
         const [weatherRes, currencyRes, metalsRes] = await Promise.all([
           fetch(weatherUrl),

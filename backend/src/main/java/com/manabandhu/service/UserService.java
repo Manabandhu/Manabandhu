@@ -27,6 +27,7 @@ public class UserService {
                 // Create a basic user record for Firebase authenticated users
                 User newUser = new User();
                 newUser.setFirebaseUid(firebaseUid);
+                newUser.setName("User"); // Provide default name to satisfy NOT NULL constraint
                 newUser.setOnboardingCompleted(false);
                 return userRepository.save(newUser);
             });
