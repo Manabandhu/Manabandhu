@@ -15,6 +15,7 @@ import {
 } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { firebaseConfig } from "./config/firebase";
+import { ENV } from "@/constants/env";
 
 let app: FirebaseApp;
 let auth: Auth | null = null;
@@ -36,7 +37,7 @@ export const signInWithGoogle = async () => {
   const { GoogleSignin } = await import("@react-native-google-signin/google-signin");
   
   GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    webClientId: ENV.google.webClientId,
   });
 
   await GoogleSignin.hasPlayServices();
