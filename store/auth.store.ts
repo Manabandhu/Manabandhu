@@ -80,6 +80,12 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         return new Promise<void>((resolve) => {
+          if (!auth) {
+            set({ isLoading: false, isAuthenticated: false, user: null });
+            resolve();
+            return;
+          }
+
           const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
               try {
