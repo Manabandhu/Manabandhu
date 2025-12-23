@@ -1,34 +1,30 @@
-import React, { memo } from "react";
-import { TouchableOpacity, Text, ActivityIndicator, View, ViewStyle, TextStyle } from "react-native";
+import React from "react";
+import { Pressable, Text, ActivityIndicator, View, ViewStyle, TextStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-interface ButtonProps {
-  title: string;
+export interface GluestackButtonProps {
+  children: React.ReactNode;
   onPress: () => void;
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
-  loading?: boolean;
-  disabled?: boolean;
-  fullWidth?: boolean;
+  isLoading?: boolean;
+  isDisabled?: boolean;
   className?: string;
+  fullWidth?: boolean;
   accessibilityLabel?: string;
-  accessibilityHint?: string;
-  accessibilityRole?: "button" | "link" | "none";
   testID?: string;
 }
 
-export const Button: React.FC<ButtonProps> = memo(({
-  title,
+export const GluestackButton: React.FC<GluestackButtonProps> = ({
+  children,
   onPress,
   variant = "primary",
   size = "md",
-  loading = false,
-  disabled = false,
+  isLoading = false,
+  isDisabled = false,
   fullWidth = false,
   className = "",
   accessibilityLabel,
-  accessibilityHint,
-  accessibilityRole = "button",
   testID,
 }) => {
   const baseStyle: ViewStyle = {
@@ -37,7 +33,7 @@ export const Button: React.FC<ButtonProps> = memo(({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    opacity: disabled || loading ? 0.6 : 1,
+    opacity: isDisabled || isLoading ? 0.6 : 1,
   };
 
   const textStyle: TextStyle = {
@@ -46,23 +42,21 @@ export const Button: React.FC<ButtonProps> = memo(({
     color: variant === "outline" || variant === "ghost" ? "#6366f1" : "#ffffff",
   };
 
-  const isDisabled = disabled || loading;
+  const disabled = isDisabled || isLoading;
 
   if (variant === "primary") {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.8}
+        disabled={disabled}
         style={[baseStyle, fullWidth && { width: "100%" }]}
         className={className}
-        accessibilityLabel={accessibilityLabel || title}
-        accessibilityHint={accessibilityHint || (loading ? "Loading" : undefined)}
-        accessibilityRole={accessibilityRole}
-        accessibilityState={{ disabled: isDisabled, busy: loading }}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        accessibilityState={{ disabled, busy: isLoading }}
         testID={testID}
       >
-        {!isDisabled ? (
+        {!disabled ? (
           <LinearGradient
             colors={["#6366f1", "#4f46e5"]}
             start={{ x: 0, y: 0 }}
@@ -89,43 +83,44 @@ export const Button: React.FC<ButtonProps> = memo(({
             }}
           />
         )}
-        {loading ? (
-          <ActivityIndicator color={isDisabled ? "#9ca3af" : "#ffffff"} />
+        {isLoading ? (
+          <ActivityIndicator color={disabled ? "#9ca3af" : "#ffffff"} />
         ) : (
-          <Text style={[textStyle, isDisabled && { color: "#9ca3af" }]}>{title}</Text>
+          <Text style={[textStyle, disabled && { color: "#9ca3af" }]}>{children}</Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   if (variant === "secondary") {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.8}
+        disabled={disabled}
         style={[
           baseStyle,
           { backgroundColor: "#f59e0b" },
           fullWidth && { width: "100%" },
         ]}
         className={className}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        testID={testID}
       >
-        {loading ? (
+        {isLoading ? (
           <ActivityIndicator color="#ffffff" />
         ) : (
-          <Text style={textStyle}>{title}</Text>
+          <Text style={textStyle}>{children}</Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   if (variant === "outline") {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.8}
+        disabled={disabled}
         style={[
           baseStyle,
           {
@@ -136,34 +131,39 @@ export const Button: React.FC<ButtonProps> = memo(({
           fullWidth && { width: "100%" },
         ]}
         className={className}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        testID={testID}
       >
-        {loading ? (
+        {isLoading ? (
           <ActivityIndicator color="#6366f1" />
         ) : (
-          <Text style={textStyle}>{title}</Text>
+          <Text style={textStyle}>{children}</Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
-      disabled={isDisabled}
-      activeOpacity={0.8}
+      disabled={disabled}
       style={[
         baseStyle,
         { backgroundColor: "transparent" },
         fullWidth && { width: "100%" },
       ]}
       className={className}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      testID={testID}
     >
-      {loading ? (
+      {isLoading ? (
         <ActivityIndicator color="#6366f1" />
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <Text style={textStyle}>{children}</Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
-});
+};
 

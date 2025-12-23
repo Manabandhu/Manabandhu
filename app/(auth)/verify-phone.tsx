@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { phoneSchema, PhoneInput } from "@/lib/validators";
 import { Logo } from "@/components/ui/Logo";
 import { PhoneIcon } from "@/components/ui/Icons";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { sendOTP } from "@/lib/firebase";
 import { COLORS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
@@ -205,13 +205,14 @@ export default function VerifyPhoneScreen() {
             </View>
 
             {/* Send Code Button */}
-            <Button
-              title="Send Code"
+            <GluestackButton
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
+              isLoading={loading}
               fullWidth
               className="mb-6"
-            />
+            >
+              Send Code
+            </GluestackButton>
 
             {/* Alternative Link */}
             <TouchableOpacity

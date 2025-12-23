@@ -1,38 +1,36 @@
 import React from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import { Pressable, View } from "react-native";
 
-interface CardProps {
+export interface GluestackCardProps {
   children: React.ReactNode;
   onPress?: () => void;
-  selected?: boolean;
+  isSelected?: boolean;
   className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const GluestackCard: React.FC<GluestackCardProps> = ({
   children,
   onPress,
-  selected = false,
+  isSelected = false,
   className = "",
 }) => {
   const baseClasses = `rounded-2xl p-4 border-2 ${
-    selected
-      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+    isSelected
+      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
       : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
   } ${className}`;
 
   if (onPress) {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        activeOpacity={0.7}
         className={baseClasses}
       >
         {children}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   return <View className={baseClasses}>{children}</View>;
 };
-
 

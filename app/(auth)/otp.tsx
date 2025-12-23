@@ -13,7 +13,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { OTPInput } from "@/components/ui/OTPInput";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { Logo } from "@/components/ui/Logo";
 import { verifyOTP } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
@@ -237,14 +237,15 @@ export default function OTPScreen() {
             </View>
 
             {/* Verify Button */}
-            <Button
-              title={loading ? "Verifying..." : "Verify"}
+            <GluestackButton
               onPress={handleVerify}
-              loading={loading}
-              disabled={otpValue.length !== 6 || loading}
+              isLoading={loading}
+              isDisabled={otpValue.length !== 6 || loading}
               fullWidth
               className="mt-6"
-            />
+            >
+              {loading ? "Verifying..." : "Verify"}
+            </GluestackButton>
 
             {/* Footer */}
             <View style={styles.footer}>

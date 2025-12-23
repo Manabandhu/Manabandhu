@@ -7,15 +7,14 @@ import {
   Platform,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
 import { emailSchema, EmailInput } from "@/lib/validators";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { GluestackInput } from "@/components/ui/gluestack-index";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { Logo } from "@/components/ui/Logo";
 import { EmailIcon, PhoneIcon, HelpIcon } from "@/components/ui/Icons";
 import { resetPassword } from "@/lib/firebase";
@@ -122,48 +121,31 @@ export default function ResetPasswordScreen() {
               control={form.control}
               name="email"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      error && styles.inputError,
-                    ]}
-                  >
-                    <View style={styles.inputIcon}>
-                      <EmailIcon size={20} color="#868E96" />
-                    </View>
-                    <View style={styles.inputContent}>
-                      {(value && value.length > 0) && (
-                        <Text style={styles.floatingLabel}>Email Address</Text>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Email address"
-                        placeholderTextColor="#868E96"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                      />
-                    </View>
-                  </View>
-                  {error && (
-                    <Text style={styles.errorText}>{error.message}</Text>
-                  )}
-                </View>
+                <GluestackInput
+                  label="Email Address"
+                  placeholder="Email address"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  floatingLabel
+                  leftElement={<EmailIcon size={20} color="#868E96" />}
+                />
               )}
             />
 
             {/* Send Reset Link Button */}
-            <Button
-              title="Send Reset Link"
+            <GluestackButton
               onPress={form.handleSubmit(handleSubmit)}
-              loading={loading}
+              isLoading={loading}
               fullWidth
               className="mb-6"
-            />
+            >
+              Send Reset Link
+            </GluestackButton>
 
             {/* Alternative Methods */}
             <View style={styles.alternativeMethods}>
@@ -329,51 +311,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#4F46E5",
     fontWeight: "600",
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 52,
-    backgroundColor: "#F8F9FA",
-    borderWidth: 1,
-    borderColor: "#CED4DA",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-  },
-  inputError: {
-    borderColor: "#EF4444",
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  inputContent: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  floatingLabel: {
-    position: "absolute",
-    top: -8,
-    left: 0,
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#868E96",
-    backgroundColor: "#F8F9FA",
-    paddingHorizontal: 4,
-  },
-  input: {
-    fontSize: 17,
-    fontWeight: "500",
-    color: "#495057",
-    padding: 0,
-    margin: 0,
-  },
-  errorText: {
-    fontSize: 14,
-    color: "#EF4444",
-    marginTop: 8,
   },
 });
 

@@ -4,8 +4,8 @@ import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileInput } from "@/lib/validators";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { GluestackInput } from "@/components/ui/gluestack-index";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import { getCurrentUser } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
           control={control}
           name="displayName"
           render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-            <Input
+            <GluestackInput
               label="Full Name"
               placeholder="Enter your full name"
               value={value}
@@ -164,7 +164,7 @@ export default function ProfileScreen() {
           control={control}
           name="city"
           render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-            <Input
+            <GluestackInput
               label="City"
               placeholder="Enter your city"
               value={value}
@@ -214,13 +214,14 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        <Button
-          title="Continue"
+        <GluestackButton
           onPress={handleSubmit(onSubmit)}
-          loading={loading}
+          isLoading={loading}
           fullWidth
           className="mt-4"
-        />
+        >
+          Continue
+        </GluestackButton>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -18,8 +18,8 @@ import {
   CreditCardIcon,
   EyeIconPreview,
 } from "@/components/ui/Icons";
-import { Toggle } from "@/components/ui/Toggle";
-import { Button } from "@/components/ui/Button";
+import { GluestackSwitch } from "@/components/ui/gluestack-index";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
 
 interface PriorityItem {
@@ -202,9 +202,9 @@ export default function NotificationsScreen() {
                   </View>
 
                   {/* Toggle */}
-                  <Toggle
-                    value={priority.enabled}
-                    onValueChange={() => togglePriority(priority.id)}
+                  <GluestackSwitch
+                    isChecked={priority.enabled}
+                    onToggle={() => togglePriority(priority.id)}
                   />
                 </View>
               );
@@ -258,11 +258,12 @@ export default function NotificationsScreen() {
 
           {/* CTA Section */}
           <View style={styles.ctaSection}>
-            <Button
-              title="Complete Setup"
+            <GluestackButton
               onPress={handleComplete}
               fullWidth
-            />
+            >
+              Complete Setup
+            </GluestackButton>
             <TouchableOpacity onPress={handleCustomizeLater}>
               <Text style={styles.secondaryLink}>I'll customize later</Text>
             </TouchableOpacity>

@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Constants from "expo-constants";
-import { COLORS } from "@/constants";
+import Svg, { Path } from "react-native-svg";
 
 const { width, height } = Dimensions.get("window");
 
@@ -12,138 +11,271 @@ interface SplashScreenProps {
 
 export default function SplashScreen({ onAnimationComplete }: SplashScreenProps) {
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const wordmarkOpacity = useRef(new Animated.Value(0)).current;
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.8)).current;
+  const textOpacity = useRef(new Animated.Value(0)).current;
+  const textTranslateY = useRef(new Animated.Value(20)).current;
   const loadingOpacity = useRef(new Animated.Value(0)).current;
+  
+  // Pulsing ring animations
+  const ring1Scale = useRef(new Animated.Value(1)).current;
+  const ring1Opacity = useRef(new Animated.Value(0.2)).current;
+  const ring2Scale = useRef(new Animated.Value(1)).current;
+  const ring2Opacity = useRef(new Animated.Value(0.1)).current;
+  const logoPulse = useRef(new Animated.Value(1)).current;
+  const spinnerRotation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Animate logo in
+    // Start pulsing animations immediately
+    const ring1Animation = Animated.loop(
+      Animated.parallel([
+        Animated.timing(ring1Scale, {
+          toValue: 2.5,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.timing(ring1Opacity, {
+            toValue: 0.2,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ring1Opacity, {
+            toValue: 0,
+            duration: 2500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+
+    const ring2Animation = Animated.loop(
+      Animated.parallel([
+        Animated.timing(ring2Scale, {
+          toValue: 2.5,
+          duration: 2500,
+          delay: 300,
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.timing(ring2Opacity, {
+            toValue: 0.1,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ring2Opacity, {
+            toValue: 0,
+            duration: 2500,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+
+    const logoPulseAnimation = Animated.loop(
     Animated.sequence([
+        Animated.timing(logoPulse, {
+          toValue: 1.05,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoPulse, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    const spinnerAnimation = Animated.loop(
+      Animated.timing(spinnerRotation, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      })
+    );
+
+    ring1Animation.start();
+    ring2Animation.start();
+    logoPulseAnimation.start();
+    spinnerAnimation.start();
+
+    // Main entrance animations
+    Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
         duration: 800,
         useNativeDriver: true,
       }),
-      Animated.timing(wordmarkOpacity, {
+      Animated.spring(logoScale, {
         toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.timing(taglineOpacity, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.timing(loadingOpacity, {
-        toValue: 1,
-        duration: 400,
+        tension: 50,
+        friction: 7,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Call completion callback after animations
+    Animated.parallel([
+      Animated.timing(textOpacity, {
+        toValue: 1,
+        duration: 600,
+        delay: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(textTranslateY, {
+        toValue: 0,
+        duration: 600,
+        delay: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    Animated.timing(loadingOpacity, {
+      toValue: 1,
+      duration: 400,
+      delay: 800,
+      useNativeDriver: true,
+    }).start();
+
+    // Call completion callback
     const timer = setTimeout(() => {
       onAnimationComplete?.();
-    }, 2500);
+    }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      ring1Animation.stop();
+      ring2Animation.stop();
+      logoPulseAnimation.stop();
+      spinnerAnimation.stop();
+    };
   }, []);
 
+  const spin = spinnerRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   return (
+    <View style={styles.container}>
+      {/* Main Gradient Background */}
     <LinearGradient
-      colors={["#6366f1", "#4f46e5", "#4338ca"]}
-      start={{ x: 0.09, y: 0.21 }}
-      end={{ x: 0.91, y: 0.79 }}
-      style={styles.container}
-    >
-      {/* Circle Decorations */}
-      <View style={[styles.circleDecoration, styles.circle1]} />
-      <View style={[styles.circleDecoration, styles.circle2]} />
-      <View style={[styles.circleDecoration, styles.circle3]} />
+        colors={["#353390", "#5856D6", "#7A78FF"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
 
-      {/* Logo Section */}
-      <View style={styles.logoSection}>
-        <Animated.View style={{ opacity: logoOpacity }}>
-          <SplashLogo />
-        </Animated.View>
-        
-        <Animated.Text style={[styles.wordmark, { opacity: wordmarkOpacity }]}>
-          ManaBandhu
-        </Animated.Text>
-        
-        <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
-          Your trusted health companion
-        </Animated.Text>
-      </View>
+      {/* Ambient Background Glows */}
+      <View style={[styles.glow1, styles.glow]} />
+      <View style={[styles.glow2, styles.glow]} />
 
-      {/* Loading Section */}
-      <Animated.View style={[styles.loadingSection, { opacity: loadingOpacity }]}>
-        <LoadingSpinner />
-      </Animated.View>
+      {/* Central Content */}
+      <View style={styles.centralContent}>
+        {/* Logo Animation Wrapper */}
+        <View style={styles.logoWrapper}>
+          {/* Pulsing Rings */}
+          <Animated.View
+            style={[
+              styles.pulsingRing,
+              {
+                transform: [{ scale: ring1Scale }],
+                opacity: ring1Opacity,
+              },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.pulsingRing,
+              {
+                transform: [{ scale: ring2Scale }],
+                opacity: ring2Opacity,
+              },
+            ]}
+          />
 
-      {/* Version Info */}
-      <View style={styles.versionInfo}>
-        <Text style={styles.versionText}>
-          Version {Constants.expoConfig?.version || "1.0.0"}
-        </Text>
-      </View>
-    </LinearGradient>
-  );
-}
-
-function SplashLogo() {
-  return (
-    <View style={styles.logoContainer}>
-      <View style={styles.logoCircle}>
-        {/* Main circle */}
-        <View style={styles.logoMainCircle} />
-        {/* Decorative circles and paths */}
-        <View style={styles.logoDecoration}>
-          <View style={[styles.logoDot, { top: 20, left: 20 }]} />
-          <View style={[styles.logoDot, { top: 20, right: 20 }]} />
-          <View style={[styles.logoDot, { bottom: 20, left: 20 }]} />
-          <View style={[styles.logoDot, { bottom: 20, right: 20 }]} />
-          <View style={[styles.logoDot, { top: 45, left: 45 }]} />
-          <View style={[styles.logoDot, { top: 45, right: 45 }]} />
+          {/* Logo Container */}
+          <Animated.View
+            style={[
+              styles.logoContainer,
+              {
+                opacity: logoOpacity,
+                transform: [{ scale: logoScale }, { scale: logoPulse }],
+              },
+            ]}
+          >
+            <View style={styles.logoInner}>
+              {/* Rocket inside Lightbulb SVG */}
+              <Svg width={96} height={96} viewBox="0 0 24 24" style={styles.logoSvg}>
+                {/* Lightbulb Outline */}
+                <Path
+                  d="M9 21H15M12 2C8.13401 2 5 5.13401 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13401 15.866 2 12 2Z"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                {/* Rocket Ship (Filled) */}
+                <Path
+                  d="M12 5C12 5 14.5 9 14.5 11.5C14.5 13 13.5 14 13.5 14H15.5L14.5 16H9.5L8.5 14H10.5C10.5 14 9.5 13 9.5 11.5C9.5 9 12 5 12 5Z"
+                  fill="#FDE047"
+                  stroke="#FDE047"
+                  strokeWidth="1"
+                  strokeLinejoin="round"
+                />
+                {/* Rocket Flame */}
+                <Path
+                  d="M12 16V18"
+                  stroke="#F87171"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </Svg>
+            </View>
+          </Animated.View>
         </View>
+
+        {/* App Name */}
+        <Animated.View
+          style={[
+            styles.textContainer,
+            {
+              opacity: textOpacity,
+              transform: [{ translateY: textTranslateY }],
+            },
+          ]}
+        >
+          <Text style={styles.appName}>
+            Venture<Text style={styles.appNameAccent}>Vibe</Text>
+          </Text>
+          <Text style={styles.tagline}>IGNITE YOUR IDEAS</Text>
+        </Animated.View>
       </View>
-    </View>
-  );
-}
 
-function LoadingSpinner() {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+      {/* Bottom Loading Section */}
+      <Animated.View
+        style={[
+          styles.loadingSection,
+          {
+            opacity: loadingOpacity,
+          },
+        ]}
+      >
+        {/* Custom Spinner */}
+        <View style={styles.spinnerContainer}>
+          <View style={styles.spinnerOuter} />
+          <Animated.View
+            style={[
+              styles.spinnerInner,
+              {
+                transform: [{ rotate: spin }],
+              },
+            ]}
+          />
+        </View>
 
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, []);
-
-  return (
-    <View style={styles.spinnerContainer}>
-      <Animated.View style={[styles.spinner, { opacity: pulseAnim }]}>
-        {/* Top line - active */}
-        <View style={[styles.spinnerLine, styles.spinnerLineTop]} />
-        {/* Bottom line - dimmed */}
-        <View style={[styles.spinnerLine, styles.spinnerLineBottom]} />
-        {/* Left line - dimmed */}
-        <View style={[styles.spinnerLine, styles.spinnerLineLeft]} />
-        {/* Right line - dimmed */}
-        <View style={[styles.spinnerLine, styles.spinnerLineRight]} />
+        {/* Loading Text */}
+        <Text style={styles.loadingText}>Preparing launch sequence...</Text>
       </Animated.View>
     </View>
   );
@@ -160,157 +292,138 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 9999,
+    overflow: "hidden",
   },
-  circleDecoration: {
+  glow: {
     position: "absolute",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderRadius: 9999,
   },
-  circle1: {
-    width: width * 0.77,
-    height: width * 0.77,
-    top: -height * 0.14,
-    right: -width * 0.21,
+  glow1: {
+    width: 256,
+    height: 256,
+    top: -128,
+    left: -128,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    // Note: blur effect in React Native requires BlurView or a library
+    // For now, we'll use opacity to simulate the effect
   },
-  circle2: {
-    width: width * 0.9,
-    height: width * 0.9,
-    bottom: -height * 0.18,
-    left: -width * 0.26,
+  glow2: {
+    width: 320,
+    height: 320,
+    bottom: -106,
+    right: 106,
+    backgroundColor: "rgba(196, 181, 253, 0.2)", // purple-300 with opacity
   },
-  circle3: {
-    width: width * 0.77,
-    height: width * 0.77,
-    top: height * 0.4,
-    right: -width * 0.21,
-    opacity: 0.05,
-  },
-  logoSection: {
-    position: "absolute",
-    top: height * 0.35, // Responsive positioning
-    left: 0,
-    right: 0,
+  centralContent: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 32,
     zIndex: 10,
   },
-  logoContainer: {
-    width: 90,
-    height: 90,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
+  logoWrapper: {
     position: "relative",
+    marginBottom: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  logoMainCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  logoDecoration: {
+  pulsingRing: {
     position: "absolute",
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: "#FFFFFF",
+    alignSelf: "center",
+  },
+  logoContainer: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  logoInner: {
     width: "100%",
     height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  logoDot: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+  logoSvg: {
+    shadowColor: "#FFFFFF",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
   },
-  wordmark: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#ffffff",
-    marginTop: 16,
-    letterSpacing: 0.5,
-    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  textContainer: {
+    alignItems: "center",
+    gap: 8,
+  },
+  appName: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    textAlign: "center",
+    letterSpacing: -0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  appNameAccent: {
+    color: "#FDE047", // yellow-300
   },
   tagline: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "rgba(255, 255, 255, 0.9)",
-    marginTop: 8,
-    letterSpacing: 0.2,
-    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+    fontSize: 12,
+    fontWeight: "500",
+    color: "rgba(199, 210, 254, 1)", // indigo-100
+    letterSpacing: 3.2, // 0.2em
+    textTransform: "uppercase",
+    opacity: 0.9,
   },
   loadingSection: {
     position: "absolute",
-    top: height * 0.66, // Responsive positioning
+    bottom: 64,
     left: 0,
     right: 0,
     alignItems: "center",
     zIndex: 10,
   },
   spinnerContainer: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  spinner: {
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     position: "relative",
-  },
-  spinnerLine: {
-    position: "absolute",
-    backgroundColor: "#ffffff",
-  },
-  spinnerLineTop: {
-    width: 32,
-    height: 3,
-    top: 0,
-    left: 0,
-    borderRadius: 2,
-  },
-  spinnerLineBottom: {
-    width: 32,
-    height: 3,
-    bottom: 0,
-    left: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 2,
-  },
-  spinnerLineLeft: {
-    width: 3,
-    height: 32,
-    left: 0,
-    top: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 2,
-  },
-  spinnerLineRight: {
-    width: 3,
-    height: 32,
-    right: 0,
-    top: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 2,
-  },
-  versionInfo: {
-    position: "absolute",
-    bottom: 28,
-    left: 0,
-    right: 0,
     alignItems: "center",
-    zIndex: 10,
+    justifyContent: "center",
   },
-  versionText: {
-    fontSize: 10,
-    fontWeight: "400",
-    color: "rgba(255, 255, 255, 0.4)",
-    letterSpacing: 0.1,
-    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  spinnerOuter: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 4,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  spinnerInner: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 4,
+    borderColor: "transparent",
+    borderTopColor: "#FDE047", // yellow-300
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.7)",
+    fontWeight: "500",
   },
 });
-

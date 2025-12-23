@@ -17,7 +17,7 @@ import {
   ShoppingBagIcon,
   UsersIcon,
 } from "@/components/ui/Icons";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { requestLocationPermission } from "@/lib/permissions";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants/colors";
@@ -198,12 +198,13 @@ export default function LocationScreen() {
             You can update location permissions anytime in Settings.
           </Text>
           <View style={styles.buttonContainer}>
-            <Button
-              title="Enable Location"
+            <GluestackButton
               onPress={handleEnableLocation}
-              loading={loading}
+              isLoading={loading}
               fullWidth
-            />
+            >
+              Enable Location
+            </GluestackButton>
             <TouchableOpacity
               style={styles.manualButton}
               onPress={handleEnterManually}

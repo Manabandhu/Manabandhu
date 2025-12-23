@@ -26,7 +26,7 @@ import {
   MessageIcon,
   CheckIcon,
 } from "@/components/ui/Icons";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants/colors";
 
@@ -180,12 +180,13 @@ export default function GoalsScreen() {
           <TouchableOpacity onPress={handleSkip}>
             <Text style={styles.skipLink}>Skip for now</Text>
           </TouchableOpacity>
-          <Button
-            title="Continue"
+          <GluestackButton
             onPress={handleContinue}
-            disabled={selectedInterests.length === 0}
+            isDisabled={selectedInterests.length === 0}
             fullWidth
-          />
+          >
+            Continue
+          </GluestackButton>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

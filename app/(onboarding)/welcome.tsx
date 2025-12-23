@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
 import { Logo } from "@/components/ui/Logo";
 import { UserIcon, GlobeIcon, ChevronDownIcon, CheckIcon } from "@/components/ui/Icons";
-import { Button } from "@/components/ui/Button";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { profileSchema, ProfileInput } from "@/lib/validators";
 import * as Haptics from "expo-haptics";
 import { COUNTRY_LIST, DEFAULT_COUNTRY } from "@/constants/countryCodes";
@@ -278,12 +278,13 @@ export default function WelcomeScreen() {
           <TouchableOpacity onPress={handleSkip}>
             <Text style={styles.skipLink}>Skip for now</Text>
           </TouchableOpacity>
-          <Button
-            title="Continue"
+          <GluestackButton
             onPress={handleSubmit(handleContinue)}
-            disabled={!isFormValid}
+            isDisabled={!isFormValid}
             fullWidth
-          />
+          >
+            Continue
+          </GluestackButton>
         </View>
 
       </ScrollView>

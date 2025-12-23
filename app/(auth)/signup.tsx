@@ -18,8 +18,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Logo } from "@/components/ui/Logo";
 import { UserIcon, EmailIcon, LockIcon, EyeIcon, EyeOffIcon } from "@/components/ui/Icons";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { Button } from "@/components/ui/Button";
+import { GluestackCheckbox } from "@/components/ui/gluestack-index";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import { signUpWithEmail } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants";
@@ -327,10 +327,10 @@ export default function SignupScreen() {
                 control={control}
                 name="termsAccepted"
                 render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    checked={value}
-                    onToggle={() => onChange(!value)}
-                    error={!!errors.termsAccepted}
+                  <GluestackCheckbox
+                    isChecked={value}
+                    onChange={(checked) => onChange(checked)}
+                    isInvalid={!!errors.termsAccepted}
                     label={
                       <Text style={styles.termsText}>
                         I agree to the{" "}
@@ -355,14 +355,15 @@ export default function SignupScreen() {
             </View>
 
             {/* Submit Button */}
-            <Button
-              title="Create Account"
+            <GluestackButton
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
-              disabled={!isValid || loading}
+              isLoading={loading}
+              isDisabled={!isValid || loading}
               fullWidth
               className="mb-6"
-            />
+            >
+              Create Account
+            </GluestackButton>
 
             {/* Footer */}
             <View style={styles.footer}>
