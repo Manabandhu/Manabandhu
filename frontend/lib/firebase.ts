@@ -1,4 +1,5 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { Platform } from "react-native";
 import {
   getAuth,
   Auth,
@@ -11,6 +12,7 @@ import {
   sendPasswordResetEmail,
   confirmPasswordReset as firebaseConfirmPasswordReset,
   signOut as firebaseSignOut,
+  signInWithPopup,
   User as FirebaseUser,
   ApplicationVerifier,
 } from "firebase/auth";
@@ -35,39 +37,23 @@ if (!getApps().length) {
 export const signInWithGoogle = async () => {
   if (!auth) throw new Error("Firebase Auth not initialized");
   
-  const { GoogleSignin } = await import("@react-native-google-signin/google-signin");
-  
-  GoogleSignin.configure({
-    webClientId: ENV.google.webClientId,
-  });
-
-  await GoogleSignin.hasPlayServices();
-  const userInfo = await GoogleSignin.signIn();
-  const googleCredential = GoogleAuthProvider.credential(userInfo.idToken);
-  return signInWithCredential(auth, googleCredential);
+  // Check if running on native mobile (React Native/Expo)
+  if (typeof window === 'undefined' || Platform.OS === 'ios' || Platform.OS === 'android') {
+    // Mobile Google sign-in not available without proper native setup
+    throw new Error('Google sign-in is not available on mobile. Please use email/password or phone authentication.');
+  } else {
+    // Web implementation
+    const { signInWithPopup } = await import("firebase/auth");
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(auth, provider);
+  }
 };
 
 export const signInWithApple = async () => {
   if (!auth) throw new Error("Firebase Auth not initialized");
   
-  const AppleAuthentication = await import("expo-apple-authentication");
-  
-  const credential = await AppleAuthentication.signInAsync({
-    requestedScopes: [
-      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-      AppleAuthentication.AppleAuthenticationScope.EMAIL,
-    ],
-  });
-
-  const provider = new OAuthProvider("apple.com");
-  const appleCredential = provider.credential({
-    idToken: credential.identityToken!,
-    rawNonce: "nonce" in credential && typeof credential.nonce === "string" 
-      ? credential.nonce 
-      : undefined,
-  });
-  
-  return signInWithCredential(auth, appleCredential);
+  // Apple Sign-In not available without proper native setup
+  throw new Error("Apple Sign-In is not available. Please use email/password or phone authentication.");
 };
 
 export const sendOTP = async (phoneNumber: string, recaptchaVerifier: ApplicationVerifier | null) => {

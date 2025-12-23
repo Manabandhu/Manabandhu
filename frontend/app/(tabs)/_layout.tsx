@@ -92,13 +92,15 @@ export default function TabsLayout() {
           }}
         />
         
-        <Tabs.Screen 
-          name="profile/index" 
-          options={{
-            title: "Profile",
-            tabBarIcon: ({ color, size }) => <UserIcon size={size} color={color} />,
-          }}
-        />
+        {/* Hide all nested routes from tab bar */}
+        <Tabs.Screen name="jobs" options={{ href: null }} />
+        <Tabs.Screen name="rooms" options={{ href: null }} />
+        <Tabs.Screen name="rides" options={{ href: null }} />
+        <Tabs.Screen name="expenses" options={{ href: null }} />
+        <Tabs.Screen name="utilities" options={{ href: null }} />
+        <Tabs.Screen name="admin" options={{ href: null }} />
+        <Tabs.Screen name="chat/conversation" options={{ href: null }} />
+        <Tabs.Screen name="community/create-post" options={{ href: null }} />
       </Tabs>
 
       <Modal
