@@ -29,11 +29,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: "com.manabandhu.app",
   },
   web: {
-    favicon: "./assets/favicon.png",
     bundler: "metro",
+    build: {
+      babel: {
+        include: ["**/*"],
+      },
+    },
   },
   plugins: [
     "expo-router",
+    "expo-asset",
+    "expo-secure-store",
     [
       "expo-apple-authentication",
       {
