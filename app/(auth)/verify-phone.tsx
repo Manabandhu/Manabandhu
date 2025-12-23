@@ -23,6 +23,9 @@ import { COLORS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Line, Polyline } from "react-native-svg";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { sanitizePhone } from "@/lib/sanitize";
 
 const { width } = Dimensions.get("window");
 
@@ -93,16 +96,19 @@ export default function VerifyPhoneScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      const fullPhoneNumber = `${data.countryCode}${data.phoneNumber}`;
+      const sanitizedPhone = sanitizePhone(data.phoneNumber);
+      const fullPhoneNumber = `${data.countryCode}${sanitizedPhone}`;
       const verificationId = await sendOTP(fullPhoneNumber, null);
 
       router.push({
         pathname: ROUTES.auth.otp,
         params: { verificationId, phoneNumber: fullPhoneNumber },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      console.error("Send OTP error:", error);
+      const appError = normalizeError(error);
+      logger.error("Send OTP error", { phoneNumber: data.phoneNumber }, error);
+      // Could show error toast here with appError.userMessage
     } finally {
       setLoading(false);
     }

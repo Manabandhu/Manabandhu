@@ -22,6 +22,9 @@ import { resetPassword } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { sanitizeEmail } from "@/lib/sanitize";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -37,18 +40,21 @@ export default function ResetPasswordScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      await resetPassword(data.email);
+      const sanitizedEmail = sanitizeEmail(data.email);
+      await resetPassword(sanitizedEmail);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       // Navigate to check email screen
       router.push({
         pathname: ROUTES.auth.checkEmail,
-        params: { email: data.email },
+        params: { email: sanitizedEmail },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Password reset failed", { email: data.email }, error);
       form.setError("email", {
-        message: error.message || "Failed to send reset email",
+        message: appError.userMessage || getFirebaseErrorMessage(error),
       });
     } finally {
       setLoading(false);

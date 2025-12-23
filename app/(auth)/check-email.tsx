@@ -16,11 +16,15 @@ import { EmailIcon } from "@/components/ui/Icons";
 import { resetPassword } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { sanitizeEmail } from "@/lib/sanitize";
+import { TIMING } from "@/constants/timing";
 
 export default function CheckEmailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string }>();
-  const [resendTimer, setResendTimer] = useState(60); // 60 seconds = 1 minute
+  const [resendTimer, setResendTimer] = useState(TIMING.OTP_RESEND_COOLDOWN_EMAIL);
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -59,14 +63,18 @@ export default function CheckEmailScreen() {
       setResending(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       
-      await resetPassword(email);
+      const sanitizedEmail = sanitizeEmail(email);
+      await resetPassword(sanitizedEmail);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
       // Reset timer
-      setResendTimer(60);
+      setResendTimer(TIMING.OTP_RESEND_COOLDOWN_EMAIL);
       setCanResend(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Resend email failed", { email }, error);
+      // Could show error toast here with appError.userMessage
     } finally {
       setResending(false);
     }
@@ -127,7 +135,7 @@ export default function CheckEmailScreen() {
 
             {/* Secondary Message */}
             <Text style={styles.messageSecondary}>
-              The link will expire in 15 minutes
+              The link will expire in {TIMING.PASSWORD_RESET_EXPIRY_MINUTES} minutes
             </Text>
 
             {/* Open Email App Button */}

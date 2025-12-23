@@ -19,6 +19,9 @@ import { verifyOTP } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
 import { navigateAfterAuth } from "@/lib/navigation";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { TIMING } from "@/constants/timing";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function OTPScreen() {
     emailLink?: string;
   }>();
   const [loading, setLoading] = useState(false);
-  const [resendTimer, setResendTimer] = useState(58);
+  const [resendTimer, setResendTimer] = useState(TIMING.OTP_RESEND_COOLDOWN);
   const [canResend, setCanResend] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [otpValue, setOtpValue] = useState("");
@@ -109,10 +112,13 @@ export default function OTPScreen() {
       // Redirect after showing success
       setTimeout(async () => {
         await navigateAfterAuth();
-      }, 2000);
-    } catch (error: any) {
+      }, TIMING.OTP_SUCCESS_REDIRECT_DELAY);
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("OTP verification failed", { verificationId: params.verificationId }, error);
       setLoading(false);
+      // Could show error toast here with appError.userMessage
     }
   };
 
@@ -126,7 +132,7 @@ export default function OTPScreen() {
     if (!canResend) return;
 
     try {
-      setResendTimer(58);
+      setResendTimer(TIMING.OTP_RESEND_COOLDOWN);
       setCanResend(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 

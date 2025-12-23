@@ -12,6 +12,7 @@ import {
   confirmPasswordReset as firebaseConfirmPasswordReset,
   signOut as firebaseSignOut,
   User as FirebaseUser,
+  ApplicationVerifier,
 } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { firebaseConfig } from "./config/firebase";
@@ -61,15 +62,20 @@ export const signInWithApple = async () => {
   const provider = new OAuthProvider("apple.com");
   const appleCredential = provider.credential({
     idToken: credential.identityToken!,
-    rawNonce: (credential as any).nonce,
+    rawNonce: "nonce" in credential && typeof credential.nonce === "string" 
+      ? credential.nonce 
+      : undefined,
   });
   
   return signInWithCredential(auth, appleCredential);
 };
 
-export const sendOTP = async (phoneNumber: string, recaptchaVerifier: any) => {
+export const sendOTP = async (phoneNumber: string, recaptchaVerifier: ApplicationVerifier | null) => {
   if (!auth) throw new Error("Firebase Auth not initialized");
   const provider = new PhoneAuthProvider(auth);
+  if (!recaptchaVerifier) {
+    throw new Error("Recaptcha verifier is required");
+  }
   return provider.verifyPhoneNumber(phoneNumber, recaptchaVerifier);
 };
 

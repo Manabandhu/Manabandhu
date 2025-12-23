@@ -25,6 +25,9 @@ import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
+import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
+import { sanitizeEmail, sanitizeText, sanitizePhone } from "@/lib/sanitize";
 
 const { width } = Dimensions.get("window");
 
@@ -51,7 +54,6 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const {} = useAuthStore();
 
   const {
     control,
@@ -75,18 +77,24 @@ export default function SignupScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      const result = await signUpWithEmail(data.email, data.password);
+      const sanitizedEmail = sanitizeEmail(data.email);
+      const sanitizedName = sanitizeText(data.fullName, 100);
+      const sanitizedPhone = sanitizePhone(data.phoneNumber);
+      
+      const result = await signUpWithEmail(sanitizedEmail, data.password);
       if (result.user) {
         // Update user profile with name
         const { updateProfile } = await import("firebase/auth");
-        await updateProfile(result.user, { displayName: data.fullName });
+        await updateProfile(result.user, { displayName: sanitizedName });
 
         // Auth state listener will hydrate the store; just navigate to profile completion
         router.push(ROUTES.auth.profile);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      console.error("Signup error:", error);
+      const appError = normalizeError(error);
+      logger.error("Signup error", { email: data.email }, error);
+      // Could show error toast here with appError.userMessage
     } finally {
       setLoading(false);
     }

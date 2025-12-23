@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { TextInput, Text, View, TextInputProps, StyleSheet } from "react-native";
+import React, { useState, memo, useCallback } from "react";
+import { TextInput, Text, View, TextInputProps, StyleSheet, NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -8,9 +8,12 @@ interface InputProps extends TextInputProps {
   rightIcon?: React.ReactNode;
   containerClassName?: string;
   floatingLabel?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  testID?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input: React.FC<InputProps> = memo(({
   label,
   error,
   leftIcon,
@@ -20,21 +23,24 @@ export const Input: React.FC<InputProps> = ({
   value,
   onFocus,
   onBlur,
+  accessibilityLabel,
+  accessibilityHint,
+  testID,
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasValue = value && value.toString().length > 0;
   const showLabel = floatingLabel ? true : !!label;
 
-  const handleFocus = (e: any) => {
+  const handleFocus = useCallback((e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     setIsFocused(true);
     onFocus?.(e);
-  };
+  }, [onFocus]);
 
-  const handleBlur = (e: any) => {
+  const handleBlur = useCallback((e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     setIsFocused(false);
     onBlur?.(e);
-  };
+  }, [onBlur]);
 
   return (
     <View className={`mb-4 ${containerClassName}`}>
@@ -68,6 +74,11 @@ export const Input: React.FC<InputProps> = ({
             onFocus={handleFocus}
             onBlur={handleBlur}
             style={styles.input}
+            accessibilityLabel={accessibilityLabel || label || props.placeholder}
+            accessibilityHint={accessibilityHint || (error ? `Error: ${error}` : undefined)}
+            accessibilityState={{ disabled: props.editable === false }}
+            accessibilityRole="textbox"
+            testID={testID}
             {...props}
           />
         </View>
@@ -78,7 +89,7 @@ export const Input: React.FC<InputProps> = ({
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   inputWrapper: {

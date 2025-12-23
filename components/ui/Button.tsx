@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { TouchableOpacity, Text, ActivityIndicator, View, ViewStyle, TextStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -11,9 +11,13 @@ interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   className?: string;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityRole?: "button" | "link" | "none";
+  testID?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = memo(({
   title,
   onPress,
   variant = "primary",
@@ -22,6 +26,10 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   fullWidth = false,
   className = "",
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole = "button",
+  testID,
 }) => {
   const baseStyle: ViewStyle = {
     minHeight: size === "sm" ? 40 : size === "md" ? 48 : 56,
@@ -48,6 +56,11 @@ export const Button: React.FC<ButtonProps> = ({
         activeOpacity={0.8}
         style={[baseStyle, fullWidth && { width: "100%" }]}
         className={className}
+        accessibilityLabel={accessibilityLabel || title}
+        accessibilityHint={accessibilityHint || (loading ? "Loading" : undefined)}
+        accessibilityRole={accessibilityRole}
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
+        testID={testID}
       >
         {!isDisabled ? (
           <LinearGradient
@@ -152,5 +165,5 @@ export const Button: React.FC<ButtonProps> = ({
       )}
     </TouchableOpacity>
   );
-};
+});
 
