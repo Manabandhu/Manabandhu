@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       // Save priorities to Firestore
-      const { db, getCurrentUser } = await import("../../lib/firebase.js");
+      const { db, getCurrentUser } = await import("../../lib/firebase");
       const { doc, setDoc } = await import("firebase/firestore");
       const user = getCurrentUser();
 

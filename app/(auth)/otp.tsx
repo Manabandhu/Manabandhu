@@ -15,13 +15,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { OTPInput } from "@/components/ui/OTPInput";
 import { GluestackButton } from "@/components/ui/gluestack-index";
 import { Logo } from "@/components/ui/Logo";
-import { verifyOTP } from "@/lib/firebase";
+import { verifyOTP, auth } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
 import { navigateAfterAuth } from "@/lib/navigation";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { TIMING } from "@/constants/timing";
+import { ApplicationVerifier, RecaptchaVerifier } from "firebase/auth";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -38,6 +39,7 @@ export default function OTPScreen() {
   const [otpValue, setOtpValue] = useState("");
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const recaptchaVerifier = useRef<ApplicationVerifier | null>(null);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -72,6 +74,22 @@ export default function OTPScreen() {
       opacityAnim.setValue(0);
     }
   }, [showSuccess]);
+
+  useEffect(() => {
+    if (Platform.OS === "web" && auth) {
+      const verifier = new RecaptchaVerifier(auth, "otp-recaptcha-container", {
+        size: "invisible",
+      });
+      void verifier.render();
+      recaptchaVerifier.current = verifier;
+    }
+
+    return () => {
+      const verifier = recaptchaVerifier.current as RecaptchaVerifier | null;
+      verifier?.clear();
+      recaptchaVerifier.current = null;
+    };
+  }, []);
 
   const formatPhoneNumber = (phone: string): string => {
     // Format phone number to (XXX) XXX-XXXX format
@@ -135,17 +153,29 @@ export default function OTPScreen() {
   const handleResend = async () => {
     if (!canResend) return;
 
+    if (!params.phoneNumber) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    if (!recaptchaVerifier.current) {
+      logger.warn("Recaptcha verifier unavailable for resend attempt");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
     try {
       setResendTimer(TIMING.OTP_RESEND_COOLDOWN);
       setCanResend(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-        if (params.phoneNumber) {
-        const { sendOTP } = await import("../../lib/firebase.js");
-        const id = await sendOTP(params.phoneNumber, null);
-        router.setParams({ verificationId: id });
-      }
+      const { sendOTP } = await import("../../lib/firebase");
+      const id = await sendOTP(params.phoneNumber, recaptchaVerifier.current);
+      router.setParams({ verificationId: id });
     } catch (error) {
+      setResendTimer(0);
+      setCanResend(true);
+      logger.error("OTP resend failed", { phoneNumber: params.phoneNumber }, error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -173,6 +203,9 @@ export default function OTPScreen() {
       className="flex-1"
       style={{ backgroundColor: "#F2F2F2" }}
     >
+      {Platform.OS === "web" && (
+        <View nativeID="otp-recaptcha-container" style={{ display: "none" }} />
+      )}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"

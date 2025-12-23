@@ -212,7 +212,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signOut: async () => {
-        const { signOut: firebaseSignOut } = await import("../lib/firebase.js");
+        const { signOut: firebaseSignOut } = await import("../lib/firebase");
         const { cleanup } = get();
         cleanup();
         await firebaseSignOut();
@@ -234,4 +234,3 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-
