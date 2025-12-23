@@ -5,7 +5,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   StyleSheet,
   Animated,
 } from "react-native";
@@ -13,6 +12,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Logo } from "@/components/ui/Logo";
 import Svg, { Path, Circle } from "react-native-svg";
+import { GluestackButton } from "@/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
@@ -142,20 +142,9 @@ export default function PasswordResetSuccessScreen() {
                 },
               ]}
             >
-              <TouchableOpacity
-                style={styles.signInButton}
-                onPress={handleSignIn}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={["#4F46E5", "#6366F1"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.signInButtonGradient}
-                >
-                  <Text style={styles.signInButtonText}>Sign In</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+              <GluestackButton onPress={handleSignIn} fullWidth size="lg">
+                Sign In
+              </GluestackButton>
             </Animated.View>
           </View>
         </View>
@@ -251,24 +240,5 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    alignItems: "center",
-  },
-  signInButton: {
-    width: "85%",
-    maxWidth: 294,
-    height: 52,
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  signInButtonGradient: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  signInButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#FFFFFF",
   },
 });
-
