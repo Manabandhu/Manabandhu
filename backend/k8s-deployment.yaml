@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: manabandhu-backend
+spec:
+  type: LoadBalancer
+  selector:
+    app: manabandhu-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manabandhu-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: manabandhu-backend
+  template:
+    metadata:
+      labels:
+        app: manabandhu-backend
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/YOUR_PROJECT_ID/manabandhu-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: manabandhu-secrets
+              key: database-url
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: manabandhu-config
+              key: redis-host
+        - name: FIREBASE_SERVICE_ACCOUNT
+          value: /secrets/serviceAccountKey.json
+        volumeMounts:
+        - name: firebase-secret
+          mountPath: /secrets
+          readOnly: true
+      volumes:
+      - name: firebase-secret
+        secret:
+          secretName: firebase-service-account
