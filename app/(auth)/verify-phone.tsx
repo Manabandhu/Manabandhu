@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { phoneSchema, PhoneInput } from "@/lib/validators";
 import { Logo } from "@/components/ui/Logo";
 import { PhoneIcon } from "@/components/ui/Icons";
 import { GluestackButton } from "@/components/ui/gluestack-index";
-import { sendOTP } from "@/lib/firebase";
+import { sendOTP, auth } from "@/lib/firebase";
 import { COLORS } from "@/constants";
 import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
@@ -26,6 +26,7 @@ import Svg, { Circle, Line, Polyline } from "react-native-svg";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizePhone } from "@/lib/sanitize";
+import { ApplicationVerifier, RecaptchaVerifier } from "firebase/auth";
 
 const { width } = Dimensions.get("window");
 
@@ -78,6 +79,7 @@ const DropdownArrow = ({ size = 12, color = "#6b7280" }) => (
 export default function VerifyPhoneScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const recaptchaVerifier = useRef<ApplicationVerifier | null>(null);
   
   const {
     control,
@@ -91,14 +93,33 @@ export default function VerifyPhoneScreen() {
     },
   });
 
+  useEffect(() => {
+    if (Platform.OS === "web" && auth) {
+      const verifier = new RecaptchaVerifier(auth, "verify-phone-recaptcha", {
+        size: "invisible",
+      });
+      void verifier.render();
+      recaptchaVerifier.current = verifier;
+    }
+
+    return () => {
+      const verifier = recaptchaVerifier.current as RecaptchaVerifier | null;
+      verifier?.clear();
+      recaptchaVerifier.current = null;
+    };
+  }, []);
+
   const onSubmit = async (data: PhoneInput) => {
     try {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       const sanitizedPhone = sanitizePhone(data.phoneNumber);
       const fullPhoneNumber = `${data.countryCode}${sanitizedPhone}`;
-      const verificationId = await sendOTP(fullPhoneNumber, null);
+      if (!recaptchaVerifier.current) {
+        throw new Error("Verification is not available. Please retry in a moment.");
+      }
+      const verificationId = await sendOTP(fullPhoneNumber, recaptchaVerifier.current);
 
       router.push({
         pathname: ROUTES.auth.otp,
@@ -119,6 +140,9 @@ export default function VerifyPhoneScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      {Platform.OS === "web" && (
+        <View nativeID="verify-phone-recaptcha" style={{ display: "none" }} />
+      )}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -409,4 +433,3 @@ const styles = StyleSheet.create({
     fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
   },
 });
-

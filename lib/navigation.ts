@@ -37,8 +37,14 @@ export const navigateAfterAuth = async () => {
     return;
   }
 
-  router.replace(ROUTES.onboarding.welcome);
-};
+  const userData = userDoc.data();
+  const onboardingCompleted = !!userData?.onboardingCompleted;
 
+  if (onboardingCompleted) {
+    router.replace(ROUTES.tabs.home);
+  } else {
+    router.replace(ROUTES.onboarding.welcome);
+  }
+};
 
 
