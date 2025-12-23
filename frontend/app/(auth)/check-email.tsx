@@ -276,14 +276,11 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   buttonContainer: {
-    width: "85%",
-    maxWidth: 294,
-    alignSelf: "center",
+    width: "100%",
     marginBottom: 16,
   },
   resendButton: {
-    width: "85%",
-    maxWidth: 294,
+    width: "100%",
     height: 50,
     backgroundColor: "#F8F9FA",
     borderWidth: 1,
