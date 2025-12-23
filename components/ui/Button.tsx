@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle } from "react-native";
+import { TouchableOpacity, Text, ActivityIndicator, View, ViewStyle, TextStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface ButtonProps {
@@ -26,7 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyle: ViewStyle = {
     minHeight: size === "sm" ? 40 : size === "md" ? 48 : 56,
     paddingHorizontal: size === "sm" ? 16 : size === "md" ? 24 : 32,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     opacity: disabled || loading ? 0.6 : 1,
@@ -49,23 +49,37 @@ export const Button: React.FC<ButtonProps> = ({
         style={[baseStyle, fullWidth && { width: "100%" }]}
         className={className}
       >
-        <LinearGradient
-          colors={["#6366f1", "#4f46e5"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            borderRadius: 12,
-          }}
-        />
-        {loading ? (
-          <ActivityIndicator color="#ffffff" />
+        {!isDisabled ? (
+          <LinearGradient
+            colors={["#6366f1", "#4f46e5"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              borderRadius: 16,
+            }}
+          />
         ) : (
-          <Text style={textStyle}>{title}</Text>
+          <View
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              borderRadius: 16,
+              backgroundColor: "#d1d5db",
+            }}
+          />
+        )}
+        {loading ? (
+          <ActivityIndicator color={isDisabled ? "#9ca3af" : "#ffffff"} />
+        ) : (
+          <Text style={[textStyle, isDisabled && { color: "#9ca3af" }]}>{title}</Text>
         )}
       </TouchableOpacity>
     );

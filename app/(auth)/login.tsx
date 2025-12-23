@@ -1,151 +1,177 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { emailSchema, phoneSchema, EmailInput, PhoneInput } from "@/lib/validators";
+import { LinearGradient } from "expo-linear-gradient";
+import { loginSchema, LoginInput } from "@/lib/validators";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { signInWithEmail, signUpWithEmail, sendOTP } from "@/lib/firebase";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Logo } from "@/components/ui/Logo";
+import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/components/ui/Icons";
+import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 
-type LoginMethod = "email" | "phone";
-
 export default function LoginScreen() {
   const router = useRouter();
-  const [method, setMethod] = useState<LoginMethod>("email");
   const [loading, setLoading] = useState(false);
-  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { setUser } = useAuthStore();
 
-  const emailForm = useForm<EmailInput>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: { email: "" },
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
   });
 
-  const phoneForm = useForm<PhoneInput>({
-    resolver: zodResolver(phoneSchema),
-    defaultValues: { phoneNumber: "", countryCode: "+1" },
-  });
-
-  const handleEmailSubmit = async (data: EmailInput) => {
+  const handleSubmit = async (data: LoginInput) => {
     try {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      const { sendEmailLink } = await import("@/lib/firebase");
-      const actionCodeSettings = {
-        url: "manabandhu://auth",
-        handleCodeInApp: true,
-      };
-      
-      await sendEmailLink(data.email, actionCodeSettings);
-      router.push({
-        pathname: "/(auth)/otp",
-        params: { email: data.email, emailLink: "true" },
-      });
+
+      const result = await signInWithEmail(data.email, data.password);
+      const user = result.user;
+
+      if (user) {
+        const { db, getCurrentUser } = await import("@/lib/firebase");
+        const { doc, getDoc } = await import("firebase/firestore");
+        const currentUser = getCurrentUser();
+
+        if (currentUser) {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+
+          if (!userDoc.exists()) {
+            router.replace("/(auth)/profile");
+          } else {
+            router.replace("/(onboarding)/welcome");
+          }
+        }
+      }
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      emailForm.setError("email", { message: error.message || "Failed to send email link" });
+      form.setError("password", {
+        message: error.message || "Invalid email or password",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePhoneSubmit = async (data: PhoneInput) => {
+  const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      const fullPhoneNumber = `${data.countryCode}${data.phoneNumber}`;
-      const id = await sendOTP(fullPhoneNumber, null);
-      setVerificationId(id);
-      router.push({
-        pathname: "/(auth)/otp",
-        params: { verificationId: id, phoneNumber: fullPhoneNumber },
-      });
+      await signInWithGoogle();
+      const { db, getCurrentUser } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const user = getCurrentUser();
+
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          router.replace("/(auth)/profile");
+        } else {
+          router.replace("/(onboarding)/welcome");
+        }
+      }
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      phoneForm.setError("phoneNumber", { message: error.message });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await signInWithApple();
+      const { db, getCurrentUser } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const user = getCurrentUser();
+
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          router.replace("/(auth)/profile");
+        } else {
+          router.replace("/(onboarding)/welcome");
+        }
+      }
+    } catch (error: any) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookSignIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Facebook sign in implementation
+  };
+
+  const handlePhoneSignIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/(auth)/verify-phone");
+  };
+
+  const handleForgotPassword = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/(auth)/reset-password");
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white dark:bg-gray-900"
+      className="flex-1"
+      style={{ backgroundColor: "#F2F2F2" }}
     >
       <ScrollView
-        contentContainerClassName="flex-grow px-6 py-8"
+        contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="mb-6"
+        {/* Hero Section */}
+        <LinearGradient
+          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroSection}
         >
-          <Text className="text-primary-600 text-base">← Back</Text>
-        </TouchableOpacity>
+          {/* Decorative circles */}
+          <View style={styles.circleDecoration1} />
+          <View style={styles.circleDecoration2} />
 
-        <View className="mb-8">
-          <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome Back
-          </Text>
-          <Text className="text-gray-600 dark:text-gray-400">
-            Sign in to continue to ManaBandhu
-          </Text>
-        </View>
-
-        <View className="flex-row mb-6 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-          <TouchableOpacity
-            onPress={() => setMethod("email")}
-            className={`flex-1 py-3 rounded-lg ${
-              method === "email"
-                ? "bg-white dark:bg-gray-700 shadow-sm"
-                : ""
-            }`}
-          >
-            <Text
-              className={`text-center font-semibold ${
-                method === "email"
-                  ? "text-primary-600 dark:text-primary-400"
-                  : "text-gray-600 dark:text-gray-400"
-              }`}
-            >
-              Email
+          <View style={styles.heroContent}>
+            <Logo size={80} color="#FFFFFF" />
+            <Text style={styles.heroTitle}>Welcome back</Text>
+            <Text style={styles.heroSubtitle}>
+              Sign in to your ManaBandhu account
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMethod("phone")}
-            className={`flex-1 py-3 rounded-lg ${
-              method === "phone"
-                ? "bg-white dark:bg-gray-700 shadow-sm"
-                : ""
-            }`}
-          >
-            <Text
-              className={`text-center font-semibold ${
-                method === "phone"
-                  ? "text-primary-600 dark:text-primary-400"
-                  : "text-gray-600 dark:text-gray-400"
-              }`}
-            >
-              Phone
-            </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </LinearGradient>
 
-        {method === "email" ? (
-          <View>
+        {/* Form Section */}
+        <View style={styles.formSection}>
+          <View style={styles.formContainer}>
+            {/* Email Input */}
             <Controller
-              control={emailForm.control}
+              control={form.control}
               name="email"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
                 <Input
-                  label="Email Address"
-                  placeholder="Enter your email"
+                  label="Email"
+                  placeholder="Email address"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
@@ -153,59 +179,286 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
+                  floatingLabel
+                  leftIcon={<EmailIcon size={20} color="#6B7280" />}
                 />
               )}
             />
 
-            <Button
-              title="Continue"
-              onPress={emailForm.handleSubmit(handleEmailSubmit)}
-              loading={loading}
-              fullWidth
-            />
-          </View>
-        ) : (
-          <View>
+            {/* Password Input */}
             <Controller
-              control={phoneForm.control}
-              name="countryCode"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Country Code"
-                  placeholder="+1"
-                  value={value}
-                  onChangeText={onChange}
-                  keyboardType="phone-pad"
-                />
-              )}
-            />
-
-            <Controller
-              control={phoneForm.control}
-              name="phoneNumber"
+              control={form.control}
+              name="password"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
                 <Input
-                  label="Phone Number"
-                  placeholder="Enter your phone number"
+                  label="Password"
+                  placeholder="Password"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   error={error?.message}
-                  keyboardType="phone-pad"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  floatingLabel
+                  leftIcon={<LockIcon size={20} color="#6B7280" />}
+                  rightIcon={
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowPassword(!showPassword);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon size={20} color="#6B7280" />
+                      ) : (
+                        <EyeIcon size={20} color="#6B7280" />
+                      )}
+                    </TouchableOpacity>
+                  }
                 />
               )}
             />
 
+            {/* Options Row */}
+            <View style={styles.optionsRow}>
+              <Checkbox
+                checked={rememberMe}
+                onToggle={() => {
+                  setRememberMe(!rememberMe);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                label={<Text style={styles.rememberText}>Remember me</Text>}
+              />
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Text style={styles.forgotPassword}>Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sign In Button */}
             <Button
-              title="Send OTP"
-              onPress={phoneForm.handleSubmit(handlePhoneSubmit)}
+              title="Sign in"
+              onPress={form.handleSubmit(handleSubmit)}
               loading={loading}
               fullWidth
+              className="mt-2"
             />
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Or continue with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Social Buttons */}
+            <View style={styles.socialButtons}>
+              <TouchableOpacity
+                style={[styles.socialButton, styles.googleButton]}
+                onPress={handleGoogleSignIn}
+                disabled={loading}
+              >
+                <GoogleIcon size={20} />
+                <Text style={styles.socialButtonText}>Continue with Google</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.socialButton, styles.facebookButton]}
+                onPress={handleFacebookSignIn}
+                disabled={loading}
+              >
+                <FacebookIcon size={20} color="#FFFFFF" />
+                <Text style={[styles.socialButtonText, styles.facebookButtonText]}>
+                  Continue with Facebook
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.socialButton, styles.appleButton]}
+                onPress={handleAppleSignIn}
+                disabled={loading}
+              >
+                <AppleIcon size={20} color="#FFFFFF" />
+                <Text style={[styles.socialButtonText, styles.appleButtonText]}>
+                  Continue with Apple
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.socialButton, styles.phoneButton]}
+                onPress={handlePhoneSignIn}
+                disabled={loading}
+              >
+                <PhoneIcon size={20} color="#000000" />
+                <Text style={styles.socialButtonText}>Continue with Phone Number</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account?</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push("/(auth)/signup");
+                }}
+              >
+                <Text style={styles.signupLink}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
+const styles = StyleSheet.create({
+  heroSection: {
+    position: "relative",
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    paddingTop: 32,
+    paddingBottom: 48,
+    paddingHorizontal: 24,
+    minHeight: 280,
+    overflow: "hidden",
+  },
+  circleDecoration1: {
+    position: "absolute",
+    top: -50,
+    right: -50,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  circleDecoration2: {
+    position: "absolute",
+    bottom: -30,
+    left: -30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  },
+  heroContent: {
+    position: "relative",
+    zIndex: 1,
+    alignItems: "center",
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+  },
+  formSection: {
+    paddingTop: 32,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+    backgroundColor: "#F2F2F2",
+    flex: 1,
+  },
+  formContainer: {
+    flex: 1,
+  },
+  optionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  rememberText: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "400",
+  },
+  forgotPassword: {
+    fontSize: 14,
+    color: "#4F46E5",
+    fontWeight: "600",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E5E7EB",
+  },
+  dividerText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "400",
+    marginHorizontal: 16,
+  },
+  socialButtons: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  socialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 48,
+    borderRadius: 16,
+    borderWidth: 2,
+    gap: 12,
+  },
+  googleButton: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E5E7EB",
+  },
+  facebookButton: {
+    backgroundColor: "#1877F2",
+    borderColor: "#1877F2",
+  },
+  appleButton: {
+    backgroundColor: "#000000",
+    borderColor: "#000000",
+  },
+  phoneButton: {
+    backgroundColor: "#F9FAFB",
+    borderColor: "#E5E7EB",
+  },
+  socialButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#000000",
+  },
+  facebookButtonText: {
+    color: "#FFFFFF",
+  },
+  appleButtonText: {
+    color: "#FFFFFF",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+    marginTop: "auto",
+    paddingTop: 24,
+  },
+  footerText: {
+    fontSize: 14,
+    color: "#4B5563",
+    fontWeight: "400",
+  },
+  signupLink: {
+    fontSize: 14,
+    color: "#4F46E5",
+    fontWeight: "600",
+  },
+});
