@@ -239,8 +239,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   buttonContainer: {
-    width: "85%",
-    maxWidth: 294,
-    alignSelf: "center",
+    width: "100%",
   },
 });
