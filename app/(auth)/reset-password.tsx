@@ -65,11 +65,6 @@ export default function ResetPasswordScreen() {
     router.push(ROUTES.auth.verifyPhone);
   };
 
-  const handleSecurityQuestions = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Navigate to security questions screen
-    // TODO: Implement security questions flow
-  };
 
   const handleSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -164,13 +159,7 @@ export default function ResetPasswordScreen() {
                   <Text style={styles.alternativeButtonText}>Phone Number</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.alternativeButton}
-                  onPress={handleSecurityQuestions}
-                >
-                  <HelpIcon size={18} color="#495057" />
-                  <Text style={styles.alternativeButtonText}>Security Questions</Text>
-                </TouchableOpacity>
+                {/* Security questions flow not implemented - hidden for now */}
               </View>
             </View>
 

@@ -24,19 +24,23 @@ import { TIMING } from "@/constants/timing";
 export default function CheckEmailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string }>();
-  const [resendTimer, setResendTimer] = useState(TIMING.OTP_RESEND_COOLDOWN_EMAIL);
+  const [resendTimer, setResendTimer] = useState<number>(TIMING.OTP_RESEND_COOLDOWN_EMAIL);
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
 
   const email = params.email || "john@example.com";
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setResendTimer((prev: any) => prev - 1), 1000);
+      setCanResend(false);
     } else {
       setCanResend(true);
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [resendTimer]);
 
   const handleOpenEmailApp = async () => {

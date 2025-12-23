@@ -1,1 +1,22 @@
-export type UserRole = \"student\" | \"worker\" | \"visitor\";\n\nexport interface User {\n  uid: string;\n  email?: string;\n  phoneNumber?: string;\n  displayName?: string;\n  photoURL?: string;\n  country?: string;\n  city?: string;\n  role?: UserRole;\n  onboardingCompleted: boolean;\n  createdAt: string;\n  updatedAt: string;\n}\n\nexport interface AuthState {\n  user: User | null;\n  isLoading: boolean;\n  isAuthenticated: boolean;\n  onboardingCompleted: boolean;\n}
+export type UserRole = "student" | "worker" | "visitor";
+
+export interface User {
+	uid: string;
+	email?: string;
+	phoneNumber?: string;
+	displayName?: string;
+	photoURL?: string;
+	country?: string;
+	city?: string;
+	role?: UserRole;
+	onboardingCompleted: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface AuthState {
+	user: User | null;
+	isLoading: boolean;
+	isAuthenticated: boolean;
+	onboardingCompleted: boolean;
+}

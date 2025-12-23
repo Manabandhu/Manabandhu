@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { TextInput, View, Text, TextInputProps, NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
+import { TextInput, View, Text, TextInputProps } from "react-native";
 
 export interface GluestackInputProps extends TextInputProps {
   label?: string;
@@ -24,14 +24,12 @@ export const GluestackInput: React.FC<GluestackInputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasValue = value && value.toString().length > 0;
-  const showLabel = floatingLabel ? true : !!label;
-
-  const handleFocus = useCallback((e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleFocus = useCallback((e: any) => {
     setIsFocused(true);
     onFocus?.(e);
   }, [onFocus]);
 
-  const handleBlur = useCallback((e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+  const handleBlur = useCallback((e: any) => {
     setIsFocused(false);
     onBlur?.(e);
   }, [onBlur]);
