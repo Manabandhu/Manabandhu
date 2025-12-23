@@ -14,6 +14,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Logo } from "@/components/ui/Logo";
 import Svg, { Path, Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
 
 export default function PasswordResetSuccessScreen() {
   const router = useRouter();
@@ -49,7 +51,7 @@ export default function PasswordResetSuccessScreen() {
 
   const handleSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.replace("/(auth)/login");
+    router.replace(ROUTES.auth.login);
   };
 
   return (
@@ -64,7 +66,7 @@ export default function PasswordResetSuccessScreen() {
       >
         {/* Hero Section */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}

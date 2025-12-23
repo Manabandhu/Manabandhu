@@ -35,3 +35,8 @@ export const TYPOGRAPHY = {
     "2xl": 24,
   },
 };
+
+export const GRADIENTS = {
+  primary: ["#6366F1", "#4F46E5", "#4338CA"] as const,
+  primaryShort: ["#6366F1", "#4F46E5"] as const,
+};

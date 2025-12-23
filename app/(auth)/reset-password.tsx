@@ -20,6 +20,8 @@ import { Logo } from "@/components/ui/Logo";
 import { EmailIcon, PhoneIcon, HelpIcon } from "@/components/ui/Icons";
 import { resetPassword } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -40,7 +42,7 @@ export default function ResetPasswordScreen() {
 
       // Navigate to check email screen
       router.push({
-        pathname: "/(auth)/check-email",
+        pathname: ROUTES.auth.checkEmail,
         params: { email: data.email },
       });
     } catch (error: any) {
@@ -55,7 +57,7 @@ export default function ResetPasswordScreen() {
 
   const handlePhoneReset = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/verify-phone");
+    router.push(ROUTES.auth.verifyPhone);
   };
 
   const handleSecurityQuestions = () => {
@@ -66,7 +68,7 @@ export default function ResetPasswordScreen() {
 
   const handleSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/login");
+    router.push(ROUTES.auth.login);
   };
 
   return (
@@ -82,7 +84,7 @@ export default function ResetPasswordScreen() {
       >
         {/* Hero Section */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}

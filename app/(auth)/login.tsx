@@ -22,6 +22,7 @@ import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/fireba
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 import { ROUTES } from "@/constants/routes";
+import { GRADIENTS } from "@/constants";
 import { navigateAfterAuth } from "@/lib/navigation";
 
 export default function LoginScreen() {
@@ -111,7 +112,7 @@ export default function LoginScreen() {
       >
         {/* Hero Section */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}
