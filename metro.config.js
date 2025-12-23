@@ -25,7 +25,7 @@ if (process.env.EXPO_PLATFORM === "web") {
   config.serializer = {
     ...config.serializer,
     getPolyfills: () => [
-      require.resolve("./polyfills/import-meta.js"),
+      require.resolve("./lib/polyfills.js"),
     ],
   };
 }

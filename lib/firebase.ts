@@ -8,24 +8,11 @@ import {
   signInWithCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-  signInWithEmailLink as firebaseSignInWithEmailLink,
   signOut as firebaseSignOut,
   User as FirebaseUser,
 } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
-import * as SecureStore from "expo-secure-store";
-
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
-};
+import { firebaseConfig } from "./config/firebase";
 
 let app: FirebaseApp;
 let auth: Auth | null = null;
@@ -40,9 +27,6 @@ if (!getApps().length) {
   auth = getAuth(app);
   db = getFirestore(app);
 }
-
-export const googleProvider = new GoogleAuthProvider();
-export const appleProvider = new OAuthProvider("apple.com");
 
 export const signInWithGoogle = async () => {
   if (!auth) throw new Error("Firebase Auth not initialized");
@@ -102,31 +86,10 @@ export const signUpWithEmail = async (email: string, password: string) => {
   return createUserWithEmailAndPassword(auth, email, password);
 };
 
-export const resetPassword = async (email: string) => {
-  if (!auth) throw new Error("Firebase Auth not initialized");
-  return sendPasswordResetEmail(auth, email);
-};
-
-export const sendEmailLink = async (email: string, actionCodeSettings: any) => {
-  if (!auth) throw new Error("Firebase Auth not initialized");
-  return sendSignInLinkToEmail(auth, email, actionCodeSettings);
-};
-
-export const checkEmailLink = (emailLink: string): boolean => {
-  if (!auth) return false;
-  return isSignInWithEmailLink(auth, emailLink);
-};
-
-export const signInWithEmailLink = async (email: string, emailLink: string) => {
-  if (!auth) throw new Error("Firebase Auth not initialized");
-  return firebaseSignInWithEmailLink(auth, email, emailLink);
-};
-
 export const signOut = async () => {
   if (auth) {
     await firebaseSignOut(auth);
   }
-  await SecureStore.deleteItemAsync("authToken");
 };
 
 export const getCurrentUser = (): FirebaseUser | null => {

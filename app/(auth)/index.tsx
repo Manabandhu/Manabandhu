@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Linking, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "@/components/ui/Button";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { Logo } from "@/components/ui/Logo";
+import { EmailIcon } from "@/components/ui/Icons";
 import { signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
+import { COLORS } from "@/constants";
 import * as Haptics from "expo-haptics";
+
+const { width } = Dimensions.get("window");
 
 export default function AuthIndex() {
   const router = useRouter();
@@ -59,48 +64,266 @@ export default function AuthIndex() {
     }
   };
 
+  const handleEmailSignUp = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/(auth)/login");
+  };
+
+  const handlePhoneSignUp = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/(auth)/login");
+  };
+
+  const handleFacebookSignIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // TODO: Implement Facebook sign in
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1"
+      style={styles.container}
     >
       <ScrollView
-        contentContainerClassName="flex-grow"
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <LinearGradient
-          colors={["#6366f1", "#4f46e5", "#4338ca"]}
-          className="flex-1"
-        >
-          <View className="flex-1 justify-center px-6 py-12">
-            <View className="items-center mb-12">
-              <Text className="text-4xl font-bold text-white mb-3">
-                ManaBandhu
-              </Text>
-              <Text className="text-lg text-white/90 text-center">
-                Your trusted companion for life's journey
-              </Text>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <LinearGradient
+            colors={["#6366f1", "#4f46e5", "#4338ca"]}
+            start={{ x: 0.09, y: 0.21 }}
+            end={{ x: 0.91, y: 0.79 }}
+            style={styles.heroGradient}
+          >
+            {/* Circle Decorations */}
+            <View style={[styles.circleDecoration, styles.circle1]} />
+            <View style={[styles.circleDecoration, styles.circle2]} />
+            <View style={[styles.circleDecoration, styles.circle3]} />
+
+            {/* Hero Content */}
+            <View style={styles.heroContent}>
+              <Logo size={70} />
+              <Text style={styles.heroTitle}>Join ManaBandhu</Text>
+              <Text style={styles.heroSubtitle}>Connect with your community</Text>
+            </View>
+          </LinearGradient>
+        </View>
+
+        {/* Form Section */}
+        <View style={styles.formSection}>
+          <View style={styles.formContainer}>
+            <Text style={styles.sectionHeader}>Get Started</Text>
+
+            {/* Email Sign Up Button */}
+            <TouchableOpacity
+              onPress={handleEmailSignUp}
+              activeOpacity={0.8}
+              style={styles.emailButton}
+            >
+              <LinearGradient
+                colors={["#6366f1", "#4f46e5"]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.emailButtonGradient}
+              >
+                <EmailIcon size={20} color="#f9fafb" />
+                <Text style={styles.emailButtonText}>Sign up with Email</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Or continue with</Text>
+              <View style={styles.dividerLine} />
             </View>
 
-            <View className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
-              <SocialLoginButtons
-                onGooglePress={handleGoogleSignIn}
-                onApplePress={handleAppleSignIn}
-                loading={loading}
-              />
+            {/* Social Login Buttons */}
+            <SocialLoginButtons
+              onGooglePress={handleGoogleSignIn}
+              onApplePress={handleAppleSignIn}
+              onFacebookPress={handleFacebookSignIn}
+              onPhonePress={handlePhoneSignUp}
+              loading={loading}
+            />
 
-              <Button
-                title="Continue with Email"
-                onPress={() => router.push("/(auth)/login")}
-                variant="outline"
-                fullWidth
-                className="mt-4"
-              />
+            {/* Terms Text */}
+            <Text style={styles.termsText}>
+              By continuing, you agree to our{" "}
+              <Text
+                style={styles.termsLink}
+                onPress={() => Linking.openURL("https://example.com/terms")}
+              >
+                Terms of Service
+              </Text>
+              {" "}and{" "}
+              <Text
+                style={styles.termsLink}
+                onPress={() => Linking.openURL("https://example.com/privacy")}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+                <Text style={styles.signInLink}>Sign in</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f9fafb",
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  heroSection: {
+    height: 250,
+    position: "relative",
+  },
+  heroGradient: {
+    flex: 1,
+    position: "relative",
+    overflow: "hidden",
+  },
+  circleDecoration: {
+    position: "absolute",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 9999,
+  },
+  circle1: {
+    width: 100,
+    height: 100,
+    top: -50,
+    right: 10,
+  },
+  circle2: {
+    width: 60,
+    height: 60,
+    bottom: -10,
+    left: -30,
+  },
+  circle3: {
+    width: 120,
+    height: 120,
+    top: 125,
+    left: -60,
+    opacity: 0.05,
+  },
+  heroContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 20,
+    zIndex: 1,
+  },
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#ffffff",
+    marginTop: 16,
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  heroSubtitle: {
+    fontSize: 15,
+    fontWeight: "400",
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: 8,
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  formSection: {
+    flex: 1,
+    backgroundColor: "#f9fafb",
+    paddingTop: 20,
+  },
+  formContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 16,
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  emailButton: {
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  emailButtonGradient: {
+    height: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+  },
+  emailButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#f9fafb",
+    fontFamily: "Arial",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 16,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e5e7eb",
+  },
+  dividerText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#6b7280",
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  termsText: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#6b7280",
+    textAlign: "center",
+    marginTop: 24,
+    lineHeight: 18,
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  termsLink: {
+    color: "#4f46e5",
+    fontWeight: "500",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 24,
+  },
+  footerText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#4b5563",
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  signInLink: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4f46e5",
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+});
