@@ -2,21 +2,20 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Linking, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Button } from "@/components/ui/Button";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { Logo } from "@/components/ui/Logo";
 import { EmailIcon } from "@/components/ui/Icons";
 import { signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
-import { COLORS } from "@/constants";
+import { GRADIENTS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
+import { navigateAfterAuth } from "@/lib/navigation";
 import * as Haptics from "expo-haptics";
-
-const { width } = Dimensions.get("window");
 
 export default function AuthIndex() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { setUser } = useAuthStore();
+  const {} = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -24,15 +23,7 @@ export default function AuthIndex() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const result = await signInWithGoogle();
       if (result.user) {
-        const { db } = await import("@/lib/firebase");
-        const { doc, getDoc } = await import("firebase/firestore");
-        const userDoc = await getDoc(doc(db, "users", result.user.uid));
-        
-        if (!userDoc.exists()) {
-          router.push("/(auth)/profile");
-        } else {
-          router.replace("/(onboarding)/welcome");
-        }
+        await navigateAfterAuth();
       }
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -47,15 +38,7 @@ export default function AuthIndex() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const result = await signInWithApple();
       if (result.user) {
-        const { db } = await import("@/lib/firebase");
-        const { doc, getDoc } = await import("firebase/firestore");
-        const userDoc = await getDoc(doc(db, "users", result.user.uid));
-        
-        if (!userDoc.exists()) {
-          router.push("/(auth)/profile");
-        } else {
-          router.replace("/(onboarding)/welcome");
-        }
+        await navigateAfterAuth();
       }
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -66,12 +49,12 @@ export default function AuthIndex() {
 
   const handleEmailSignUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/signup");
+    router.push(ROUTES.auth.signup);
   };
 
   const handlePhoneSignUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(auth)/verify-phone");
+    router.push(ROUTES.auth.verifyPhone);
   };
 
   const handleFacebookSignIn = () => {
@@ -92,7 +75,7 @@ export default function AuthIndex() {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <LinearGradient
-            colors={["#6366f1", "#4f46e5", "#4338ca"]}
+            colors={GRADIENTS.primary}
             start={{ x: 0.09, y: 0.21 }}
             end={{ x: 0.91, y: 0.79 }}
             style={styles.heroGradient}
@@ -142,10 +125,10 @@ export default function AuthIndex() {
 
             {/* Social Login Buttons */}
             <SocialLoginButtons
-              onGooglePress={handleGoogleSignIn}
-              onApplePress={handleAppleSignIn}
-              onFacebookPress={handleFacebookSignIn}
-              onPhonePress={handlePhoneSignUp}
+              onGooglePress={async () => handleGoogleSignIn()}
+              onApplePress={async () => handleAppleSignIn()}
+              onFacebookPress={async () => handleFacebookSignIn()}
+              onPhonePress={async () => handlePhoneSignUp()}
               loading={loading}
             />
 
@@ -170,7 +153,7 @@ export default function AuthIndex() {
             {/* Footer */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+              <TouchableOpacity onPress={() => router.push(ROUTES.auth.login)}>
                 <Text style={styles.signInLink}>Sign in</Text>
               </TouchableOpacity>
             </View>

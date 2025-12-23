@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
+import { ROUTES } from "@/constants/routes";
 
 const roles = [
   { value: "student", label: "Student" },
@@ -57,7 +58,7 @@ export default function ProfileScreen() {
 
       const user = getCurrentUser();
       if (!user) {
-        router.replace("/(auth)");
+        router.replace(ROUTES.auth.root);
         return;
       }
 
@@ -75,7 +76,7 @@ export default function ProfileScreen() {
       await setDoc(doc(db, "users", user.uid), userData, { merge: true });
       await updateUserProfile(userData);
 
-      router.replace("/(onboarding)/welcome");
+      router.replace(ROUTES.onboarding.welcome);
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

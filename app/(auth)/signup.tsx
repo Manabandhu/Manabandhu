@@ -22,7 +22,8 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 import { signUpWithEmail } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
-import { COLORS } from "@/constants";
+import { GRADIENTS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
 import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
@@ -50,7 +51,7 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { setUser } = useAuthStore();
+  const {} = useAuthStore();
 
   const {
     control,
@@ -79,9 +80,9 @@ export default function SignupScreen() {
         // Update user profile with name
         const { updateProfile } = await import("firebase/auth");
         await updateProfile(result.user, { displayName: data.fullName });
-        
-        setUser(result.user);
-        router.push("/(auth)/profile");
+
+        // Auth state listener will hydrate the store; just navigate to profile completion
+        router.push(ROUTES.auth.profile);
       }
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -104,7 +105,7 @@ export default function SignupScreen() {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <LinearGradient
-            colors={["#6366f1", "#4f46e5", "#4338ca"]}
+            colors={GRADIENTS.primary}
             start={{ x: 0.09, y: 0.21 }}
             end={{ x: 0.91, y: 0.79 }}
             style={styles.heroGradient}
@@ -352,7 +353,7 @@ export default function SignupScreen() {
               loading={loading}
               disabled={!isValid || loading}
               fullWidth
-              className={styles.submitButton}
+              className="mb-6"
             />
 
             {/* Footer */}

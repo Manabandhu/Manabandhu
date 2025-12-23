@@ -18,6 +18,8 @@ import { Logo } from "@/components/ui/Logo";
 import { LockIcon, EyeIcon, EyeOffIcon, CheckIcon } from "@/components/ui/Icons";
 import { confirmPasswordReset } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants";
+import { ROUTES } from "@/constants/routes";
 
 interface PasswordRequirement {
   id: string;
@@ -106,7 +108,7 @@ export default function NewPasswordScreen() {
       await confirmPasswordReset(oobCode, data.password);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/(auth)/password-reset-success");
+      router.replace(ROUTES.auth.passwordResetSuccess);
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       form.setError("password", {
@@ -119,7 +121,7 @@ export default function NewPasswordScreen() {
 
   const handleBackToSignIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.replace("/(auth)/login");
+    router.replace(ROUTES.auth.login);
   };
 
   const getStrengthColor = (index: number): string => {
@@ -145,7 +147,7 @@ export default function NewPasswordScreen() {
       >
         {/* Hero Section */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}

@@ -15,6 +15,7 @@ import { Logo } from "@/components/ui/Logo";
 import { EmailIcon } from "@/components/ui/Icons";
 import { resetPassword } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
+import { GRADIENTS } from "@/constants";
 
 export default function CheckEmailScreen() {
   const router = useRouter();
@@ -95,7 +96,7 @@ export default function CheckEmailScreen() {
       >
         {/* Hero Section */}
         <LinearGradient
-          colors={["#6366F1", "#4F46E5", "#4338CA"]}
+          colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroSection}
