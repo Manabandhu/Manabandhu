@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Redirect } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/auth.store";
 import { View, ActivityIndicator } from "react-native";
 
 export default function Index() {
-  const { isLoading, isAuthenticated, onboardingCompleted } = useAuth();
+  const { isLoading, isAuthenticated, onboardingCompleted } = useAuthStore();
 
   if (isLoading) {
     return (

@@ -1,64 +1,101 @@
 import React from "react";
-import { View, Text, Platform, TouchableOpacity, ActivityIndicator } from "react-native";
-import { Button } from "@/components/ui/Button";
+import { View, Text, Platform, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/components/ui/Icons";
+import { COLORS } from "@/constants";
+
+const { width } = Dimensions.get("window");
+const buttonWidth = (width - 60) / 2; // 2 columns with 20px padding on each side and 20px gap
 
 interface SocialLoginButtonsProps {
   onGooglePress: () => Promise<void>;
   onApplePress: () => Promise<void>;
+  onFacebookPress?: () => Promise<void>;
+  onPhonePress?: () => Promise<void>;
   loading?: boolean;
 }
 
 export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
   onGooglePress,
   onApplePress,
+  onFacebookPress,
+  onPhonePress,
   loading = false,
 }) => {
-  const isAppleAvailable = Platform.OS === "ios" || Platform.OS === "web";
-
   return (
-    <View className="space-y-3">
-      {isAppleAvailable && (
-        <TouchableOpacity
-          onPress={onApplePress}
-          disabled={loading}
-          activeOpacity={0.8}
-          className="flex-row items-center justify-center bg-black dark:bg-white rounded-xl py-4 px-6"
-        >
-          {loading ? (
-            <ActivityIndicator color={Platform.OS === "ios" ? "#ffffff" : "#000000"} />
-          ) : (
-            <>
-              <Text className="text-white dark:text-black text-base font-semibold ml-2">
-                Continue with Apple
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      )}
-
+    <View style={styles.container}>
+      {/* Google Button - Top Left */}
       <TouchableOpacity
         onPress={onGooglePress}
         disabled={loading}
         activeOpacity={0.8}
-        className="flex-row items-center justify-center bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl py-4 px-6"
+        style={[styles.socialButton, styles.googleButton]}
       >
-        {loading ? (
-          <ActivityIndicator color="#4285F4" />
-        ) : (
-          <>
-            <Text className="text-gray-900 dark:text-gray-100 text-base font-semibold ml-2">
-              Continue with Google
-            </Text>
-          </>
-        )}
+        <GoogleIcon size={24} />
       </TouchableOpacity>
 
-      <View className="flex-row items-center my-4">
-        <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
-        <Text className="mx-4 text-sm text-gray-500 dark:text-gray-400">OR</Text>
-        <View className="flex-1 h-px bg-gray-300 dark:bg-gray-600" />
-      </View>
+      {/* Facebook Button - Top Right */}
+      <TouchableOpacity
+        onPress={onFacebookPress}
+        disabled={loading}
+        activeOpacity={0.8}
+        style={[styles.socialButton, styles.facebookButton]}
+      >
+        <FacebookIcon size={24} color="#ffffff" />
+      </TouchableOpacity>
+
+      {/* Apple Button - Bottom Left */}
+      <TouchableOpacity
+        onPress={onApplePress}
+        disabled={loading}
+        activeOpacity={0.8}
+        style={[styles.socialButton, styles.appleButton]}
+      >
+        <AppleIcon size={24} color="#ffffff" />
+      </TouchableOpacity>
+
+      {/* Phone Button - Bottom Right */}
+      <TouchableOpacity
+        onPress={onPhonePress}
+        disabled={loading}
+        activeOpacity={0.8}
+        style={[styles.socialButton, styles.phoneButton]}
+      >
+        <PhoneIcon size={24} color="#6b7280" />
+      </TouchableOpacity>
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 16,
+  },
+  socialButton: {
+    width: buttonWidth,
+    height: 44,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+  },
+  googleButton: {
+    backgroundColor: "#ffffff",
+    borderColor: "#e5e7eb",
+  },
+  facebookButton: {
+    backgroundColor: "#1877f2",
+    borderColor: "#1877f2",
+  },
+  appleButton: {
+    backgroundColor: "#000000",
+    borderColor: "#000000",
+  },
+  phoneButton: {
+    backgroundColor: "#f9fafb",
+    borderColor: "#e5e7eb",
+  },
+});

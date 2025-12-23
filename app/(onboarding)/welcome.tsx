@@ -4,12 +4,12 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button } from "@/components/ui/Button";
 import { Progress } from "@/components/ui/Progress";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
