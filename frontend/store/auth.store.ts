@@ -4,13 +4,11 @@ import * as SecureStore from "expo-secure-store";
 import { User } from "@/types";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { userApi } from "@/lib/api";
 import { Platform } from "react-native";
 
-// Cache for user documents to avoid redundant Firestore reads
 const userDocCache = new Map<string, { data: User; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
 
 interface AuthState {
   user: User | null;
@@ -71,12 +69,10 @@ const secureStorage = {
 const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => {
   const uid = firebaseUser.uid;
   
-  // Check cache first
   const cached = userDocCache.get(uid);
   const now = Date.now();
   
   if (cached && (now - cached.timestamp) < CACHE_TTL) {
-    // Return cached data but update with latest Firebase user data
     return {
       ...cached.data,
       email: firebaseUser.email || cached.data.email,
@@ -86,28 +82,40 @@ const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => 
     };
   }
 
-  // Fetch from Firestore
-  const userDoc = await getDoc(doc(db, "users", uid));
-  const userData = userDoc.data();
+  try {
+    const userData = await userApi.getCurrentUser();
+    
+    const user: User = {
+      uid,
+      email: firebaseUser.email || undefined,
+      phoneNumber: firebaseUser.phoneNumber || undefined,
+      displayName: firebaseUser.displayName || userData?.name || undefined,
+      photoURL: firebaseUser.photoURL || userData?.photoUrl || undefined,
+      country: userData?.country || undefined,
+      city: userData?.city || undefined,
+      role: userData?.role || undefined,
+      onboardingCompleted: userData?.onboardingCompleted || false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-  const user: User = {
-    uid,
-    email: firebaseUser.email || undefined,
-    phoneNumber: firebaseUser.phoneNumber || undefined,
-    displayName: firebaseUser.displayName || userData?.displayName || undefined,
-    photoURL: firebaseUser.photoURL || undefined,
-    country: userData?.country || undefined,
-    city: userData?.city || undefined,
-    role: userData?.role || undefined,
-    onboardingCompleted: userData?.onboardingCompleted || false,
-    createdAt: userData?.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+    userDocCache.set(uid, { data: user, timestamp: now });
 
-  // Update cache
-  userDocCache.set(uid, { data: user, timestamp: now });
-
-  return user;
+    return user;
+  } catch (error) {
+    const basicUser: User = {
+      uid,
+      email: firebaseUser.email || undefined,
+      phoneNumber: firebaseUser.phoneNumber || undefined,
+      displayName: firebaseUser.displayName || undefined,
+      photoURL: firebaseUser.photoURL || undefined,
+      onboardingCompleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    return basicUser;
+  }
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -200,9 +208,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const updatedUser = { ...user, ...updates, updatedAt: new Date().toISOString() };
-          await setDoc(doc(db, "users", user.uid), updatedUser, { merge: true });
           
-          // Update cache
           userDocCache.set(user.uid, { data: updatedUser, timestamp: Date.now() });
           
           set({ user: updatedUser });

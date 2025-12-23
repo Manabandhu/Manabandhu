@@ -6,10 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileInput } from "@/lib/validators";
 import { GluestackInput } from "@/components/ui/gluestack-index";
 import { GluestackButton } from "@/components/ui/gluestack-index";
-import { useAuthStore } from "@/store/auth.store";
-import { getCurrentUser } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { onboardingApi } from "@/lib/api";
 import * as Haptics from "expo-haptics";
 import { ROUTES } from "@/constants/routes";
 
@@ -35,7 +32,6 @@ const countries = [
 export default function ProfileScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { updateUserProfile } = useAuthStore();
 
   const {
     control,
@@ -56,25 +52,12 @@ export default function ProfileScreen() {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const user = getCurrentUser();
-      if (!user) {
-        router.replace(ROUTES.auth.root);
-        return;
-      }
-
-      const userData = {
-        uid: user.uid,
+      await onboardingApi.updateOnboarding({
         displayName: data.displayName,
         country: data.country,
         city: data.city,
         role: data.role,
-        onboardingCompleted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      await setDoc(doc(db, "users", user.uid), userData, { merge: true });
-      await updateUserProfile(userData);
+      });
 
       router.replace(ROUTES.onboarding.welcome);
     } catch (error) {

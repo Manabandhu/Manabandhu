@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -44,6 +45,29 @@ public class User {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @ElementCollection
+    @CollectionTable(name = "user_purposes", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "purpose")
+    private List<String> purposes;
+
+    @ElementCollection
+    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "interest")
+    private List<String> interests;
+
+    @ElementCollection
+    @CollectionTable(name = "user_homepage_priorities", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "priority")
+    private List<String> homepagePriorities;
+
+    @ElementCollection
+    @CollectionTable(name = "user_enabled_priorities", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "priority")
+    private List<String> enabledPriorities;
+
+    @Column(nullable = false)
+    private Boolean onboardingCompleted = false;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

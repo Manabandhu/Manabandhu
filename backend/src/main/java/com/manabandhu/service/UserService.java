@@ -1,6 +1,7 @@
 package com.manabandhu.service;
 
 import com.manabandhu.dto.CreateUserRequest;
+import com.manabandhu.dto.OnboardingRequest;
 import com.manabandhu.dto.UserDTO;
 import com.manabandhu.exception.ResourceNotFoundException;
 import com.manabandhu.model.User;
@@ -61,18 +62,43 @@ public class UserService {
         return mapToDTO(updatedUser);
     }
 
+    @Transactional
+    @CacheEvict(value = "users", key = "#firebaseUid")
+    public UserDTO updateOnboarding(String firebaseUid, OnboardingRequest request) {
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        if (request.getDisplayName() != null) user.setName(request.getDisplayName());
+        if (request.getCountry() != null) user.setCountry(request.getCountry());
+        if (request.getCity() != null) user.setCity(request.getCity());
+        if (request.getRole() != null) user.setRole(request.getRole());
+        if (request.getPurposes() != null) user.setPurposes(request.getPurposes());
+        if (request.getInterests() != null) user.setInterests(request.getInterests());
+        if (request.getHomepagePriorities() != null) user.setHomepagePriorities(request.getHomepagePriorities());
+        if (request.getEnabledPriorities() != null) user.setEnabledPriorities(request.getEnabledPriorities());
+        if (request.getOnboardingCompleted() != null) user.setOnboardingCompleted(request.getOnboardingCompleted());
+        
+        User updatedUser = userRepository.save(user);
+        return mapToDTO(updatedUser);
+    }
+
     private UserDTO mapToDTO(User user) {
-        return new UserDTO(
-            user.getId(),
-            user.getFirebaseUid(),
-            user.getName(),
-            user.getEmail(),
-            user.getPhoneNumber(),
-            user.getCountry(),
-            user.getCity(),
-            user.getRole(),
-            user.getPhotoUrl(),
-            user.getIsActive()
-        );
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setFirebaseUid(user.getFirebaseUid());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setCountry(user.getCountry());
+        dto.setCity(user.getCity());
+        dto.setRole(user.getRole());
+        dto.setPhotoUrl(user.getPhotoUrl());
+        dto.setIsActive(user.getIsActive());
+        dto.setPurposes(user.getPurposes());
+        dto.setInterests(user.getInterests());
+        dto.setHomepagePriorities(user.getHomepagePriorities());
+        dto.setEnabledPriorities(user.getEnabledPriorities());
+        dto.setOnboardingCompleted(user.getOnboardingCompleted());
+        return dto;
     }
 }

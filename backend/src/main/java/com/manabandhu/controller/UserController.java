@@ -1,6 +1,7 @@
 package com.manabandhu.controller;
 
 import com.manabandhu.dto.CreateUserRequest;
+import com.manabandhu.dto.OnboardingRequest;
 import com.manabandhu.dto.UserDTO;
 import com.manabandhu.service.UserService;
 import jakarta.validation.Valid;
@@ -38,6 +39,15 @@ public class UserController {
             @Valid @RequestBody CreateUserRequest request) {
         String firebaseUid = (String) authentication.getPrincipal();
         UserDTO user = userService.updateUser(firebaseUid, request);
+        return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping("/me/onboarding")
+    public ResponseEntity<UserDTO> updateOnboarding(
+            Authentication authentication,
+            @Valid @RequestBody OnboardingRequest request) {
+        String firebaseUid = (String) authentication.getPrincipal();
+        UserDTO user = userService.updateOnboarding(firebaseUid, request);
         return ResponseEntity.ok(user);
     }
 }

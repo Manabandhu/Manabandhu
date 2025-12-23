@@ -33,7 +33,7 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**", "/actuator/health", "/error").permitAll()
+                .requestMatchers("/api/public/**", "/api/auth/**", "/actuator/health", "/error").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(firebaseAuthenticationFilter, 
