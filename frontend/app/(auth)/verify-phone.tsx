@@ -80,11 +80,15 @@ const DropdownArrow = ({ size = 12, color = "#6b7280" }) => (
 export default function VerifyPhoneScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState<CountryCode>('US');
+  const [country, setCountry] = useState<Country | null>(null);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const recaptchaVerifier = useRef<ApplicationVerifier | null>(null);
   
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<PhoneInput>({
     resolver: zodResolver(phoneSchema),
@@ -93,6 +97,13 @@ export default function VerifyPhoneScreen() {
       countryCode: "+1",
     },
   });
+
+  const onSelectCountry = (selectedCountry: Country) => {
+    setCountry(selectedCountry);
+    setCountryCode(selectedCountry.cca2);
+    setValue('countryCode', `+${selectedCountry.callingCode[0]}`);
+    setShowCountryPicker(false);
+  };
 
   useEffect(() => {
     if (Platform.OS === "web" && auth) {
@@ -184,13 +195,37 @@ export default function VerifyPhoneScreen() {
                 ]}
               >
                 {/* Country Code Selector */}
-                <View style={styles.countryCodeSelector}>
-                  <Text style={styles.flagIcon}>🇺🇸</Text>
-                  <Text style={styles.countryCode}>+1</Text>
+                <TouchableOpacity 
+                  style={styles.countryCodeSelector}
+                  onPress={() => setShowCountryPicker(true)}
+                >
+                  <CountryPicker
+                    countryCode={countryCode}
+                    withFilter
+                    withFlag
+                    withCallingCode
+                    onSelect={onSelectCountry}
+                    visible={showCountryPicker}
+                    onClose={() => setShowCountryPicker(false)}
+                    containerButtonStyle={{
+                      height: '60%',
+                      marginTop: 'auto'
+                    }}
+                    modalProps={{
+                      animationType: 'slide'
+                    }}
+                  />
+                  <Controller
+                    control={control}
+                    name="countryCode"
+                    render={({ field: { value } }) => (
+                      <Text style={styles.countryCode}>{value}</Text>
+                    )}
+                  />
                   <View style={styles.dropdownArrow}>
                     <DropdownArrow size={12} color="#6b7280" />
                   </View>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.divider} />
 
                 {/* Phone Icon */}
@@ -353,6 +388,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginRight: 12,
+  },
+  flagContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   flagIcon: {
     fontSize: 18,

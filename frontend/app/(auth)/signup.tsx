@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,15 @@ import {
   TextInput,
   Dimensions,
   Linking,
+  FlatList,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { countries } from '@/constants/countries';
 import { Logo } from "@/components/ui/Logo";
 import { UserIcon, EmailIcon, LockIcon, EyeIcon, EyeOffIcon } from "@/components/ui/Icons";
 import { GluestackCheckbox } from "@/components/ui/gluestack-index";
@@ -37,6 +40,7 @@ const signupSchema = z
     fullName: z.string().min(2, "Full name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
     phoneNumber: z.string().min(10, "Please enter a valid phone number"),
+    countryCode: z.string().default("+1"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
     termsAccepted: z.boolean().refine((val) => val === true, {
@@ -56,10 +60,15 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [countryCode, setCountryCode] = useState('US');
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ['60%'], []);
 
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -67,12 +76,20 @@ export default function SignupScreen() {
       fullName: "",
       email: "",
       phoneNumber: "",
+      countryCode: "+1",
       password: "",
       confirmPassword: "",
       termsAccepted: false,
     },
     mode: "onChange",
   });
+
+  const onSelectCountry = (country: typeof countries[0]) => {
+    setSelectedCountry(country);
+    setCountryCode(country.code);
+    setValue('countryCode', country.dialCode);
+    bottomSheetRef.current?.close();
+  };
 
   const onSubmit = async (data: SignupFormData) => {
     try {
@@ -220,10 +237,19 @@ export default function SignupScreen() {
                   errors.phoneNumber && styles.inputWrapperError,
                 ]}
               >
-                <View style={styles.countryCodeWrapper}>
-                  <Text style={styles.countryFlag}>🇺🇸</Text>
-                  <Text style={styles.countryCode}>+1</Text>
-                </View>
+                <TouchableOpacity 
+                  style={styles.countryCodeWrapper}
+                  onPress={() => bottomSheetRef.current?.expand()}
+                >
+                  <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
+                  <Controller
+                    control={control}
+                    name="countryCode"
+                    render={({ field: { value } }) => (
+                      <Text style={styles.countryCode}>{value}</Text>
+                    )}
+                  />
+                </TouchableOpacity>
                 <View style={styles.divider} />
                 <Controller
                   control={control}
@@ -385,6 +411,31 @@ export default function SignupScreen() {
           </View>
         </View>
       </ScrollView>
+      
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <Text style={styles.bottomSheetTitle}>Select Country</Text>
+          <FlatList
+            data={countries}
+            keyExtractor={(item) => item.code}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.countryItem}
+                onPress={() => onSelectCountry(item)}
+              >
+                <Text style={styles.countryFlag}>{item.flag}</Text>
+                <Text style={styles.countryName}>{item.name}</Text>
+                <Text style={styles.countryDialCode}>{item.dialCode}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </BottomSheetView>
+      </BottomSheet>
     </KeyboardAvoidingView>
   );
 }
@@ -487,6 +538,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
+  flagContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   countryFlag: {
     fontSize: 18,
     marginRight: 8,
@@ -558,6 +613,33 @@ const styles = StyleSheet.create({
     color: "#dc2626",
     textAlign: "center",
     fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  bottomSheetContent: {
+    flex: 1,
+    padding: 20,
+  },
+  bottomSheetTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  countryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  countryName: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  countryDialCode: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 

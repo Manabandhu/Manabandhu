@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import CustomSplashScreen from "@/components/ui/SplashScreen";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { FontProvider } from "@/components/FontProvider";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TIMING } from "@/constants/timing";
 import { Platform } from "react-native";
 import "../global.css";
@@ -54,22 +55,24 @@ export default function RootLayout() {
   }
 
   return (
-    <FontProvider>
-      <ErrorBoundary>
-        <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: "#ffffff" },
-          }}
-        >
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(onboarding)" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="index" />
-        </Stack>
-      </ErrorBoundary>
-    </FontProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <FontProvider>
+        <ErrorBoundary>
+          <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: "#ffffff" },
+            }}
+          >
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="index" />
+          </Stack>
+        </ErrorBoundary>
+      </FontProvider>
+    </GestureHandlerRootView>
   );
 }
 
