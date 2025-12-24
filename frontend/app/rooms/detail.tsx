@@ -10,7 +10,7 @@ export default function RoomDetail() {
   return (
     <ScrollView className="flex-1 bg-white dark:bg-gray-900">
       <Image
-        source={{ uri: "https://images.unsplash.com/photo-1505692069463-5e3405e3e7ee" }}
+        source={{ uri: "https://via.placeholder.com/400x200/6366f1/ffffff?text=Room+Image" }}
         className="h-56 w-full"
       />
       <View className="px-6 py-4 space-y-3">

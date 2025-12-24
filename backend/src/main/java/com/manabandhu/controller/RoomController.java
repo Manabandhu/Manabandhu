@@ -25,14 +25,53 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@RequestBody Map<String, Object> request, Authentication auth) {
-        Room room = new Room();
-        room.setTitle((String) request.get("title"));
-        room.setDescription((String) request.get("description"));
-        room.setLocation((String) request.get("location"));
-        room.setRent(new java.math.BigDecimal(request.get("rent").toString()));
-        room.setType(Room.RoomType.valueOf((String) request.get("type")));
-        room.setPostedBy(auth.getName());
-        room.setContactInfo((String) request.get("contactInfo"));
-        return ResponseEntity.ok(roomRepository.save(room));
+        try {
+            Room room = new Room();
+            
+            // Validate required fields
+            String title = (String) request.get("title");
+            if (title == null || title.trim().isEmpty()) {
+                throw new IllegalArgumentException("Title is required");
+            }
+            room.setTitle(title.trim());
+            
+            // Description can be empty
+            String description = (String) request.get("description");
+            room.setDescription(description != null ? description.trim() : "");
+            
+            // Location can be empty
+            String location = (String) request.get("location");
+            room.setLocation(location != null ? location.trim() : "");
+            
+            // Handle rent conversion safely
+            Object rentObj = request.get("rent");
+            if (rentObj != null) {
+                room.setRent(new java.math.BigDecimal(rentObj.toString()));
+            } else {
+                room.setRent(java.math.BigDecimal.ZERO);
+            }
+            
+            // Handle type conversion safely
+            Object typeObj = request.get("type");
+            if (typeObj != null) {
+                try {
+                    room.setType(Room.RoomType.valueOf(typeObj.toString()));
+                } catch (IllegalArgumentException e) {
+                    room.setType(Room.RoomType.PRIVATE_ROOM);
+                }
+            } else {
+                room.setType(Room.RoomType.PRIVATE_ROOM);
+            }
+            
+            room.setPostedBy(auth.getName());
+            
+            Object contactInfoObj = request.get("contactInfo");
+            room.setContactInfo(contactInfoObj != null ? contactInfoObj.toString() : "");
+            
+            return ResponseEntity.ok(roomRepository.save(room));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

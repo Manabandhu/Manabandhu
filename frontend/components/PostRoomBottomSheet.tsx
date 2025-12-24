@@ -14,18 +14,18 @@ export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: 
   const [rent, setRent] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState('APARTMENT');
+  const [type, setType] = useState('PRIVATE_ROOM');
   const [contactInfo, setContactInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const roomTypes = ['APARTMENT', 'HOUSE', 'STUDIO', 'SHARED_ROOM'];
+  const roomTypes = ['PRIVATE_ROOM', 'SHARED_ROOM', 'STUDIO', 'APARTMENT'];
 
   const resetForm = () => {
     setTitle('');
     setRent('');
     setLocation('');
     setDescription('');
-    setType('APARTMENT');
+    setType('PRIVATE_ROOM');
     setContactInfo('');
   };
 
