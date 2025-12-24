@@ -2,28 +2,31 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { chatAPI, Message } from "@/lib/api/chat";
+import { roomsApi } from "@/lib/api/rooms";
 import { MessageIcon } from "@/components/ui/Icons";
 import { useAuthStore } from "@/store/auth.store";
 
 export default function Conversation() {
-  const { chatId, name } = useLocalSearchParams<{ chatId: string; name: string }>();
+  const { chatId, name, listingId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string }>();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   
   const currentUserId = useAuthStore.getState().user?.uid || 'unknown';
 
   const loadMessages = async () => {
     if (!chatId) return;
+    setErrorMessage(null);
     try {
       const response = await chatAPI.getChatMessages(parseInt(chatId));
-      setMessages(response.content.reverse()); // Reverse to show oldest first
+      setMessages(response.content.reverse());
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      setErrorMessage('Unable to load messages right now.');
     } finally {
       setLoading(false);
     }
@@ -31,8 +34,9 @@ export default function Conversation() {
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !chatId || sending) return;
-    
+
     setSending(true);
+    setErrorMessage(null);
     try {
       const message = await chatAPI.sendMessage(parseInt(chatId), {
         content: newMessage.trim(),
@@ -41,8 +45,11 @@ export default function Conversation() {
       setMessages(prev => [...prev, message]);
       setNewMessage('');
       scrollViewRef.current?.scrollToEnd({ animated: true });
+      if (listingId) {
+        await roomsApi.heartbeat(chatId);
+      }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      setErrorMessage('Unable to send message right now.');
     } finally {
       setSending(false);
     }
@@ -86,6 +93,11 @@ export default function Conversation() {
         className="flex-1 px-4 py-4"
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
+        {errorMessage && (
+          <View className="bg-red-50 border border-red-100 rounded-lg p-3 mb-4">
+            <Text className="text-red-600 text-sm">{errorMessage}</Text>
+          </View>
+        )}
         {messages.length === 0 ? (
           <View className="flex-1 justify-center items-center py-20">
             <MessageIcon size={48} color="#9CA3AF" />
@@ -149,5 +161,3 @@ export default function Conversation() {
     </KeyboardAvoidingView>
   );
 }
-
-

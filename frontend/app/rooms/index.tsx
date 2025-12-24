@@ -1,39 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
-import { API_BASE_URL } from '@/constants/api';
-import { auth } from '@/lib/firebase';
-import { HomeIcon, MapPinIcon, DollarSignIcon } from "@/components/ui/Icons";
-import PostRoomBottomSheet from "@/components/PostRoomBottomSheet";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import BottomSheet from "@gorhom/bottom-sheet";
+import RoomFiltersBottomSheet from "@/components/rooms/RoomFiltersBottomSheet";
+import RoomListingCard from "@/components/rooms/RoomListingCard";
+import RoomMapCanvas from "@/components/rooms/RoomMapCanvas";
+import { roomsApi } from "@/lib/api/rooms";
+import { RoomFilters, RoomListingSummary } from "@/types";
 
-interface Room {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  rent: number;
-  type: string;
-  contactInfo: string;
-  createdAt: string;
-}
-
-export default function RoomFinder() {
+export default function RoomFinderHome() {
   const router = useRouter();
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
+  const initialTab = tab === "map" ? "map" : "list";
+  const [activeTab, setActiveTab] = useState<"list" | "map">(initialTab);
+  const [filters, setFilters] = useState<RoomFilters>({});
+  const [listings, setListings] = useState<RoomListingSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [showPostRoomSheet, setShowPostRoomSheet] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const sheetRef = useRef<BottomSheet>(null);
 
-  const loadRooms = async () => {
+  const loadListings = async (currentFilters = filters) => {
+    setError(null);
+    setLoading(true);
     try {
-      const token = await auth?.currentUser?.getIdToken();
-      const response = await fetch(`${API_BASE_URL}/api/rooms`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setRooms(data.content || []);
-    } catch (error) {
-      console.error('Failed to load rooms:', error);
+      const response = await roomsApi.getListings(currentFilters);
+      setListings(response.content || []);
+    } catch (err) {
+      setError("Unable to load listings right now.");
     } finally {
       setLoading(false);
     }
@@ -41,79 +35,89 @@ export default function RoomFinder() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadRooms();
+    await loadListings();
     setRefreshing(false);
   };
 
   useEffect(() => {
-    loadRooms();
-  }, []);
-
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500">Loading rooms...</Text>
-      </View>
-    );
-  }
+    loadListings(filters);
+  }, [filters]);
 
   return (
-    <ScrollView 
-      className="flex-1 bg-gray-50 px-4 py-6"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-3xl font-bold text-gray-900">Rooms</Text>
-        <TouchableOpacity
-          className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => setShowPostRoomSheet(true)}
-        >
-          <Text className="text-white font-semibold">+ Post</Text>
-        </TouchableOpacity>
-      </View>
-
-      {rooms.length === 0 ? (
-        <View className="flex-1 justify-center items-center py-20">
-          <HomeIcon size={48} color="#9CA3AF" />
-          <Text className="text-gray-500 text-lg mt-4">No rooms available</Text>
-          <Text className="text-gray-400 text-sm mt-2">Be the first to post a listing!</Text>
-        </View>
-      ) : (
-        rooms.map((room) => (
+    <View className="flex-1 bg-gray-50">
+      <View className="px-5 pt-6 pb-4 bg-white border-b border-gray-100">
+        <Text className="text-2xl font-bold text-gray-900">Room Finder</Text>
+        <Text className="text-sm text-gray-500 mt-1">Find rooms and homes near you</Text>
+        <View className="flex-row gap-3 mt-4">
           <TouchableOpacity
-            key={room.id}
-            className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
-            onPress={() => router.push(`/rooms/detail?id=${room.id}`)}
+            onPress={() => setActiveTab("list")}
+            className={`flex-1 py-2 rounded-full ${activeTab === "list" ? "bg-blue-600" : "bg-gray-100"}`}
           >
-            <Text className="text-lg font-semibold text-gray-900 mb-2">
-              {room.title}
-            </Text>
-            <View className="flex-row items-center mb-2">
-              <MapPinIcon size={16} color="#6B7280" />
-              <Text className="text-gray-600 ml-1">{room.location}</Text>
-            </View>
-            <View className="flex-row items-center mb-3">
-              <DollarSignIcon size={16} color="#10B981" />
-              <Text className="text-green-600 font-semibold ml-1">
-                ${room.rent}/month
-              </Text>
-              <Text className="text-gray-400 mx-2">•</Text>
-              <Text className="text-gray-600">{room.type.replace('_', ' ')}</Text>
-            </View>
-            <Text className="text-gray-700" numberOfLines={2}>
-              {room.description}
+            <Text className={`text-center font-medium ${activeTab === "list" ? "text-white" : "text-gray-600"}`}>
+              List
             </Text>
           </TouchableOpacity>
-        ))
+          <TouchableOpacity
+            onPress={() => setActiveTab("map")}
+            className={`flex-1 py-2 rounded-full ${activeTab === "map" ? "bg-blue-600" : "bg-gray-100"}`}
+          >
+            <Text className={`text-center font-medium ${activeTab === "map" ? "text-white" : "text-gray-600"}`}>
+              Map
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View className="flex-row gap-3 mt-4">
+          <TouchableOpacity
+            onPress={() => sheetRef.current?.expand()}
+            className="flex-1 border border-gray-200 rounded-lg py-2"
+          >
+            <Text className="text-center text-gray-600">Filters</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/rooms/create")}
+            className="flex-1 bg-blue-600 rounded-lg py-2"
+          >
+            <Text className="text-center text-white font-semibold">Post Listing</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {activeTab === "list" ? (
+        <ScrollView
+          className="flex-1 px-5 py-4"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {loading && <Text className="text-gray-500">Loading listings...</Text>}
+          {error && <Text className="text-red-500 mb-3">{error}</Text>}
+          {!loading && listings.length === 0 && (
+            <View className="items-center py-20">
+              <Text className="text-gray-500 text-lg">No listings yet</Text>
+              <Text className="text-gray-400 mt-2">Be the first to post a room.</Text>
+            </View>
+          )}
+          {listings.map((listing) => (
+            <RoomListingCard
+              key={listing.id}
+              listing={listing}
+              onPress={() => router.push(`/rooms/detail?id=${listing.id}`)}
+            />
+          ))}
+        </ScrollView>
+      ) : (
+        <View className="flex-1 px-5 py-4">
+          <RoomMapCanvas listings={listings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}`)} />
+        </View>
       )}
 
-      <PostRoomBottomSheet 
-        visible={showPostRoomSheet}
-        onClose={() => setShowPostRoomSheet(false)}
-        onRoomPosted={loadRooms}
+      <RoomFiltersBottomSheet
+        sheetRef={sheetRef}
+        initialFilters={filters}
+        onClose={() => sheetRef.current?.close()}
+        onApply={(next) => {
+          setFilters(next);
+          sheetRef.current?.close();
+        }}
       />
-    </ScrollView>
+    </View>
   );
 }
-
-

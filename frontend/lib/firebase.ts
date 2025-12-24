@@ -17,21 +17,25 @@ import {
   ApplicationVerifier,
 } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 import { firebaseConfig } from "./config/firebase";
 import { ENV } from "@/constants/env";
 
 let app: FirebaseApp;
 let auth: Auth | null = null;
 let db: Firestore;
+let storage: FirebaseStorage;
 
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+  storage = getStorage(app);
 } else {
   app = getApps()[0];
   auth = getAuth(app);
   db = getFirestore(app);
+  storage = getStorage(app);
 }
 
 export const signInWithGoogle = async () => {
@@ -101,4 +105,4 @@ export const getCurrentUser = (): FirebaseUser | null => {
   return auth?.currentUser || null;
 };
 
-export { auth, db };
+export { auth, db, storage };

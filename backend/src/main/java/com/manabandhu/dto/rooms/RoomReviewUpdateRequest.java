@@ -1,0 +1,40 @@
+package com.manabandhu.dto.rooms;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
+import java.util.List;
+
+public class RoomReviewUpdateRequest {
+    @Min(1)
+    @Max(5)
+    private int rating;
+
+    private List<String> tags;
+
+    private String comment;
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+}
