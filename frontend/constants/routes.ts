@@ -28,6 +28,11 @@ export const ROUTES = {
     chat: "/(tabs)/chat",
     profile: "/(tabs)/profile",
   },
+  uscis: {
+    root: "/uscis",
+    addCase: "/uscis/add-case",
+    caseDetail: "/uscis/case",
+  },
   root: {
     index: "/",
   },

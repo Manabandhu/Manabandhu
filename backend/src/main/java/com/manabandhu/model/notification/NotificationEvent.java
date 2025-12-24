@@ -30,7 +30,8 @@ public class NotificationEvent {
     private LocalDateTime createdAt;
 
     public enum NotificationType {
-        LISTING_HIDDEN_DUE_TO_INACTIVITY
+        LISTING_HIDDEN_DUE_TO_INACTIVITY,
+        USCIS_STATUS_CHANGE
     }
 
     public UUID getId() {

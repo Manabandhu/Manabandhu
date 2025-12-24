@@ -145,12 +145,12 @@ export default function HomeScreen() {
         background: "#DBEAFE",
       },
       {
-        label: "Explore",
-        description: "Discover new opportunities",
-        icon: CompassIcon,
-        route: ROUTES.tabs.explore,
-        accent: "#EC4899",
-        background: "#FCE7F3",
+        label: "USCIS Tracker",
+        description: "Track immigration cases",
+        icon: SearchIcon,
+        route: "/uscis",
+        accent: "#059669",
+        background: "#D1FAE5",
       },
     ],
     []
@@ -163,12 +163,14 @@ export default function HomeScreen() {
   ];
 
   const nearbyUpdates = [
+    { title: "Your I-485 case status updated", meta: "2 min ago • USCIS", tag: "Immigration" },
     { title: "2 verified room listings near you", meta: "5 min ago • Fremont", tag: "Housing" },
     { title: "Carpool to downtown leaves at 6 PM", meta: "Today • 1 seat left", tag: "Rides" },
     { title: "Weekend hiring event for students", meta: "Sat 10 AM • Free entry", tag: "Jobs" },
   ];
 
   const communityHighlights = [
+    { title: "USCIS processing times updated", meta: "Immigration • 1h ago" },
     { title: "Visa bulletin updated for F1/F2", meta: "Immigration • 2h ago" },
     { title: "Best grocery deals this week", meta: "Deals • Crowdsourced" },
   ];
