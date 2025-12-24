@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl } f
 import { useRouter } from "expo-router";
 import { jobsAPI, Job } from "@/lib/api/jobs";
 import { BriefcaseIcon, SearchIcon, MapPinIcon } from "@/components/ui/Icons";
+import PostJobBottomSheet from "@/components/PostJobBottomSheet";
 
 const jobTypes = [
   { key: 'ALL', label: 'All Jobs' },
@@ -19,6 +20,7 @@ export default function Jobs() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('ALL');
+  const [showPostJobSheet, setShowPostJobSheet] = useState(false);
 
   const loadJobs = async () => {
     try {
@@ -95,7 +97,7 @@ export default function Jobs() {
         </Text>
         <TouchableOpacity
           className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => router.push("/jobs/post")}
+          onPress={() => setShowPostJobSheet(true)}
         >
           <Text className="text-white font-semibold">+ Post</Text>
         </TouchableOpacity>
@@ -204,6 +206,12 @@ export default function Jobs() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <PostJobBottomSheet 
+        visible={showPostJobSheet}
+        onClose={() => setShowPostJobSheet(false)}
+        onJobPosted={loadJobs}
+      />
     </ScrollView>
   );
 }
