@@ -158,8 +158,8 @@ export default function SplashScreen({ onAnimationComplete }: SplashScreenProps)
   return (
     <View style={styles.container}>
       {/* Main Gradient Background */}
-    <LinearGradient
-        colors={["#353390", "#5856D6", "#7A78FF"]}
+      <LinearGradient
+        colors={["#6366f1", "#8b5cf6", "#a855f7"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -204,31 +204,45 @@ export default function SplashScreen({ onAnimationComplete }: SplashScreenProps)
             ]}
           >
             <View style={styles.logoInner}>
-              {/* Rocket inside Lightbulb SVG */}
+              {/* ManaBandhu Logo SVG */}
               <Svg width={96} height={96} viewBox="0 0 24 24" style={styles.logoSvg}>
-                {/* Lightbulb Outline */}
+                {/* Community/People Icon */}
                 <Path
-                  d="M9 21H15M12 2C8.13401 2 5 5.13401 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13401 15.866 2 12 2Z"
+                  d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
                   stroke="#FFFFFF"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   fill="none"
                 />
-                {/* Rocket Ship (Filled) */}
                 <Path
-                  d="M12 5C12 5 14.5 9 14.5 11.5C14.5 13 13.5 14 13.5 14H15.5L14.5 16H9.5L8.5 14H10.5C10.5 14 9.5 13 9.5 11.5C9.5 9 12 5 12 5Z"
-                  fill="#FDE047"
-                  stroke="#FDE047"
-                  strokeWidth="1"
-                  strokeLinejoin="round"
-                />
-                {/* Rocket Flame */}
-                <Path
-                  d="M12 16V18"
-                  stroke="#F87171"
+                  d="M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+                  stroke="#FFFFFF"
                   strokeWidth="2"
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <Path
+                  d="M23 21v-2a4 4 0 0 0-3-3.87"
+                  stroke="#FDE047"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M16 3.13a4 4 0 0 1 0 7.75"
+                  stroke="#FDE047"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Heart/Connection Symbol */}
+                <Path
+                  d="M12 15c-1.5-1.5-4-1.5-4 1s2.5 2.5 4 1 4 1.5 4-1-2.5-2.5-4-1z"
+                  fill="#F87171"
+                  stroke="#F87171"
+                  strokeWidth="1"
                 />
               </Svg>
             </View>
@@ -246,9 +260,9 @@ export default function SplashScreen({ onAnimationComplete }: SplashScreenProps)
           ]}
         >
           <Text style={styles.appName}>
-            Venture<Text style={styles.appNameAccent}>Vibe</Text>
+            Mana<Text style={styles.appNameAccent}>Bandhu</Text>
           </Text>
-          <Text style={styles.tagline}>IGNITE YOUR IDEAS</Text>
+          <Text style={styles.tagline}>CONNECT • SUPPORT • THRIVE</Text>
         </Animated.View>
       </View>
 
@@ -275,7 +289,7 @@ export default function SplashScreen({ onAnimationComplete }: SplashScreenProps)
         </View>
 
         {/* Loading Text */}
-        <Text style={styles.loadingText}>Preparing launch sequence...</Text>
+        <Text style={styles.loadingText}>Building your community...</Text>
       </Animated.View>
     </View>
   );

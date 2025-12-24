@@ -11,6 +11,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
 
@@ -32,6 +35,13 @@ public class UserService {
                 return userRepository.save(newUser);
             });
         return mapToDTO(user);
+    }
+
+    public List<UserDTO> getAllActiveUsers() {
+        List<User> users = userRepository.findByIsActiveTrue();
+        return users.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -30,6 +30,11 @@ export const userApi = {
     return response.data;
   },
 
+  getAllUsers: async (): Promise<User[]> => {
+    const response = await apiClient.get('/api/users');
+    return response.data;
+  },
+
   createUser: async (data: CreateUserRequest): Promise<User> => {
     const response = await apiClient.post('/api/users', data);
     return response.data;

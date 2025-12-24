@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "User Management", description = "APIs for user operations")
@@ -34,6 +36,14 @@ public class UserController {
         String firebaseUid = (String) authentication.getPrincipal();
         UserDTO user = userService.getUserByFirebaseUid(firebaseUid);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all users", description = "Retrieve all active users for chat functionality")
+    @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllActiveUsers();
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping
