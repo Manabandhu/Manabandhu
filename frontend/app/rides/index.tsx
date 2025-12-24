@@ -1,41 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
-import { API_BASE_URL } from '@/constants/api';
-import { auth } from '@/lib/firebase';
-import { CarIcon, MapPinIcon, UsersIcon } from "@/components/ui/Icons";
+import * as Location from "expo-location";
+import { ridesApi } from "@/lib/api/rides";
+import { RideFilters, RidePostSummary, RidePostType } from "@/types";
+import RideCard from "@/components/rides/RideCard";
+import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
+import RideMapPreview from "@/components/rides/RideMapPreview";
+import { MapPinIcon } from "@/components/ui/Icons";
 
-interface Ride {
-  id: number;
-  fromLocation: string;
-  toLocation: string;
-  departureTime: string;
-  availableSeats: number;
-  pricePerSeat: number;
-  contactInfo: string;
-  createdAt: string;
-}
+const TAB_CONFIG: { label: string; type: RidePostType }[] = [
+  { label: "Available Rides", type: "OFFER" },
+  { label: "Ride Requests", type: "REQUEST" },
+];
 
-export default function RideShare() {
+export default function RidesHome() {
   const router = useRouter();
-  const [rides, setRides] = useState<Ride[]>([]);
+  const [activeTab, setActiveTab] = useState<RidePostType>("OFFER");
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [rides, setRides] = useState<RidePostSummary[]>([]);
+  const [filters, setFilters] = useState<RideFilters>({ type: "OFFER" });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
 
-  const loadRides = async () => {
+  const selectedRide = useMemo(
+    () => rides.find((ride) => ride.id === selectedRideId) ?? rides[0],
+    [rides, selectedRideId]
+  );
+
+  const loadRides = useCallback(async () => {
+    setError(null);
     try {
-      const token = await auth?.currentUser?.getIdToken();
-      const response = await fetch(`${API_BASE_URL}/api/rides`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setRides(data.content || []);
-    } catch (error) {
-      console.error('Failed to load rides:', error);
+      const response = await ridesApi.getPosts(filters);
+      setRides(response.content || []);
+      if (response.content?.length) {
+        setSelectedRideId(response.content[0].id);
+      }
+    } catch {
+      setError("Unable to load rides right now.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -43,86 +52,143 @@ export default function RideShare() {
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    loadRides();
-  }, []);
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString([], { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const loadLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      return;
+    }
+    const location = await Location.getCurrentPositionAsync({});
+    setFilters((prev) => ({
+      ...prev,
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
+    }));
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500">Loading rides...</Text>
-      </View>
-    );
-  }
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, type: activeTab }));
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadRides();
+  }, [loadRides]);
+
+  useEffect(() => {
+    loadLocation();
+  }, []);
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-gray-50 px-4 py-6"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-3xl font-bold text-gray-900">Rides</Text>
+      <View className="flex-row justify-between items-start mb-6">
+        <View>
+          <Text className="text-3xl font-bold text-gray-900">Rides</Text>
+          <Text className="text-sm text-gray-500">Discover offers and requests near you.</Text>
+        </View>
+        <View className="flex-row space-x-2">
+          <TouchableOpacity
+            className="bg-white border border-gray-200 px-3 py-2 rounded-full"
+            onPress={() => setShowFilters(true)}
+          >
+            <Text className="text-sm font-semibold text-gray-700">Filters</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-blue-600 px-3 py-2 rounded-full"
+            onPress={() =>
+              router.push(activeTab === "OFFER" ? "/rides/offer" : "/rides/request")
+            }
+          >
+            <Text className="text-sm font-semibold text-white">
+              {activeTab === "OFFER" ? "+ Offer" : "+ Request"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="flex-row bg-white rounded-full p-1 mb-4">
+        {TAB_CONFIG.map((tab) => (
+          <TouchableOpacity
+            key={tab.type}
+            className={`flex-1 py-2 rounded-full ${activeTab === tab.type ? "bg-blue-600" : ""}`}
+            onPress={() => setActiveTab(tab.type)}
+          >
+            <Text
+              className={`text-center text-sm font-semibold ${activeTab === tab.type ? "text-white" : "text-gray-600"}`}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-sm text-gray-500">{rides.length} results</Text>
         <TouchableOpacity
-          className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => router.push("/rides/offer")}
+          className="flex-row items-center"
+          onPress={() => setViewMode(viewMode === "list" ? "map" : "list")}
         >
-          <Text className="text-white font-semibold">+ Offer</Text>
+          <MapPinIcon size={16} color="#2563EB" />
+          <Text className="text-blue-600 ml-1 text-sm font-semibold">
+            {viewMode === "list" ? "Map" : "List"}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {rides.length === 0 ? (
+      {viewMode === "map" && selectedRide ? (
+        <View className="mb-4">
+          <RideMapPreview
+            pickup={{
+              lat: selectedRide.pickupLat,
+              lng: selectedRide.pickupLng,
+              color: "#10B981",
+            }}
+            drop={{
+              lat: selectedRide.dropLat,
+              lng: selectedRide.dropLng,
+              color: "#F97316",
+            }}
+          />
+        </View>
+      ) : null}
+
+      {loading ? (
         <View className="flex-1 justify-center items-center py-20">
-          <CarIcon size={48} color="#9CA3AF" />
-          <Text className="text-gray-500 text-lg mt-4">No rides available</Text>
-          <Text className="text-gray-400 text-sm mt-2">Be the first to offer a ride!</Text>
+          <Text className="text-gray-500">Loading rides...</Text>
+        </View>
+      ) : error ? (
+        <View className="bg-red-50 border border-red-100 rounded-xl p-4">
+          <Text className="text-red-600 text-sm">{error}</Text>
+        </View>
+      ) : rides.length === 0 ? (
+        <View className="flex-1 justify-center items-center py-20">
+          <Text className="text-gray-500 text-lg">No rides available</Text>
+          <Text className="text-gray-400 text-sm mt-2">
+            Be the first to post a ride!
+          </Text>
         </View>
       ) : (
         rides.map((ride) => (
-          <TouchableOpacity
+          <RideCard
             key={ride.id}
-            className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
-            onPress={() => router.push(`/rides/detail?id=${ride.id}`)}
-          >
-            <View className="flex-row items-center mb-3">
-              <MapPinIcon size={18} color="#10B981" />
-              <Text className="text-lg font-semibold text-gray-900 ml-2">
-                {ride.fromLocation} → {ride.toLocation}
-              </Text>
-            </View>
-            
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-gray-600">
-                {formatTime(ride.departureTime)}
-              </Text>
-              <View className="flex-row items-center">
-                <UsersIcon size={16} color="#6B7280" />
-                <Text className="text-gray-600 ml-1">
-                  {ride.availableSeats} seats
-                </Text>
-              </View>
-            </View>
-            
-            <View className="flex-row justify-between items-center">
-              <Text className="text-green-600 font-semibold">
-                ${ride.pricePerSeat}/seat
-              </Text>
-              <Text className="text-blue-600 font-medium">Book Now</Text>
-            </View>
-          </TouchableOpacity>
+            ride={ride}
+            onPress={() => {
+              setSelectedRideId(ride.id);
+              router.push(`/rides/detail?id=${ride.id}`);
+            }}
+          />
         ))
       )}
+
+      <RideFiltersSheet
+        visible={showFilters}
+        filters={filters}
+        onApply={(updated) => {
+          setFilters(updated);
+        }}
+        onClose={() => setShowFilters(false)}
+      />
     </ScrollView>
   );
 }
-
-

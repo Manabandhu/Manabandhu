@@ -1,0 +1,14 @@
+package com.manabandhu.repository;
+
+import com.manabandhu.model.ride.RidePostActivity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface RidePostActivityRepository extends JpaRepository<RidePostActivity, UUID> {
+    Page<RidePostActivity> findByActorUserIdOrderByCreatedAtDesc(String actorUserId, Pageable pageable);
+
+    Page<RidePostActivity> findAllByOrderByCreatedAtDesc(Pageable pageable);
+}

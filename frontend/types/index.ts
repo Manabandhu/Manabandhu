@@ -22,3 +22,4 @@ export interface AuthState {
 }
 
 export * from "./rooms";
+export * from "./rides";

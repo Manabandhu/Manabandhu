@@ -3,11 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingVi
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { chatAPI, Message } from "@/lib/api/chat";
 import { roomsApi } from "@/lib/api/rooms";
+import { ridesApi } from "@/lib/api/rides";
 import { MessageIcon } from "@/components/ui/Icons";
 import { useAuthStore } from "@/store/auth.store";
 
 export default function Conversation() {
-  const { chatId, name, listingId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string }>();
+  const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   
@@ -47,6 +48,9 @@ export default function Conversation() {
       scrollViewRef.current?.scrollToEnd({ animated: true });
       if (listingId) {
         await roomsApi.heartbeat(chatId);
+      }
+      if (ridePostId) {
+        await ridesApi.heartbeat(chatId);
       }
     } catch (error) {
       setErrorMessage('Unable to send message right now.');
