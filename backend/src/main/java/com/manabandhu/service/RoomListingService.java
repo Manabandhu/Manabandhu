@@ -270,14 +270,14 @@ public class RoomListingService {
 
     private Specification<RoomListing> priceFilter(RoomListingSearch search) {
         return (root, query, cb) -> {
-            List<javax.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
             if (search.minRent() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("rentMonthly"), search.minRent()));
             }
             if (search.maxRent() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("rentMonthly"), search.maxRent()));
             }
-            return cb.and(predicates.toArray(new javax.persistence.criteria.Predicate[0]));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
     }
 
