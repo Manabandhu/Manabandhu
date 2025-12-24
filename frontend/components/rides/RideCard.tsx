@@ -19,23 +19,23 @@ export default function RideCard({ ride, onPress }: RideCardProps) {
       onPress={onPress}
     >
       <View className="flex-row justify-between items-start">
-        <View className="flex-1 pr-4">
-          <View className="flex-row items-center mb-2">
+        <View className="flex-1 pr-3">
+          <View className="flex-row items-center">
             <MapPinIcon size={16} color="#10B981" />
             <Text className="text-base font-semibold text-gray-900 ml-2" numberOfLines={2}>
               {ride.pickupLabel} → {ride.dropLabel}
             </Text>
           </View>
           {ride.title ? (
-            <Text className="text-sm text-gray-600 mb-1" numberOfLines={1}>
+            <Text className="text-sm text-gray-600 mt-1" numberOfLines={1}>
               {ride.title}
             </Text>
           ) : null}
         </View>
-        <RideStatusBadge status={ride.status} />
+        <Text className="text-blue-600 font-semibold">${ride.priceTotal.toFixed(2)}</Text>
       </View>
 
-      <View className="flex-row justify-between items-center mt-2">
+      <View className="flex-row justify-between items-center mt-3">
         <Text className="text-sm text-gray-600">{formatDepartTime(ride.departAt)}</Text>
         {ride.seatsTotal ? (
           <View className="flex-row items-center">
@@ -51,7 +51,7 @@ export default function RideCard({ ride, onPress }: RideCardProps) {
       </View>
 
       <View className="flex-row justify-between items-center mt-3">
-        <Text className="text-blue-600 font-semibold">${ride.priceTotal.toFixed(2)}</Text>
+        <RideStatusBadge status={ride.status} />
         {expiresIn !== null && ride.status === "OPEN" ? (
           <Text className="text-xs text-gray-500">Expires in {expiresIn}h</Text>
         ) : null}

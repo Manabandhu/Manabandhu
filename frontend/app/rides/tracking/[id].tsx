@@ -93,46 +93,52 @@ export default function TrackingMap() {
     (ride.postType === "OFFER" ? ride.ownerUserId === currentUserId : ride.bookedByUserId === currentUserId);
 
   return (
-    <View className="flex-1 bg-white px-6 py-6">
-      <Text className="text-2xl font-bold text-gray-900 mb-4">Live Tracking</Text>
-      <RideMapPreview
-        pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, color: "#10B981" }}
-        drop={{ lat: ride.dropLat, lng: ride.dropLng, color: "#F97316" }}
-        driver={
-          tracking?.lastLat !== null && tracking?.lastLat !== undefined && tracking?.lastLng !== null && tracking?.lastLng !== undefined
-            ? { lat: tracking.lastLat, lng: tracking.lastLng, color: "#2563EB" }
-            : undefined
-        }
-        height={260}
-      />
+    <View className="flex-1 bg-gray-50">
+      <View className="px-5 py-5 gap-5">
+        <Text className="text-2xl font-bold text-gray-900">Live Tracking</Text>
 
-      <View className="bg-gray-50 rounded-2xl p-4 mt-5">
-        <Text className="text-sm text-gray-500">Driver ETA</Text>
-        <Text className="text-xl font-semibold text-gray-900">
-          {tracking?.etaMinutes ? `${tracking.etaMinutes} min` : "Calculating"}
-        </Text>
-        <Text className="text-sm text-gray-500 mt-2">Distance remaining</Text>
-        <Text className="text-lg font-semibold text-gray-900">
-          {tracking?.distanceRemainingMiles ? `${tracking.distanceRemainingMiles.toFixed(1)} mi` : "--"}
-        </Text>
-      </View>
+        <RideMapPreview
+          pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, color: "#10B981" }}
+          drop={{ lat: ride.dropLat, lng: ride.dropLng, color: "#F97316" }}
+          driver={
+            tracking?.lastLat !== null &&
+            tracking?.lastLat !== undefined &&
+            tracking?.lastLng !== null &&
+            tracking?.lastLng !== undefined
+              ? { lat: tracking.lastLat, lng: tracking.lastLng, color: "#2563EB" }
+              : undefined
+          }
+          height={260}
+        />
 
-      {error ? (
-        <View className="bg-red-50 border border-red-100 rounded-xl p-3 mt-4">
-          <Text className="text-red-600 text-sm">{error}</Text>
-        </View>
-      ) : null}
-
-      {isDriver ? (
-        <TouchableOpacity
-          className={`rounded-xl py-3 mt-6 ${sharing ? "bg-rose-600" : "bg-emerald-600"}`}
-          onPress={sharing ? stopSharing : startSharing}
-        >
-          <Text className="text-white text-center font-semibold">
-            {sharing ? "Stop sharing" : "Start sharing"}
+        <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <Text className="text-sm text-gray-500">Driver ETA</Text>
+          <Text className="text-xl font-semibold text-gray-900">
+            {tracking?.etaMinutes ? `${tracking.etaMinutes} min` : "Calculating"}
           </Text>
-        </TouchableOpacity>
-      ) : null}
+          <Text className="text-sm text-gray-500 mt-2">Distance remaining</Text>
+          <Text className="text-lg font-semibold text-gray-900">
+            {tracking?.distanceRemainingMiles ? `${tracking.distanceRemainingMiles.toFixed(1)} mi` : "--"}
+          </Text>
+        </View>
+
+        {error ? (
+          <View className="bg-red-50 border border-red-100 rounded-xl p-3">
+            <Text className="text-red-600 text-sm">{error}</Text>
+          </View>
+        ) : null}
+
+        {isDriver ? (
+          <TouchableOpacity
+            className={`rounded-xl py-3 ${sharing ? "bg-rose-600" : "bg-emerald-600"}`}
+            onPress={sharing ? stopSharing : startSharing}
+          >
+            <Text className="text-white text-center font-semibold">
+              {sharing ? "Stop sharing" : "Start sharing"}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
     </View>
   );
 }
