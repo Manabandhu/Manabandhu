@@ -33,6 +33,10 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User information retrieved successfully")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         String firebaseUid = (String) authentication.getPrincipal();
         UserDTO user = userService.getUserByFirebaseUid(firebaseUid);
         return ResponseEntity.ok(user);

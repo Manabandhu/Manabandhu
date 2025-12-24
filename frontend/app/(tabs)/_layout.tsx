@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Pressable, View, Modal, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Pressable, View, Modal, StyleSheet, Text, TouchableOpacity, Dimensions } from "react-native";
 import { useState } from "react";
 import { COLORS } from "@/constants/colors";
 import { 
@@ -14,22 +14,27 @@ import {
   UsersIcon,
   SettingsIcon,
   PlusIcon,
-  SplitIcon
+  SplitIcon,
+  XIcon
 } from "@/components/ui/Icons";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const { width } = Dimensions.get('window');
 
 export default function TabsLayout() {
   const [showExploreMenu, setShowExploreMenu] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const exploreOptions = [
-    { icon: BriefcaseIcon, label: "Jobs", route: "/jobs" },
-    { icon: RoomIcon, label: "Rooms", route: "/rooms" },
-    { icon: CarIcon, label: "Rides", route: "/rides" },
-    { icon: CreditCardIcon, label: "Expenses", route: "/expenses" },
-    { icon: SplitIcon, label: "Splitly", route: "/splitly" },
-    { icon: SettingsIcon, label: "Utilities", route: "/utilities" },
-    { icon: UserIcon, label: "Admin", route: "/admin" },
+    { icon: BriefcaseIcon, label: "Jobs", route: "/jobs", color: "#3B82F6" },
+    { icon: RoomIcon, label: "Rooms", route: "/rooms", color: "#10B981" },
+    { icon: CarIcon, label: "Rides", route: "/rides", color: "#F59E0B" },
+    { icon: CreditCardIcon, label: "Expenses", route: "/expenses", color: "#EF4444" },
+    { icon: SplitIcon, label: "Splitly", route: "/splitly", color: "#8B5CF6" },
+    { icon: SettingsIcon, label: "Utilities", route: "/utilities", color: "#6B7280" },
+    { icon: UserIcon, label: "Admin", route: "/admin", color: "#DC2626" },
   ];
 
   const handleExploreOptionPress = (route: string) => {
@@ -108,24 +113,33 @@ export default function TabsLayout() {
       <Modal
         visible={showExploreMenu}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setShowExploreMenu(false)}
       >
         <Pressable 
           style={styles.modalOverlay} 
           onPress={() => setShowExploreMenu(false)}
         >
-          <View style={styles.exploreMenu}>
-            <Text style={styles.exploreTitle}>Explore</Text>
+          <View style={[styles.exploreMenu, { paddingBottom: insets.bottom + 20 }]}>
+            <View style={styles.exploreHeader}>
+              <Text style={styles.exploreTitle}>Explore Services</Text>
+              <TouchableOpacity 
+                onPress={() => setShowExploreMenu(false)}
+                style={styles.closeButton}
+              >
+                <XIcon size={24} color={COLORS.gray[600]} />
+              </TouchableOpacity>
+            </View>
             <View style={styles.exploreGrid}>
               {exploreOptions.map((option, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.exploreOption}
                   onPress={() => handleExploreOptionPress(option.route)}
+                  activeOpacity={0.7}
                 >
-                  <View style={styles.exploreIconContainer}>
-                    <option.icon size={24} color={COLORS.primary} />
+                  <View style={[styles.exploreIconContainer, { backgroundColor: option.color + '15' }]}>
+                    <option.icon size={28} color={option.color} />
                   </View>
                   <Text style={styles.exploreLabel}>{option.label}</Text>
                 </TouchableOpacity>
@@ -147,7 +161,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.3)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 8,
   },
   modalOverlay: {
@@ -161,37 +178,46 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 40,
-    maxHeight: "70%",
+    maxHeight: "80%",
+  },
+  exploreHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
   },
   exploreTitle: {
     fontSize: 24,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
   },
   exploreGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 16,
   },
   exploreOption: {
-    width: "30%",
+    width: (width - 80) / 3,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 24,
   },
   exploreIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: "#F3F4F6",
+    width: 72,
+    height: 72,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   exploreLabel: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 14,
+    fontWeight: "600",
     color: "#374151",
     textAlign: "center",
   },

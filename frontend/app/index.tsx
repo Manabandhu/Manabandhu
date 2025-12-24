@@ -1,27 +1,13 @@
 import { Redirect } from "expo-router";
 import { useAuthStore } from "@/store/auth.store";
-import { View, ActivityIndicator } from "react-native";
 import { ROUTES } from "@/constants/routes";
-import { useEffect, useState } from "react";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Index() {
-  const { isLoading, isAuthenticated, onboardingCompleted, initializeAuth } = useAuthStore();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const { isLoading, isAuthenticated, onboardingCompleted } = useAuthStore();
 
-  useEffect(() => {
-    const init = async () => {
-      await initializeAuth();
-      setIsInitialized(true);
-    };
-    init();
-  }, []);
-
-  if (!isInitialized || isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" color="#6366f1" />
-      </View>
-    );
+  if (isLoading) {
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   if (!isAuthenticated) {

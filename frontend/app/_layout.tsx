@@ -26,10 +26,13 @@ export default function RootLayout() {
         if (__DEV__) {
           console.error("Error initializing auth:", e);
         }
+        // Show error to user in production
       } finally {
         setAppIsReady(true);
+        // Delay splash hide for better UX
         setTimeout(() => {
           SplashScreen.hideAsync();
+          setTimeout(() => setShowCustomSplash(false), 300);
         }, TIMING.SPLASH_HIDE_DELAY);
       }
     };

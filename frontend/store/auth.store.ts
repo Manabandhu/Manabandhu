@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>()(
           existingUnsubscribe();
         }
 
-        // Don't set loading if we have persisted auth state
+        // Only set loading if we don't have persisted auth state
         if (!currentState.user) {
           set({ isLoading: true });
         }
@@ -183,7 +183,17 @@ export const useAuthStore = create<AuthState>()(
           }
 
           let isResolved = false;
+          const timeoutId = setTimeout(() => {
+            if (!isResolved) {
+              isResolved = true;
+              set({ isLoading: false });
+              resolve();
+            }
+          }, 10000); // 10 second timeout
+
           const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            clearTimeout(timeoutId);
+            
             if (firebaseUser) {
               try {
                 const user = await firebaseUserToUser(firebaseUser);
@@ -195,6 +205,7 @@ export const useAuthStore = create<AuthState>()(
                   unsubscribe,
                 });
               } catch (error) {
+                console.error('Error converting Firebase user:', error);
                 set({ isLoading: false, isAuthenticated: false, user: null, unsubscribe });
               }
             } else {
@@ -207,7 +218,6 @@ export const useAuthStore = create<AuthState>()(
               });
             }
             
-            // Only resolve once on initial auth state check
             if (!isResolved) {
               isResolved = true;
               resolve();
