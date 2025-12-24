@@ -7,6 +7,7 @@ import RoomListingCard from "@/components/rooms/RoomListingCard";
 import RoomMapCanvas from "@/components/rooms/RoomMapCanvas";
 import { roomsApi } from "@/lib/api/rooms";
 import { RoomFilters, RoomListingSummary } from "@/types";
+import { HomeIcon } from "@/components/ui/Icons";
 
 export default function RoomFinderHome() {
   const router = useRouter();
@@ -46,9 +47,20 @@ export default function RoomFinderHome() {
   return (
     <View className="flex-1 bg-gray-50">
       <View className="px-5 pt-6 pb-4 bg-white border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">Room Finder</Text>
-        <Text className="text-sm text-gray-500 mt-1">Find rooms and homes near you</Text>
-        <View className="flex-row gap-3 mt-4">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-900">Rooms</Text>
+            <Text className="text-sm text-gray-500 mt-1">Find rooms and homes near you</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/rooms/create")}
+            className="bg-blue-600 px-4 py-2 rounded-full"
+          >
+            <Text className="text-white font-semibold">+ Post</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="flex-row gap-3 mt-5">
           <TouchableOpacity
             onPress={() => setActiveTab("list")}
             className={`flex-1 py-2 rounded-full ${activeTab === "list" ? "bg-blue-600" : "bg-gray-100"}`}
@@ -66,6 +78,7 @@ export default function RoomFinderHome() {
             </Text>
           </TouchableOpacity>
         </View>
+
         <View className="flex-row gap-3 mt-4">
           <TouchableOpacity
             onPress={() => sheetRef.current?.expand()}
@@ -74,10 +87,10 @@ export default function RoomFinderHome() {
             <Text className="text-center text-gray-600">Filters</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push("/rooms/create")}
-            className="flex-1 bg-blue-600 rounded-lg py-2"
+            onPress={() => router.push("/rooms/my-listings")}
+            className="flex-1 bg-gray-100 rounded-lg py-2"
           >
-            <Text className="text-center text-white font-semibold">Post Listing</Text>
+            <Text className="text-center text-gray-700 font-semibold">My Listings</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -91,8 +104,17 @@ export default function RoomFinderHome() {
           {error && <Text className="text-red-500 mb-3">{error}</Text>}
           {!loading && listings.length === 0 && (
             <View className="items-center py-20">
-              <Text className="text-gray-500 text-lg">No listings yet</Text>
-              <Text className="text-gray-400 mt-2">Be the first to post a room.</Text>
+              <HomeIcon size={36} color="#9CA3AF" />
+              <Text className="text-gray-500 text-lg mt-3">No listings yet</Text>
+              <Text className="text-gray-400 mt-2 text-center">
+                Be the first to post a room in your neighborhood.
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/rooms/create")}
+                className="mt-4 bg-blue-600 px-5 py-2 rounded-full"
+              >
+                <Text className="text-white font-semibold">Post a listing</Text>
+              </TouchableOpacity>
             </View>
           )}
           {listings.map((listing) => (
