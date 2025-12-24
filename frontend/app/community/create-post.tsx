@@ -18,7 +18,7 @@ export default function CreateCommunityPost() {
     try {
       await communityAPI.createPost({ content: content.trim() });
       Alert.alert('Success', 'Post created successfully!', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK', onPress: () => router.push('/(tabs)/community') }
       ]);
     } catch (error) {
       console.error('Failed to create post:', error);

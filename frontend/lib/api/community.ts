@@ -70,6 +70,16 @@ class CommunityAPI {
     });
     if (!response.ok) throw new Error('Failed to delete post');
   }
+
+  async updatePost(postId: number, request: CreatePostRequest): Promise<CommunityPost> {
+    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}`, {
+      method: 'PUT',
+      headers: await this.getAuthHeaders(),
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) throw new Error('Failed to update post');
+    return response.json();
+  }
 }
 
 export const communityAPI = new CommunityAPI();

@@ -70,6 +70,14 @@ class JobsAPI {
     return response.json();
   }
 
+  async getUserJobs(userId: string, page = 0, size = 10): Promise<{ content: Job[]; totalElements: number }> {
+    const response = await fetch(`${API_BASE_URL}/api/jobs/user/${userId}?page=${page}&size=${size}`, {
+      headers: await this.getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch user jobs');
+    return response.json();
+  }
+
   async createJob(request: CreateJobRequest): Promise<Job> {
     const response = await fetch(`${API_BASE_URL}/api/jobs`, {
       method: 'POST',
