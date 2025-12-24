@@ -57,9 +57,10 @@ export default function DoneScreen() {
   useEffect(() => {
     const completeOnboarding = async () => {
       try {
-        await onboardingApi.updateOnboarding({
+        const result = await onboardingApi.updateOnboarding({
           onboardingCompleted: true,
         });
+        console.log('Onboarding completed:', result);
         setOnboardingCompleted(true);
       } catch (error) {
         console.error("Error completing onboarding:", error);

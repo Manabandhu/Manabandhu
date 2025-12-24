@@ -1,5 +1,6 @@
 package com.manabandhu.dto;
 
+import com.manabandhu.model.AuthProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,8 @@ public class UserDTO {
     private String city;
     private String role;
     private String photoUrl;
+    private AuthProvider authProvider;
+    private String proxyName;
     private Boolean isActive;
     private List<String> purposes;
     private List<String> interests;

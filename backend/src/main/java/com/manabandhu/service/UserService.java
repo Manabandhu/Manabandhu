@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,7 @@ public class UserService {
                 User newUser = new User();
                 newUser.setFirebaseUid(firebaseUid);
                 newUser.setName("User"); // Provide default name to satisfy NOT NULL constraint
+                newUser.setProxyName(generateProxyName());
                 newUser.setOnboardingCompleted(false);
                 return userRepository.save(newUser);
             });
@@ -119,6 +121,8 @@ public class UserService {
         dto.setCity(user.getCity());
         dto.setRole(user.getRole());
         dto.setPhotoUrl(user.getPhotoUrl());
+        dto.setAuthProvider(user.getAuthProvider());
+        dto.setProxyName(user.getProxyName());
         dto.setIsActive(user.getIsActive());
         dto.setPurposes(user.getPurposes());
         dto.setInterests(user.getInterests());
@@ -126,5 +130,25 @@ public class UserService {
         dto.setEnabledPriorities(user.getEnabledPriorities());
         dto.setOnboardingCompleted(user.getOnboardingCompleted());
         return dto;
+    }
+
+    private String generateProxyName() {
+        String[] adjectives = {"Happy", "Clever", "Bright", "Swift", "Calm", "Bold", "Kind", "Wise", "Cool", "Smart"};
+        String[] nouns = {"Panda", "Tiger", "Eagle", "Wolf", "Fox", "Bear", "Lion", "Hawk", "Owl", "Deer"};
+        
+        Random random = new Random();
+        String adjective = adjectives[random.nextInt(adjectives.length)];
+        String noun = nouns[random.nextInt(nouns.length)];
+        int number = random.nextInt(9999) + 1;
+        
+        String proxyName = adjective + noun + number;
+        
+        // Check if proxyName exists, if so generate a new one
+        while (userRepository.existsByProxyName(proxyName)) {
+            number = random.nextInt(9999) + 1;
+            proxyName = adjective + noun + number;
+        }
+        
+        return proxyName;
     }
 }

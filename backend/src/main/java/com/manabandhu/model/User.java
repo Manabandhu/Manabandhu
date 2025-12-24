@@ -43,6 +43,11 @@ public class User {
 
     private String photoUrl;
 
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.EMAIL;
+
+    private String proxyName;
+
     @Column(nullable = false)
     private Boolean isActive = true;
 

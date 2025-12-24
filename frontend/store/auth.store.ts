@@ -136,13 +136,26 @@ export const useAuthStore = create<AuthState>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
-      setOnboardingCompleted: (completed) =>
-        set((state) => ({
-          onboardingCompleted: completed,
-          user: state.user
+      setOnboardingCompleted: (completed) => {
+        set((state) => {
+          const updatedUser = state.user
             ? { ...state.user, onboardingCompleted: completed }
-            : null,
-        })),
+            : null;
+          
+          // Update cache if user exists
+          if (updatedUser) {
+            userDocCache.set(updatedUser.uid, { 
+              data: updatedUser, 
+              timestamp: Date.now() 
+            });
+          }
+          
+          return {
+            onboardingCompleted: completed,
+            user: updatedUser,
+          };
+        });
+      },
 
       initializeAuth: async () => {
         // Clean up any existing listener

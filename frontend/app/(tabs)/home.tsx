@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -7,6 +7,7 @@ import { GluestackButton } from "@/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
+import * as Location from "expo-location";
 import {
   MapPinIcon,
   BellIcon,
@@ -19,12 +20,15 @@ import {
   CalendarIcon,
   UsersIcon,
   DollarSignIcon,
+  ChevronDownIcon,
+  NavigationIcon,
 } from "@/components/ui/Icons";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
   const [location, setLocation] = useState("San Francisco, CA");
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [search, setSearch] = useState("");
   const [marketLoading, setMarketLoading] = useState(true);
   const [marketError, setMarketError] = useState<string | null>(null);
@@ -218,6 +222,39 @@ export default function HomeScreen() {
     router.replace(ROUTES.auth.root);
   };
 
+  const popularCities = [
+    "San Francisco, CA",
+    "New York, NY",
+    "Los Angeles, CA",
+    "Chicago, IL",
+    "Houston, TX",
+    "Seattle, WA",
+    "Boston, MA",
+    "Austin, TX",
+  ];
+
+  const getCurrentLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Location permission is required to get your current location.');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      const cityState = `${address.city}, ${address.region}`;
+      setLocation(cityState);
+      setShowLocationModal(false);
+    } catch (error) {
+      Alert.alert('Error', 'Unable to get your current location. Please try again.');
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-[#F9FAFB]">
       <ScrollView
@@ -227,48 +264,49 @@ export default function HomeScreen() {
       >
         <LinearGradient
           colors={GRADIENTS.primaryShort}
-          className="mx-4 mt-2 rounded-3xl p-5 shadow-lg"
+          className="mx-4 mt-2 rounded-3xl shadow-lg"
+          style={{ paddingTop: 20, paddingBottom: 20, paddingHorizontal: 20 }}
         >
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-sm text-white/80">Hi, {user?.displayName || "Friend"}</Text>
-              <Text className="text-3xl font-bold text-white mt-1">
+              <Text className="text-2xl font-bold text-white mt-1 leading-7">
                 Let's get you settled today
               </Text>
               <View className="flex-row flex-wrap gap-2 mt-3">
-                <View className="flex-row items-center bg-white/15 rounded-full px-3 py-2">
-                  <MapPinIcon size={16} color="#FFFFFF" />
-                  <Text className="text-white text-sm font-semibold ml-2">
+                <View className="flex-row items-center bg-white/15 rounded-full px-3 py-1.5">
+                  <MapPinIcon size={14} color="#FFFFFF" />
+                  <Text className="text-white text-xs font-semibold ml-2">
                     {location}
                   </Text>
                 </View>
-                <View className="flex-row items-center bg-white/10 rounded-full px-3 py-2">
-                  <BellIcon size={16} color="#FFFFFF" />
-                  <Text className="text-white text-sm ml-2">Alerts on</Text>
+                <View className="flex-row items-center bg-white/10 rounded-full px-3 py-1.5">
+                  <BellIcon size={14} color="#FFFFFF" />
+                  <Text className="text-white text-xs ml-2">Alerts on</Text>
                 </View>
               </View>
             </View>
           </View>
 
-          <View className="mt-4 bg-white/10 rounded-2xl px-3 py-2">
-            <Text className="text-xs text-white/80">Your location</Text>
-            <TextInput
-              value={location}
-              onChangeText={setLocation}
-              placeholder="Enter city"
-              placeholderTextColor="rgba(255,255,255,0.75)"
-              className="text-white text-base mt-1"
-            />
-          </View>
+          <TouchableOpacity 
+            className="mt-4 bg-white/10 rounded-2xl px-3 py-2 flex-row items-center justify-between"
+            onPress={() => setShowLocationModal(true)}
+          >
+            <View className="flex-1">
+              <Text className="text-xs text-white/80">Your location</Text>
+              <Text className="text-white text-sm mt-1">{location}</Text>
+            </View>
+            <ChevronDownIcon size={16} color="rgba(255,255,255,0.8)" />
+          </TouchableOpacity>
 
           <View className="mt-4 bg-white rounded-2xl px-4 py-3 flex-row items-center shadow-sm">
-            <SearchIcon size={18} color="#4F46E5" />
+            <SearchIcon size={16} color="#4F46E5" />
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Search rooms, rides, jobs..."
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-base text-gray-900"
+              className="flex-1 ml-3 text-sm text-gray-900"
               returnKeyType="search"
             />
           </View>
@@ -279,13 +317,13 @@ export default function HomeScreen() {
               return (
                 <TouchableOpacity
                   key={filter.label}
-                  className="flex-row items-center rounded-full px-3 py-2"
+                  className="flex-row items-center rounded-full px-3 py-1.5"
                   style={{ backgroundColor: filter.background }}
                   activeOpacity={0.85}
                   onPress={() => router.push(filter.route)}
                 >
-                  <IconComponent size={16} color={filter.color} />
-                  <Text className="ml-2 text-sm font-semibold" style={{ color: filter.color }}>
+                  <IconComponent size={14} color={filter.color} />
+                  <Text className="ml-2 text-xs font-semibold" style={{ color: filter.color }}>
                     {filter.label}
                   </Text>
                 </TouchableOpacity>
@@ -293,6 +331,51 @@ export default function HomeScreen() {
             })}
           </View>
         </LinearGradient>
+
+        {/* Location Modal */}
+        <Modal
+          visible={showLocationModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowLocationModal(false)}
+        >
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-3xl p-6">
+              <Text className="text-xl font-bold text-gray-900 mb-4">Select Location</Text>
+              
+              <TouchableOpacity
+                className="flex-row items-center bg-blue-50 rounded-2xl p-4 mb-4"
+                onPress={getCurrentLocation}
+              >
+                <MapPinIcon size={20} color="#4F46E5" />
+                <Text className="ml-3 text-base font-semibold text-blue-600">Use Current Location</Text>
+              </TouchableOpacity>
+
+              <Text className="text-sm font-semibold text-gray-700 mb-3">Popular Cities</Text>
+              <ScrollView className="max-h-64">
+                {popularCities.map((city) => (
+                  <TouchableOpacity
+                    key={city}
+                    className="py-3 border-b border-gray-100"
+                    onPress={() => {
+                      setLocation(city);
+                      setShowLocationModal(false);
+                    }}
+                  >
+                    <Text className="text-base text-gray-900">{city}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                className="mt-4 bg-gray-100 rounded-2xl py-3"
+                onPress={() => setShowLocationModal(false)}
+              >
+                <Text className="text-center text-base font-semibold text-gray-600">Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         <View className="px-4 mt-6 gap-5">
           <View className="bg-white rounded-2xl p-5 shadow-sm">
