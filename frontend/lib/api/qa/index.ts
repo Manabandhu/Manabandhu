@@ -9,27 +9,89 @@ import {
   ReportRequest,
   QuestionsFilter 
 } from '@/types/qa';
+import { toast } from '@/lib/toast';
+
+export interface ApiError {
+  status: number;
+  error: string;
+  message: string;
+  fieldErrors?: Record<string, string>;
+  timestamp: string;
+}
 
 class QaApiService {
   private baseUrl = `${API_BASE_URL}/api/qa`;
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    showErrorToast: boolean = true
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      if (!response.ok) {
+        const errorData: ApiError = await response.json().catch(() => ({
+          status: response.status,
+          error: response.statusText,
+          message: 'An unexpected error occurred',
+          timestamp: new Date().toISOString(),
+        }));
+
+        if (showErrorToast) {
+          this.handleApiError(errorData);
+        }
+        
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        const networkError = 'Network error. Please check your connection and try again.';
+        if (showErrorToast) {
+          toast.showError(networkError);
+        }
+        throw new Error(networkError);
+      }
+      throw error;
     }
+  }
 
-    return response.json();
+  private handleApiError(error: ApiError) {
+    switch (error.status) {
+      case 400:
+        if (error.fieldErrors) {
+          const fieldMessages = Object.values(error.fieldErrors).join('\n');
+          toast.showError(fieldMessages, 'Validation Error');
+        } else {
+          toast.showError(error.message || 'Invalid request');
+        }
+        break;
+      case 401:
+        toast.showError('Please log in to continue', 'Authentication Required');
+        break;
+      case 403:
+        toast.showError('You don\'t have permission to perform this action', 'Access Denied');
+        break;
+      case 404:
+        toast.showError('The requested resource was not found', 'Not Found');
+        break;
+      case 409:
+        toast.showError(error.message || 'This action conflicts with existing data', 'Conflict');
+        break;
+      case 500:
+        toast.showError('Server error. Please try again later', 'Server Error');
+        break;
+      default:
+        toast.showError(error.message || 'An unexpected error occurred');
+    }
   }
 
   async getQuestions(filter: QuestionsFilter = {}, token?: string) {
@@ -59,11 +121,14 @@ class QaApiService {
   }
 
   async createQuestion(data: QuestionRequest, token: string) {
-    return this.request<Question>('/questions', {
+    const result = await this.request<Question>('/questions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
     });
+    
+    toast.showSuccess('Your question has been posted successfully!');
+    return result;
   }
 
   async getAnswers(questionId: string, token?: string) {
@@ -73,34 +138,41 @@ class QaApiService {
   }
 
   async createAnswer(questionId: string, data: AnswerRequest, token: string) {
-    return this.request<Answer>(`/questions/${questionId}/answers`, {
+    const result = await this.request<Answer>(`/questions/${questionId}/answers`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
     });
+    
+    toast.showSuccess('Your answer has been posted successfully!');
+    return result;
   }
 
   async acceptAnswer(answerId: string, token: string) {
-    return this.request<void>(`/answers/${answerId}/accept`, {
+    await this.request<void>(`/answers/${answerId}/accept`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
+    
+    toast.showSuccess('Answer accepted successfully!');
   }
 
   async vote(data: VoteRequest, token: string) {
-    return this.request<void>('/votes', {
+    await this.request<void>('/votes', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
-    });
+    }, false); // Don't show error toast for votes as they're frequent
   }
 
   async reportContent(data: ReportRequest, token: string) {
-    return this.request<void>('/report', {
+    await this.request<void>('/report', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(data),
     });
+    
+    toast.showSuccess('Content reported successfully. Thank you for helping keep our community safe.');
   }
 
   async getTags() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   TextInput,
   RefreshControl,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Question, QuestionsFilter } from '@/types/qa';
 import { QuestionCard } from '@/components/qa/QuestionCard';
 import { qaApi } from '@/lib/api/qa';
+import { toast } from '@/lib/toast';
 import { COLORS } from '@/constants/colors';
 import { SearchIcon, PlusIcon } from '@/components/ui/Icons';
 
@@ -22,45 +23,105 @@ export default function QaHomeScreen() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'unanswered' | 'my'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'RECENT' | 'VIEWS'>('RECENT');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQuestions();
-  }, [activeTab, sortBy]);
-
-  const loadQuestions = async () => {
+  const loadQuestions = async (page: number = 0, append: boolean = false) => {
     try {
+      if (page === 0) {
+        setError(null);
+      }
+      
       const filter: QuestionsFilter = {
         sortBy,
         status: activeTab === 'unanswered' ? 'OPEN' : undefined,
-        search: searchQuery || undefined,
+        search: searchQuery.trim() || undefined,
+        page,
+        size: 20,
       };
 
       const response = await qaApi.getQuestions(filter);
-      setQuestions(response.content);
+      
+      if (append) {
+        setQuestions(prev => [...prev, ...response.content]);
+      } else {
+        setQuestions(response.content);
+      }
+      
+      setHasMore(response.content.length === 20 && page < response.totalPages - 1);
+      setCurrentPage(page);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load questions');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load questions';
+      setError(errorMessage);
+      if (page === 0) {
+        toast.showError(errorMessage);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMore(false);
     }
   };
 
   const handleRefresh = () => {
     setRefreshing(true);
-    loadQuestions();
+    setCurrentPage(0);
+    setHasMore(true);
+    loadQuestions(0, false);
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore && !loading) {
+      setLoadingMore(true);
+      loadQuestions(currentPage + 1, true);
+    }
   };
 
   const handleSearch = () => {
     setLoading(true);
-    loadQuestions();
+    setCurrentPage(0);
+    setHasMore(true);
+    loadQuestions(0, false);
+  };
+
+  const handleTabChange = (tab: 'all' | 'unanswered' | 'my') => {
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+      setLoading(true);
+      setCurrentPage(0);
+      setHasMore(true);
+    }
+  };
+
+  const handleSortChange = (sort: 'RECENT' | 'VIEWS') => {
+    if (sort !== sortBy) {
+      setSortBy(sort);
+      setLoading(true);
+      setCurrentPage(0);
+      setHasMore(true);
+    }
   };
 
   const handleAskQuestion = () => {
     router.push('/qa/ask');
   };
+
+  // Load questions when tab or sort changes
+  useEffect(() => {
+    loadQuestions(0, false);
+  }, [activeTab, sortBy]);
+
+  // Refresh when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      handleRefresh();
+    }, [])
+  );
 
   const tabs = [
     { key: 'all', label: 'All Questions' },
@@ -87,7 +148,7 @@ export default function QaHomeScreen() {
           <TouchableOpacity
             key={tab.key}
             style={[styles.tab, activeTab === tab.key && styles.activeTab]}
-            onPress={() => setActiveTab(tab.key as any)}
+            onPress={() => handleTabChange(tab.key as any)}
           >
             <Text style={[styles.tabText, activeTab === tab.key && styles.activeTabText]}>
               {tab.label}
@@ -100,7 +161,7 @@ export default function QaHomeScreen() {
         <Text style={styles.sortLabel}>Sort by:</Text>
         <TouchableOpacity
           style={[styles.sortButton, sortBy === 'RECENT' && styles.activeSortButton]}
-          onPress={() => setSortBy('RECENT')}
+          onPress={() => handleSortChange('RECENT')}
         >
           <Text style={[styles.sortButtonText, sortBy === 'RECENT' && styles.activeSortButtonText]}>
             Recent
@@ -108,7 +169,7 @@ export default function QaHomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.sortButton, sortBy === 'VIEWS' && styles.activeSortButton]}
-          onPress={() => setSortBy('VIEWS')}
+          onPress={() => handleSortChange('VIEWS')}
         >
           <Text style={[styles.sortButtonText, sortBy === 'VIEWS' && styles.activeSortButtonText]}>
             Most Viewed
@@ -117,6 +178,51 @@ export default function QaHomeScreen() {
       </View>
     </View>
   );
+
+  const renderFooter = () => {
+    if (!loadingMore) return null;
+    return (
+      <View style={styles.loadingFooter}>
+        <ActivityIndicator size="small" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading more questions...</Text>
+      </View>
+    );
+  };
+
+  const renderEmptyState = () => {
+    if (loading) {
+      return (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.emptyText}>Loading questions...</Text>
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.errorText}>Failed to load questions</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>
+          {searchQuery ? 'No questions found matching your search' : 'No questions found'}
+        </Text>
+        {!searchQuery && (
+          <TouchableOpacity style={styles.askFirstButton} onPress={handleAskQuestion}>
+            <Text style={styles.askFirstButtonText}>Ask the first question</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -133,16 +239,13 @@ export default function QaHomeScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <QuestionCard question={item} />}
         ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        ListEmptyComponent={renderEmptyState}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {loading ? 'Loading questions...' : 'No questions found'}
-            </Text>
-          </View>
-        }
+        contentContainerStyle={[styles.listContent, questions.length === 0 && styles.emptyListContent]}
       />
     </SafeAreaView>
   );
@@ -255,13 +358,59 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 20,
   },
+  emptyListContent: {
+    flexGrow: 1,
+  },
   emptyContainer: {
-    padding: 40,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 40,
   },
   emptyText: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
+    marginTop: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  askFirstButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  askFirstButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingFooter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  loadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#6B7280',
   },
 });

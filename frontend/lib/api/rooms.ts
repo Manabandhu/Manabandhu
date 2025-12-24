@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/constants/api";
 import { auth } from "@/lib/firebase";
+import { toast } from "@/lib/toast";
 import {
   RoomListing,
   RoomListingActivity,
@@ -38,154 +39,285 @@ const getAuthHeaders = async () => {
   };
 };
 
+const handleResponse = async (response: Response, successMessage?: string) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData.message || `HTTP ${response.status}`;
+    throw new Error(message);
+  }
+  
+  if (successMessage) {
+    toast.showSuccess(successMessage);
+  }
+  
+  return response.json();
+};
+
 export const roomsApi = {
   async getListings(filters: RoomFilters & { status?: ListingStatus[] } = {}) {
-    const query = buildQuery(filters);
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings${query ? `?${query}` : ""}`,
-      { headers: await getAuthHeaders() }
-    );
-    if (!response.ok) throw new Error("Failed to fetch listings");
-    return response.json() as Promise<{ content: RoomListingSummary[] }>;
+    try {
+      const query = buildQuery(filters);
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings${query ? `?${query}` : ""}`,
+        { headers: await getAuthHeaders() }
+      );
+      return await handleResponse(response) as { content: RoomListingSummary[] };
+    } catch (error) {
+      throw error;
+    }
   },
 
   async getMyListings() {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/me`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch listings");
-    return response.json() as Promise<{ content: RoomListingSummary[] }>;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/me`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { content: RoomListingSummary[] };
+    } catch (error) {
+      throw error;
+    }
   },
 
   async getListing(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch listing");
-    return response.json() as Promise<RoomListing>;
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as RoomListing;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async createListing(payload: Partial<RoomListing>) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to create listing");
-    return response.json() as Promise<RoomListing>;
+    try {
+      if (!payload.title?.trim()) {
+        throw new Error('Title is required');
+      }
+      if (!payload.rent || payload.rent <= 0) {
+        throw new Error('Valid rent amount is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await handleResponse(response, 'Room listing created successfully!') as RoomListing;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async updateListing(id: string, payload: Partial<RoomListing>) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
-      method: "PUT",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to update listing");
-    return response.json() as Promise<RoomListing>;
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
+        method: "PUT",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await handleResponse(response, 'Room listing updated successfully!') as RoomListing;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async deleteListing(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
-      method: "DELETE",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to delete listing");
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
+        method: "DELETE",
+        headers: await getAuthHeaders(),
+      });
+      await handleResponse(response, 'Room listing deleted successfully!');
+    } catch (error) {
+      throw error;
+    }
   },
 
   async repostListing(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/repost`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to repost listing");
-    return response.json() as Promise<RoomListing>;
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/repost`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Room listing reposted successfully!') as RoomListing;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async updateStatus(id: string, status: ListingStatus) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/status`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    if (!response.ok) throw new Error("Failed to update status");
-    return response.json() as Promise<RoomListing>;
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      if (!status) {
+        throw new Error('Status is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/status`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ status }),
+      });
+      return await handleResponse(response, 'Listing status updated successfully!') as RoomListing;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async startChat(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/chat/start`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to start chat");
-    return response.json() as Promise<{ chatThreadId: string }>;
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/chat/start`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Chat started successfully!') as { chatThreadId: string };
+    } catch (error) {
+      throw error;
+    }
   },
 
   async heartbeat(chatThreadId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/chats/${chatThreadId}/heartbeat`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to record heartbeat");
+    try {
+      if (!chatThreadId?.trim()) {
+        throw new Error('Chat thread ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/chats/${chatThreadId}/heartbeat`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+      });
+      await handleResponse(response);
+    } catch (error) {
+      // Don't show error toast for heartbeat failures
+      throw error;
+    }
   },
 
   async getReviews(listingId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch reviews");
-    return response.json() as Promise<RoomReview[]>;
+    try {
+      if (!listingId?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as RoomReview[];
+    } catch (error) {
+      throw error;
+    }
   },
 
   async createReview(listingId: string, payload: { type: ReviewType; rating: number; tags?: string[]; comment?: string }) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to submit review");
-    return response.json() as Promise<RoomReview>;
+    try {
+      if (!listingId?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
+        throw new Error('Rating must be between 1 and 5');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await handleResponse(response, 'Review submitted successfully!') as RoomReview;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async updateReview(reviewId: string, payload: { rating: number; tags?: string[]; comment?: string }) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}`, {
-      method: "PUT",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to update review");
-    return response.json() as Promise<RoomReview>;
+    try {
+      if (!reviewId?.trim()) {
+        throw new Error('Review ID is required');
+      }
+      if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
+        throw new Error('Rating must be between 1 and 5');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}`, {
+        method: "PUT",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await handleResponse(response, 'Review updated successfully!') as RoomReview;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async flagReview(reviewId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}/flag`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to flag review");
-    return response.json() as Promise<RoomReview>;
+    try {
+      if (!reviewId?.trim()) {
+        throw new Error('Review ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}/flag`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Review flagged successfully!') as RoomReview;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async getReviewEligibility(listingId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews/eligibility`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch review eligibility");
-    return response.json() as Promise<ReviewEligibility>;
+    try {
+      if (!listingId?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews/eligibility`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as ReviewEligibility;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async getHomeActivities() {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/activities/home`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch activities");
-    return response.json() as Promise<{ content: RoomListingActivity[] }>;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/rooms/activities/home`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { content: RoomListingActivity[] };
+    } catch (error) {
+      throw error;
+    }
   },
 
   async getMyActivities() {
-    const response = await fetch(`${API_BASE_URL}/api/rooms/activities/me`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch activities");
-    return response.json() as Promise<{ content: RoomListingActivity[] }>;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/rooms/activities/me`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { content: RoomListingActivity[] };
+    } catch (error) {
+      throw error;
+    }
   },
 };
