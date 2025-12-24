@@ -1,0 +1,12 @@
+package com.manabandhu.dto.splitly;
+
+import lombok.Data;
+import java.util.List;
+
+@Data
+public class CreateExpenseRequest {
+    private String description;
+    private Double amount;
+    private String splitType = "EQUAL";
+    private List<ExpenseSplitRequest> splits;
+}

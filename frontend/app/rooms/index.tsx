@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { API_BASE_URL } from '@/constants/api';
 import { auth } from '@/lib/firebase';
 import { HomeIcon, MapPinIcon, DollarSignIcon } from "@/components/ui/Icons";
+import PostRoomBottomSheet from "@/components/PostRoomBottomSheet";
 
 interface Room {
   id: number;
@@ -21,6 +22,7 @@ export default function RoomFinder() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showPostRoomSheet, setShowPostRoomSheet] = useState(false);
 
   const loadRooms = async () => {
     try {
@@ -64,7 +66,7 @@ export default function RoomFinder() {
         <Text className="text-3xl font-bold text-gray-900">Rooms</Text>
         <TouchableOpacity
           className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => router.push("/rooms/post")}
+          onPress={() => setShowPostRoomSheet(true)}
         >
           <Text className="text-white font-semibold">+ Post</Text>
         </TouchableOpacity>
@@ -104,6 +106,12 @@ export default function RoomFinder() {
           </TouchableOpacity>
         ))
       )}
+
+      <PostRoomBottomSheet 
+        visible={showPostRoomSheet}
+        onClose={() => setShowPostRoomSheet(false)}
+        onRoomPosted={loadRooms}
+      />
     </ScrollView>
   );
 }

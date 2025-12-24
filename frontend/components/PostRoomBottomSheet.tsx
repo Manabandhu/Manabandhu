@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
+import { API_BASE_URL } from '@/constants/api';
+import { auth } from '@/lib/firebase';
 
 interface PostRoomBottomSheetProps {
   visible: boolean;
@@ -9,16 +11,22 @@ interface PostRoomBottomSheetProps {
 
 export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: PostRoomBottomSheetProps) {
   const [title, setTitle] = useState('');
-  const [budget, setBudget] = useState('');
+  const [rent, setRent] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [type, setType] = useState('APARTMENT');
+  const [contactInfo, setContactInfo] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const roomTypes = ['APARTMENT', 'HOUSE', 'STUDIO', 'SHARED_ROOM'];
 
   const resetForm = () => {
     setTitle('');
-    setBudget('');
+    setRent('');
     setLocation('');
     setDescription('');
+    setType('APARTMENT');
+    setContactInfo('');
   };
 
   const handleClose = () => {
@@ -27,15 +35,33 @@ export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: 
   };
 
   const handleSubmit = async () => {
-    if (!title.trim() || !budget.trim()) {
+    if (!title.trim() || !rent.trim()) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Implement rooms API call
-      // await roomsAPI.createRoom({ title, budget: parseFloat(budget), location, description });
+      const token = await auth?.currentUser?.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          location: location.trim(),
+          rent: parseFloat(rent),
+          type,
+          contactInfo: contactInfo.trim()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post room');
+      }
       
       resetForm();
       onClose();
@@ -72,13 +98,13 @@ export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: 
             <Text className="text-lg font-semibold">Post Room</Text>
             <TouchableOpacity 
               onPress={handleSubmit}
-              disabled={loading || !title.trim() || !budget.trim()}
+              disabled={loading || !title.trim() || !rent.trim()}
               className={`px-4 py-2 rounded-full ${
-                loading || !title.trim() || !budget.trim() ? 'bg-gray-300' : 'bg-blue-600'
+                loading || !title.trim() || !rent.trim() ? 'bg-gray-300' : 'bg-blue-600'
               }`}
             >
               <Text className={`font-semibold ${
-                loading || !title.trim() || !budget.trim() ? 'text-gray-500' : 'text-white'
+                loading || !title.trim() || !rent.trim() ? 'text-gray-500' : 'text-white'
               }`}>
                 {loading ? 'Posting...' : 'Post'}
               </Text>
@@ -98,14 +124,39 @@ export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: 
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-700 font-medium mb-2">Budget *</Text>
+              <Text className="text-gray-700 font-medium mb-2">Monthly Rent *</Text>
               <TextInput
-                value={budget}
-                onChangeText={setBudget}
-                placeholder="Monthly rent amount"
+                value={rent}
+                onChangeText={setRent}
+                placeholder="e.g. 1200"
                 keyboardType="numeric"
                 className="border border-gray-300 rounded-lg px-3 py-3 text-gray-900"
               />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-gray-700 font-medium mb-2">Room Type</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row gap-2">
+                  {roomTypes.map((roomType) => (
+                    <TouchableOpacity
+                      key={roomType}
+                      onPress={() => setType(roomType)}
+                      className={`px-4 py-2 rounded-full border ${
+                        type === roomType 
+                          ? 'bg-blue-600 border-blue-600' 
+                          : 'bg-white border-gray-300'
+                      }`}
+                    >
+                      <Text className={`font-medium ${
+                        type === roomType ? 'text-white' : 'text-gray-700'
+                      }`}>
+                        {roomType.replace('_', ' ')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
 
             <View className="mb-4">
@@ -114,6 +165,16 @@ export default function PostRoomBottomSheet({ visible, onClose, onRoomPosted }: 
                 value={location}
                 onChangeText={setLocation}
                 placeholder="e.g. Downtown, City Center"
+                className="border border-gray-300 rounded-lg px-3 py-3 text-gray-900"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-gray-700 font-medium mb-2">Contact Info</Text>
+              <TextInput
+                value={contactInfo}
+                onChangeText={setContactInfo}
+                placeholder="Phone number or email"
                 className="border border-gray-300 rounded-lg px-3 py-3 text-gray-900"
               />
             </View>

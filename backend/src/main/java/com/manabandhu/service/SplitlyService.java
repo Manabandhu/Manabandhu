@@ -142,9 +142,9 @@ public class SplitlyService {
         dto.setId(group.getId());
         dto.setName(group.getName());
         dto.setDescription(group.getDescription());
-        dto.setCreatedBy(group.getCreatedBy().getDisplayName());
+        dto.setCreatedBy(group.getCreatedBy().getName());
         dto.setMembers(group.getMembers().stream()
-            .map(User::getDisplayName)
+            .map(User::getName)
             .collect(Collectors.toList()));
         dto.setCreatedAt(group.getCreatedAt().toString());
         return dto;
@@ -155,7 +155,7 @@ public class SplitlyService {
         dto.setId(expense.getId());
         dto.setDescription(expense.getDescription());
         dto.setAmount(expense.getAmount());
-        dto.setPaidBy(expense.getPaidBy().getDisplayName());
+        dto.setPaidBy(expense.getPaidBy().getName());
         dto.setSplitType(expense.getSplitType().toString());
         dto.setExpenseDate(expense.getExpenseDate().toString());
         dto.setCreatedAt(expense.getCreatedAt().toString());
