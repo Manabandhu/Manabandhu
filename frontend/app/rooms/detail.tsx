@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { openMapsDirections } from "@/lib/maps";
 import { roomsApi } from "@/lib/api/rooms";
 import { ListingStatus, RoomListing, RoomReview } from "@/types";
+import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 
@@ -95,29 +96,45 @@ export default function RoomDetail() {
   const locationLabel = listing.approxAreaLabel;
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} className="h-56">
+    <ScrollView className="flex-1 bg-gray-50">
+      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} className="h-60">
         {(listing.imageUrls || []).length ? (
           (listing.imageUrls || []).map((uri) => (
-            <Image key={uri} source={{ uri }} className="h-56 w-full" />
+            <Image key={uri} source={{ uri }} className="h-60 w-full" />
           ))
         ) : (
-          <View className="h-56 w-full bg-gray-100 items-center justify-center">
-            <Text className="text-gray-400">No images yet</Text>
+          <View className="h-60 w-full bg-gray-100 items-center justify-center">
+            <HomeIcon size={32} color="#9CA3AF" />
+            <Text className="text-gray-400 mt-2">No images yet</Text>
           </View>
         )}
       </ScrollView>
 
       <View className="px-6 py-5 gap-4">
-        <View>
+        <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <Text className="text-2xl font-bold text-gray-900">{listing.title}</Text>
           <Text className="text-blue-600 text-lg mt-1">₹{listing.rentMonthly}/month</Text>
-          <Text className="text-gray-500 mt-2">
-            {listing.roomType} • {listing.listingFor} • {listing.status}
-          </Text>
+          <View className="flex-row items-center mt-3">
+            <MapPinIcon size={16} color="#9CA3AF" />
+            <Text className="text-gray-500 ml-1">{locationLabel}</Text>
+          </View>
+          <View className="flex-row flex-wrap gap-2 mt-3">
+            <View className="bg-blue-50 px-3 py-1 rounded-full">
+              <Text className="text-xs font-medium text-blue-700">{listing.roomType}</Text>
+            </View>
+            <View className="bg-purple-50 px-3 py-1 rounded-full">
+              <Text className="text-xs font-medium text-purple-700">{listing.listingFor}</Text>
+            </View>
+            <View className="bg-gray-100 px-3 py-1 rounded-full">
+              <Text className="text-xs font-medium text-gray-700">{listing.status}</Text>
+            </View>
+          </View>
         </View>
 
-        <Text className="text-gray-700">{listing.description || "No description provided."}</Text>
+        <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <Text className="text-gray-900 font-semibold mb-2">About this room</Text>
+          <Text className="text-gray-700">{listing.description || "No description provided."}</Text>
+        </View>
 
         <View className="flex-row gap-3">
           {!listing.owner && !["HIDDEN", "ARCHIVED", "DELETED"].includes(listing.status) && (
@@ -136,7 +153,7 @@ export default function RoomDetail() {
         </View>
 
         {listing.owner && (
-          <View className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+          <View className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <Text className="font-semibold text-gray-900 mb-3">Manage listing</Text>
             <View className="flex-row flex-wrap gap-2">
               {STATUS_OPTIONS.map((status) => (
@@ -168,12 +185,12 @@ export default function RoomDetail() {
           </View>
         )}
 
-        <View className="bg-gray-100 rounded-xl p-4 gap-2">
+        <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm gap-3">
           <Text className="text-gray-900 font-semibold">Location</Text>
           <Text className="text-gray-600">{locationLabel}</Text>
           <View className="flex-row gap-2">
             <TouchableOpacity
-              className="flex-1 bg-white rounded-lg py-2 border border-gray-200"
+              className="flex-1 bg-gray-100 rounded-lg py-2"
               onPress={() => router.push("/rooms?tab=map")}
             >
               <Text className="text-gray-900 text-center font-semibold">View on map</Text>
@@ -187,7 +204,7 @@ export default function RoomDetail() {
           </View>
         </View>
 
-        <View className="bg-white border border-gray-100 rounded-xl p-4">
+        <View className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
           <Text className="font-semibold text-gray-900 mb-3">Reviews</Text>
           {reviews.length === 0 ? (
             <Text className="text-gray-500">No reviews yet.</Text>

@@ -42,22 +42,35 @@ export default function MyListings() {
   const filteredListings = listings.filter((listing) => activeTab.statuses.includes(listing.status));
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="px-6 pt-6 pb-4 border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">My Listings</Text>
-        <View className="flex-row flex-wrap gap-2 mt-4">
+    <View className="flex-1 bg-gray-50">
+      <View className="px-6 pt-6 pb-4 bg-white border-b border-gray-100">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-900">My Listings</Text>
+            <Text className="text-sm text-gray-500 mt-1">Manage your rooms in one place</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/rooms/create")}
+            className="bg-blue-600 px-4 py-2 rounded-full"
+          >
+            <Text className="text-white font-semibold">+ New</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4">
           {TABS.map((tab) => (
             <TouchableOpacity
               key={tab.label}
               onPress={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full border ${
-                activeTab.label === tab.label ? "bg-blue-600 border-blue-600" : "border-gray-200"
+              className={`px-4 py-2 rounded-full mr-3 ${
+                activeTab.label === tab.label ? "bg-blue-600" : "bg-gray-100"
               }`}
             >
-              <Text className={`${activeTab.label === tab.label ? "text-white" : "text-gray-600"}`}>{tab.label}</Text>
+              <Text className={`${activeTab.label === tab.label ? "text-white" : "text-gray-700"} font-medium`}>
+                {tab.label}
+              </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
       </View>
 
       <ScrollView
@@ -67,7 +80,8 @@ export default function MyListings() {
         {loading && <Text className="text-gray-500">Loading listings...</Text>}
         {!loading && filteredListings.length === 0 && (
           <View className="items-center py-16">
-            <Text className="text-gray-500">No listings in this section yet.</Text>
+            <Text className="text-gray-500 text-lg">No listings in this section yet.</Text>
+            <Text className="text-gray-400 mt-2">Post a room to get started.</Text>
           </View>
         )}
 
@@ -77,9 +91,18 @@ export default function MyListings() {
             onPress={() => router.push(`/rooms/detail?id=${listing.id}`)}
             className="bg-white border border-gray-100 rounded-xl p-4 mb-4 shadow-sm"
           >
-            <Text className="text-lg font-semibold text-gray-900">{listing.title}</Text>
-            <Text className="text-gray-500 mt-1">{listing.approxAreaLabel}</Text>
-            <Text className="text-gray-600 mt-2">Status: {listing.status}</Text>
+            <View className="flex-row items-start justify-between">
+              <View className="flex-1 pr-2">
+                <Text className="text-lg font-semibold text-gray-900">{listing.title}</Text>
+                <Text className="text-gray-500 mt-1">{listing.approxAreaLabel}</Text>
+              </View>
+              <Text className="text-blue-600 font-semibold">₹{listing.rentMonthly}</Text>
+            </View>
+            <View className="flex-row items-center mt-3">
+              <View className="bg-gray-100 px-3 py-1 rounded-full">
+                <Text className="text-xs text-gray-700 font-medium">{listing.status}</Text>
+              </View>
+            </View>
             {listing.status === "HIDDEN" && (
               <View className="mt-3 bg-yellow-50 border border-yellow-100 rounded-lg p-3">
                 <Text className="text-sm text-yellow-700">Hidden due to inactivity.</Text>
