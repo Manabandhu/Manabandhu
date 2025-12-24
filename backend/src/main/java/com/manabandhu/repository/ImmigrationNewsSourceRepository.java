@@ -1,5 +1,6 @@
 package com.manabandhu.repository;
 
+import com.manabandhu.model.immigration.ImmigrationNewsArticle;
 import com.manabandhu.model.immigration.ImmigrationNewsSource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,5 @@ public interface ImmigrationNewsSourceRepository extends JpaRepository<Immigrati
     
     List<ImmigrationNewsSource> findByEnabledTrue();
     
-    List<ImmigrationNewsSource> findByTypeAndEnabledTrue(ImmigrationNewsSource.SourceType type);
+    List<ImmigrationNewsSource> findByTypeAndEnabledTrue(ImmigrationNewsArticle.SourceType type);
 }
