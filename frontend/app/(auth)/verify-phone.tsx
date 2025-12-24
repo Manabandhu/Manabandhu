@@ -14,7 +14,6 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 import { phoneSchema, PhoneInput } from "@/lib/validators";
 import { Logo } from "@/components/ui/Logo";
 import { PhoneIcon } from "@/components/ui/Icons";
