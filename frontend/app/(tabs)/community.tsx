@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import { communityAPI, CommunityPost } from "@/lib/api/community";
 import { useAuthStore } from "@/store/auth.store";
 import { MessageIcon, UserIcon } from "@/components/ui/Icons";
+import CreatePostBottomSheet from "@/components/CreatePostBottomSheet";
+import CommentsBottomSheet from "@/components/CommentsBottomSheet";
 
 export default function CommunityFeed() {
   const router = useRouter();
@@ -11,6 +13,9 @@ export default function CommunityFeed() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const currentUser = useAuthStore(state => state.user);
+  const [showCreatePostSheet, setShowCreatePostSheet] = useState(false);
+  const [showCommentsSheet, setShowCommentsSheet] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
   const loadPosts = async () => {
     try {
@@ -36,6 +41,16 @@ export default function CommunityFeed() {
     } catch (error) {
       console.error('Failed to like post:', error);
     }
+  };
+
+  const handleShowComments = (postId: number) => {
+    setSelectedPostId(postId);
+    setShowCommentsSheet(true);
+  };
+
+  const handleCloseComments = () => {
+    setShowCommentsSheet(false);
+    setSelectedPostId(null);
   };
 
   useEffect(() => {
@@ -73,7 +88,7 @@ export default function CommunityFeed() {
         </Text>
         <TouchableOpacity
           className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => router.push("/community/create-post")}
+          onPress={() => setShowCreatePostSheet(true)}
         >
           <Text className="text-white font-semibold">+ Post</Text>
         </TouchableOpacity>
@@ -118,7 +133,10 @@ export default function CommunityFeed() {
                 <Text className="text-gray-600 font-medium">{post.likes}</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity className="flex-row items-center">
+              <TouchableOpacity 
+                className="flex-row items-center"
+                onPress={() => handleShowComments(post.id)}
+              >
                 <MessageIcon size={18} color="#6B7280" />
                 <Text className="text-gray-600 font-medium ml-1">{post.comments}</Text>
               </TouchableOpacity>
@@ -130,6 +148,18 @@ export default function CommunityFeed() {
           </View>
         ))
       )}
+
+      <CreatePostBottomSheet 
+        visible={showCreatePostSheet}
+        onClose={() => setShowCreatePostSheet(false)}
+        onPostCreated={loadPosts}
+      />
+
+      <CommentsBottomSheet 
+        visible={showCommentsSheet}
+        onClose={handleCloseComments}
+        postId={selectedPostId || 0}
+      />
     </ScrollView>
   );
 }

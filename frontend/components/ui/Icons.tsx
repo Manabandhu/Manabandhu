@@ -429,3 +429,10 @@ export const EditIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) 
     <Path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
+
+export const SendIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Line x1="22" y1="2" x2="11" y2="13" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Polyline points="22 2 15 22 11 13 2 9 22 2" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { CreditCardIcon, UsersIcon, DollarSignIcon } from "@/components/ui/Icons";
+import AddExpenseBottomSheet from "@/components/AddExpenseBottomSheet";
 
 interface Expense {
   id: string;
@@ -24,6 +25,7 @@ export default function ExpensesDashboard() {
   const router = useRouter();
   const [expenses] = useState<Expense[]>(mockExpenses);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showAddExpenseSheet, setShowAddExpenseSheet] = useState(false);
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const yourShare = totalExpenses / 3; // Assuming 3 people split
@@ -38,7 +40,7 @@ export default function ExpensesDashboard() {
         <Text className="text-3xl font-bold text-gray-900">Expenses</Text>
         <TouchableOpacity
           className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => router.push("/expenses/add-expense")}
+          onPress={() => setShowAddExpenseSheet(true)}
         >
           <Text className="text-white font-semibold">+ Add</Text>
         </TouchableOpacity>
@@ -135,6 +137,12 @@ export default function ExpensesDashboard() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <AddExpenseBottomSheet 
+        visible={showAddExpenseSheet}
+        onClose={() => setShowAddExpenseSheet(false)}
+        onExpenseAdded={() => {/* TODO: Refresh expenses */}}
+      />
     </ScrollView>
   );
 }
