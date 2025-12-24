@@ -503,14 +503,16 @@ public class RidePostService {
         if (search.luggage == null && search.pets == null) {
             return (root, query, cb) -> cb.conjunction();
         }
-        List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
-        if (Boolean.TRUE.equals(search.luggage)) {
-            predicates.add(cb.like(root.get("requirements").as(String.class), "%\"luggage\":true%"));
-        }
-        if (Boolean.TRUE.equals(search.pets)) {
-            predicates.add(cb.like(root.get("requirements").as(String.class), "%\"pets\":true%"));
-        }
-        return (root, query, cb) -> cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        return (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            if (Boolean.TRUE.equals(search.luggage)) {
+                predicates.add(cb.like(root.get("requirements").as(String.class), "%\"luggage\":true%"));
+            }
+            if (Boolean.TRUE.equals(search.pets)) {
+                predicates.add(cb.like(root.get("requirements").as(String.class), "%\"pets\":true%"));
+            }
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
     }
 
     public record RidePostUpsertResult(RidePost post, Action action) {
