@@ -33,6 +33,7 @@ export default function TabsLayout() {
     { icon: CarIcon, label: "Rides", route: "/rides", color: "#F59E0B" },
     { icon: CreditCardIcon, label: "Expenses", route: "/expenses", color: "#EF4444" },
     { icon: SplitIcon, label: "Splitly", route: "/splitly", color: "#8B5CF6" },
+    { icon: SearchIcon, label: "Q&A", route: "/qa", color: "#059669" },
     { icon: SearchIcon, label: "USCIS", route: "/uscis", color: "#059669" },
     { icon: SearchIcon, label: "Immigration News", route: "/immigration", color: "#1D4ED8" },
     { icon: SettingsIcon, label: "Utilities", route: "/utilities", color: "#6B7280" },
