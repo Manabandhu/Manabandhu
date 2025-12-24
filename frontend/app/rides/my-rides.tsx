@@ -41,7 +41,7 @@ export default function MyRides() {
   }, []);
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 px-6 py-6">
+    <ScrollView className="flex-1 bg-gray-50 px-5 py-5">
       <Text className="text-2xl font-bold text-gray-900 mb-4">My Rides</Text>
 
       <View className="flex-row bg-white rounded-full p-1 mb-4">

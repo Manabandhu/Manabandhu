@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Modal, View, Text, TouchableOpacity, TextInput, Switch } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, TouchableOpacity, TextInput, Switch } from "react-native";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { RideFilters } from "@/types";
 
 interface RideFiltersSheetProps {
-  visible: boolean;
-  filters: RideFilters;
+  initialFilters: RideFilters;
   onApply: (filters: RideFilters) => void;
   onClose: () => void;
+  sheetRef: React.RefObject<BottomSheet>;
 }
 
 const parseNumber = (value: string) => {
@@ -14,27 +15,32 @@ const parseNumber = (value: string) => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
-export default function RideFiltersSheet({ visible, filters, onApply, onClose }: RideFiltersSheetProps) {
-  const [radius, setRadius] = useState(filters.radiusMiles?.toString() ?? "");
-  const [minPrice, setMinPrice] = useState(filters.minPrice?.toString() ?? "");
-  const [maxPrice, setMaxPrice] = useState(filters.maxPrice?.toString() ?? "");
-  const [seats, setSeats] = useState(filters.seats?.toString() ?? "");
-  const [luggage, setLuggage] = useState(Boolean(filters.luggage));
-  const [pets, setPets] = useState(Boolean(filters.pets));
+export default function RideFiltersSheet({
+  initialFilters,
+  onApply,
+  onClose,
+  sheetRef,
+}: RideFiltersSheetProps) {
+  const snapPoints = useMemo(() => ["25%", "60%"], []);
+  const [radius, setRadius] = useState(initialFilters.radiusMiles?.toString() ?? "");
+  const [minPrice, setMinPrice] = useState(initialFilters.minPrice?.toString() ?? "");
+  const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice?.toString() ?? "");
+  const [seats, setSeats] = useState(initialFilters.seats?.toString() ?? "");
+  const [luggage, setLuggage] = useState(Boolean(initialFilters.luggage));
+  const [pets, setPets] = useState(Boolean(initialFilters.pets));
 
   useEffect(() => {
-    if (!visible) return;
-    setRadius(filters.radiusMiles?.toString() ?? "");
-    setMinPrice(filters.minPrice?.toString() ?? "");
-    setMaxPrice(filters.maxPrice?.toString() ?? "");
-    setSeats(filters.seats?.toString() ?? "");
-    setLuggage(Boolean(filters.luggage));
-    setPets(Boolean(filters.pets));
-  }, [filters, visible]);
+    setRadius(initialFilters.radiusMiles?.toString() ?? "");
+    setMinPrice(initialFilters.minPrice?.toString() ?? "");
+    setMaxPrice(initialFilters.maxPrice?.toString() ?? "");
+    setSeats(initialFilters.seats?.toString() ?? "");
+    setLuggage(Boolean(initialFilters.luggage));
+    setPets(Boolean(initialFilters.pets));
+  }, [initialFilters]);
 
   const apply = () => {
     onApply({
-      ...filters,
+      ...initialFilters,
       radiusMiles: parseNumber(radius),
       minPrice: parseNumber(minPrice),
       maxPrice: parseNumber(maxPrice),
@@ -42,81 +48,75 @@ export default function RideFiltersSheet({ visible, filters, onApply, onClose }:
       luggage,
       pets,
     });
-    onClose();
   };
 
   return (
-    <Modal transparent visible={visible} animationType="slide">
-      <View className="flex-1 justify-end bg-black/40">
-        <View className="bg-white rounded-t-3xl p-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-lg font-semibold text-gray-900">Filters</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text className="text-blue-600 font-semibold">Close</Text>
-            </TouchableOpacity>
-          </View>
+    <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} onClose={onClose}>
+      <View className="flex-1 px-5 py-4">
+        <Text className="text-lg font-semibold text-gray-900 mb-4">Filters</Text>
 
-          <View className="space-y-4">
-            <View>
-              <Text className="text-sm text-gray-600 mb-2">Radius (miles)</Text>
+        <View className="space-y-4">
+          <View>
+            <Text className="text-sm text-gray-600 mb-2">Radius (miles)</Text>
+            <TextInput
+              value={radius}
+              onChangeText={setRadius}
+              keyboardType="numeric"
+              placeholder="10"
+              className="border border-gray-200 rounded-lg px-3 py-2"
+            />
+          </View>
+          <View className="flex-row space-x-3">
+            <View className="flex-1">
+              <Text className="text-sm text-gray-600 mb-2">Min price</Text>
               <TextInput
-                value={radius}
-                onChangeText={setRadius}
+                value={minPrice}
+                onChangeText={setMinPrice}
                 keyboardType="numeric"
-                placeholder="10"
-                className="border border-gray-200 rounded-xl px-3 py-2"
+                placeholder="$5"
+                className="border border-gray-200 rounded-lg px-3 py-2"
               />
             </View>
-            <View className="flex-row space-x-3">
-              <View className="flex-1">
-                <Text className="text-sm text-gray-600 mb-2">Min price</Text>
-                <TextInput
-                  value={minPrice}
-                  onChangeText={setMinPrice}
-                  keyboardType="numeric"
-                  placeholder="$5"
-                  className="border border-gray-200 rounded-xl px-3 py-2"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-sm text-gray-600 mb-2">Max price</Text>
-                <TextInput
-                  value={maxPrice}
-                  onChangeText={setMaxPrice}
-                  keyboardType="numeric"
-                  placeholder="$40"
-                  className="border border-gray-200 rounded-xl px-3 py-2"
-                />
-              </View>
-            </View>
-            <View>
-              <Text className="text-sm text-gray-600 mb-2">Seats</Text>
+            <View className="flex-1">
+              <Text className="text-sm text-gray-600 mb-2">Max price</Text>
               <TextInput
-                value={seats}
-                onChangeText={setSeats}
+                value={maxPrice}
+                onChangeText={setMaxPrice}
                 keyboardType="numeric"
-                placeholder="2"
-                className="border border-gray-200 rounded-xl px-3 py-2"
+                placeholder="$40"
+                className="border border-gray-200 rounded-lg px-3 py-2"
               />
             </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-700">Luggage allowed</Text>
-              <Switch value={luggage} onValueChange={setLuggage} />
-            </View>
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-700">Pets allowed</Text>
-              <Switch value={pets} onValueChange={setPets} />
-            </View>
           </View>
+          <View>
+            <Text className="text-sm text-gray-600 mb-2">Seats</Text>
+            <TextInput
+              value={seats}
+              onChangeText={setSeats}
+              keyboardType="numeric"
+              placeholder="2"
+              className="border border-gray-200 rounded-lg px-3 py-2"
+            />
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm text-gray-700">Luggage allowed</Text>
+            <Switch value={luggage} onValueChange={setLuggage} />
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm text-gray-700">Pets allowed</Text>
+            <Switch value={pets} onValueChange={setPets} />
+          </View>
+        </View>
 
-          <TouchableOpacity
-            className="bg-blue-600 rounded-xl py-3 mt-6"
-            onPress={apply}
-          >
-            <Text className="text-center text-white font-semibold">Apply Filters</Text>
+        <View className="flex-row gap-3 mt-6">
+          <TouchableOpacity onPress={onClose} className="flex-1 border border-gray-200 rounded-lg py-3">
+            <Text className="text-center text-gray-700 font-medium">Close</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={apply} className="flex-1 bg-blue-600 rounded-lg py-3">
+            <Text className="text-center text-white font-semibold">Apply</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    </BottomSheet>
   );
 }
