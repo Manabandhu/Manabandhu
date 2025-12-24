@@ -1,0 +1,22 @@
+import React from "react";
+import { ScrollView, Text } from "react-native";
+import { useRouter } from "expo-router";
+import RidePostForm from "@/components/rides/RidePostForm";
+import { ridesApi } from "@/lib/api/rides";
+import { RidePost } from "@/types";
+
+export default function CreateRideRequest() {
+  const router = useRouter();
+
+  const handleSubmit = async (payload: Partial<RidePost>) => {
+    const response = await ridesApi.createPost({ ...payload, postType: "REQUEST" });
+    router.replace(`/rides/detail?id=${response.post.id}`);
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-white px-6 py-6">
+      <Text className="text-2xl font-bold text-gray-900 mb-4">Request a Ride</Text>
+      <RidePostForm type="REQUEST" onSubmit={handleSubmit} submitLabel="Publish Request" />
+    </ScrollView>
+  );
+}
