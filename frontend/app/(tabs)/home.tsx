@@ -274,12 +274,16 @@ export default function HomeScreen() {
                 Let's get you settled today
               </Text>
               <View className="flex-row flex-wrap gap-2 mt-3">
-                <View className="flex-row items-center bg-white/15 rounded-full px-3 py-1.5">
+                <TouchableOpacity 
+                  className="flex-row items-center bg-white/15 rounded-full px-3 py-1.5"
+                  onPress={() => setShowLocationModal(true)}
+                >
                   <MapPinIcon size={14} color="#FFFFFF" />
                   <Text className="text-white text-xs font-semibold ml-2">
                     {location}
                   </Text>
-                </View>
+                  <ChevronDownIcon size={12} color="rgba(255,255,255,0.8)" style={{ marginLeft: 4 }} />
+                </TouchableOpacity>
                 <View className="flex-row items-center bg-white/10 rounded-full px-3 py-1.5">
                   <BellIcon size={14} color="#FFFFFF" />
                   <Text className="text-white text-xs ml-2">Alerts on</Text>
@@ -287,17 +291,6 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
-
-          <TouchableOpacity 
-            className="mt-4 bg-white/10 rounded-2xl px-3 py-2 flex-row items-center justify-between"
-            onPress={() => setShowLocationModal(true)}
-          >
-            <View className="flex-1">
-              <Text className="text-xs text-white/80">Your location</Text>
-              <Text className="text-white text-sm mt-1">{location}</Text>
-            </View>
-            <ChevronDownIcon size={16} color="rgba(255,255,255,0.8)" />
-          </TouchableOpacity>
 
           <View className="mt-4 bg-white rounded-2xl px-4 py-3 flex-row items-center shadow-sm">
             <SearchIcon size={16} color="#4F46E5" />

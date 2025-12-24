@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import CustomSplashScreen from "@/components/ui/SplashScreen";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { TIMING } from "@/constants/timing";
+import { Platform } from "react-native";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -20,14 +21,11 @@ export default function RootLayout() {
       try {
         await initializeAuth();
       } catch (e) {
-        // Error is already handled in the store
-        // Just log it here for debugging
         if (__DEV__) {
           console.error("Error initializing auth:", e);
         }
       } finally {
         setAppIsReady(true);
-        // Hide native splash after a short delay to allow custom splash animation
         setTimeout(() => {
           SplashScreen.hideAsync();
         }, TIMING.SPLASH_HIDE_DELAY);
@@ -36,20 +34,19 @@ export default function RootLayout() {
 
     prepare();
 
-    // Cleanup on unmount
     return () => {
       cleanup();
     };
-  }, [initializeAuth, cleanup]);
+  }, []);
 
   const handleSplashComplete = () => {
     setShowCustomSplash(false);
   };
 
-  if (showCustomSplash) {
+  if (showCustomSplash || !appIsReady) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style={Platform.OS === 'ios' ? 'light' : 'dark'} />
         <CustomSplashScreen onAnimationComplete={handleSplashComplete} />
       </>
     );
@@ -57,7 +54,7 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <StatusBar style="auto" />
+      <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
       <Stack
         screenOptions={{
           headerShown: false,

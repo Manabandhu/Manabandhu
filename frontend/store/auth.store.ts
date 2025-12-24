@@ -158,13 +158,22 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initializeAuth: async () => {
+        // Don't reinitialize if already authenticated and not loading
+        const currentState = get();
+        if (currentState.isAuthenticated && currentState.user && !currentState.isLoading) {
+          return;
+        }
+
         // Clean up any existing listener
         const { unsubscribe: existingUnsubscribe } = get();
         if (existingUnsubscribe) {
           existingUnsubscribe();
         }
 
-        set({ isLoading: true });
+        // Don't set loading if we have persisted auth state
+        if (!currentState.user) {
+          set({ isLoading: true });
+        }
 
         return new Promise<void>((resolve) => {
           if (!auth) {
@@ -201,7 +210,7 @@ export const useAuthStore = create<AuthState>()(
             // Only resolve once on initial auth state check
             if (!isResolved) {
               isResolved = true;
-            resolve();
+              resolve();
             }
           });
         });
