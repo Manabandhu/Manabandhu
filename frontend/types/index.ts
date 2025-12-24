@@ -20,3 +20,5 @@ export interface AuthState {
 	isAuthenticated: boolean;
 	onboardingCompleted: boolean;
 }
+
+export * from "./rooms";
