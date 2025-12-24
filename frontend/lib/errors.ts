@@ -105,6 +105,20 @@ export const normalizeError = (error: unknown): AppError => {
     return error;
   }
 
+  // Handle axios errors
+  if (error && typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+    const status = axiosError.response?.status;
+    const data = axiosError.response?.data;
+    
+    if (data?.error) {
+      const message = data.error.includes('EMAIL_EXISTS') 
+        ? 'An account with this email already exists. Please sign in instead.'
+        : data.error;
+      return new AppError(message, 'API_ERROR', status, message);
+    }
+  }
+
   if (isFirebaseError(error)) {
     return new FirebaseError(
       error.message,

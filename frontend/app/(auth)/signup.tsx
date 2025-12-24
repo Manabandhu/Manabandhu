@@ -55,6 +55,7 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     control,
@@ -76,6 +77,7 @@ export default function SignupScreen() {
   const onSubmit = async (data: SignupFormData) => {
     try {
       setLoading(true);
+      setError(null);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
       const sanitizedEmail = sanitizeEmail(data.email);
@@ -95,6 +97,7 @@ export default function SignupScreen() {
     } catch (error: unknown) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const appError = normalizeError(error);
+      setError(appError.message || 'Signup failed. Please try again.');
       logger.error("Signup error", { email: data.email }, error);
     } finally {
       setLoading(false);
@@ -136,6 +139,13 @@ export default function SignupScreen() {
           <Text style={styles.formDescription}>Enter your details to get started</Text>
 
           <View style={styles.formContainer}>
+            {/* Error Message */}
+            {error && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorMessage}>{error}</Text>
+              </View>
+            )}
+
             {/* Full Name */}
             <View style={styles.inputGroup}>
               <View
@@ -533,6 +543,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#6b7280",
+    fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  errorContainer: {
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorMessage: {
+    fontSize: 14,
+    color: "#dc2626",
+    textAlign: "center",
     fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
   },
 });
