@@ -33,6 +33,11 @@ export const ROUTES = {
     addCase: "/uscis/add-case",
     caseDetail: "/uscis/case",
   },
+  immigration: {
+    root: "/immigration",
+    bookmarks: "/immigration/bookmarks",
+    article: "/immigration/article",
+  },
   root: {
     index: "/",
   },

@@ -145,12 +145,12 @@ export default function HomeScreen() {
         background: "#DBEAFE",
       },
       {
-        label: "USCIS Tracker",
-        description: "Track immigration cases",
+        label: "Immigration News",
+        description: "Verified policy updates",
         icon: SearchIcon,
-        route: "/uscis",
-        accent: "#059669",
-        background: "#D1FAE5",
+        route: "/immigration",
+        accent: "#1D4ED8",
+        background: "#DBEAFE",
       },
     ],
     []
@@ -163,6 +163,7 @@ export default function HomeScreen() {
   ];
 
   const nearbyUpdates = [
+    { title: "Breaking: New H-1B policy announced", meta: "1 min ago • Immigration", tag: "Breaking" },
     { title: "Your I-485 case status updated", meta: "2 min ago • USCIS", tag: "Immigration" },
     { title: "2 verified room listings near you", meta: "5 min ago • Fremont", tag: "Housing" },
     { title: "Carpool to downtown leaves at 6 PM", meta: "Today • 1 seat left", tag: "Rides" },
@@ -170,6 +171,7 @@ export default function HomeScreen() {
   ];
 
   const communityHighlights = [
+    { title: "F-1 students: New OPT extension rules", meta: "Immigration • 30 min ago" },
     { title: "USCIS processing times updated", meta: "Immigration • 1h ago" },
     { title: "Visa bulletin updated for F1/F2", meta: "Immigration • 2h ago" },
     { title: "Best grocery deals this week", meta: "Deals • Crowdsourced" },
