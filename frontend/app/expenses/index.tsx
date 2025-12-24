@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { CreditCardIcon, UsersIcon, DollarSignIcon } from "@/components/ui/Icons";
+import { CreditCardIcon, UsersIcon, DollarSignIcon, SplitIcon } from "@/components/ui/Icons";
 import AddExpenseBottomSheet from "@/components/AddExpenseBottomSheet";
 
 interface Expense {
@@ -131,6 +131,15 @@ export default function ExpensesDashboard() {
 
       {/* Quick Actions */}
       <View className="mt-6 mb-8">
+        <View className="flex-row gap-3 mb-3">
+          <TouchableOpacity 
+            className="flex-1 bg-green-600 rounded-xl p-4 items-center"
+            onPress={() => router.push('/splitly')}
+          >
+            <SplitIcon size={20} color="#FFFFFF" />
+            <Text className="text-white font-medium text-sm mt-1">Split with Splitly</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity className="bg-gray-100 rounded-xl p-4">
           <Text className="text-gray-900 text-center font-medium">
             📊 View Detailed Reports

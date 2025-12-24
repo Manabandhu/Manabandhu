@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SplitIcon } from '@/components/ui/Icons';
 
 interface AddExpenseBottomSheetProps {
   visible: boolean;
@@ -8,6 +10,7 @@ interface AddExpenseBottomSheetProps {
 }
 
 export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded }: AddExpenseBottomSheetProps) {
+  const router = useRouter();
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -106,10 +109,19 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
 
             <View className="bg-gray-50 rounded-xl p-4 mb-6">
               <Text className="text-gray-900 font-semibold mb-2">Split Options</Text>
-              <Text className="text-gray-600 text-sm">
+              <Text className="text-gray-600 text-sm mb-3">
                 Split equally among group members or customize splits for specific participants.
               </Text>
-              {/* TODO: Add split options UI */}
+              <TouchableOpacity 
+                className="bg-green-600 rounded-lg p-3 flex-row items-center justify-center"
+                onPress={() => {
+                  onClose();
+                  router.push('/splitly');
+                }}
+              >
+                <SplitIcon size={16} color="#FFFFFF" />
+                <Text className="text-white font-medium ml-2">Use Splitly for Advanced Splitting</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </Pressable>

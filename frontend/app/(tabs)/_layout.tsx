@@ -13,7 +13,8 @@ import {
   CreditCardIcon,
   UsersIcon,
   SettingsIcon,
-  PlusIcon
+  PlusIcon,
+  SplitIcon
 } from "@/components/ui/Icons";
 import { useRouter } from "expo-router";
 
@@ -26,6 +27,7 @@ export default function TabsLayout() {
     { icon: RoomIcon, label: "Rooms", route: "/rooms" },
     { icon: CarIcon, label: "Rides", route: "/rides" },
     { icon: CreditCardIcon, label: "Expenses", route: "/expenses" },
+    { icon: SplitIcon, label: "Splitly", route: "/splitly" },
     { icon: SettingsIcon, label: "Utilities", route: "/utilities" },
     { icon: UserIcon, label: "Admin", route: "/admin" },
   ];

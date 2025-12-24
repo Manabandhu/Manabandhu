@@ -30,6 +30,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     bundler: "metro",
+    output: "static",
+    favicon: "./assets/favicon.png",
+    template: "./web/index.html"
   },
   plugins: [
     "expo-router",
@@ -51,6 +54,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: "your-project-id",
     },
+  },
+  experiments: {
+    typedRoutes: true,
   },
 });
 
