@@ -446,3 +446,11 @@ export const SplitIcon: React.FC<IconProps> = ({ size = 24, color = "#6B7280" })
     <Path d="M18.5 17.5L5.5 6.5" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
+
+export const TypeIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Polyline points="4 7 4 4 20 4 20 7" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="9" y1="20" x2="15" y2="20" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="12" y1="4" x2="12" y2="20" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);

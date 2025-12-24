@@ -22,6 +22,7 @@ import {
   DollarSignIcon,
   ChevronDownIcon,
   NavigationIcon,
+  MessageIcon,
 } from "@/components/ui/Icons";
 
 export default function HomeScreen() {
@@ -120,22 +121,6 @@ export default function HomeScreen() {
   const featureCards = useMemo(
     () => [
       {
-        label: "Rooms",
-        description: "Verified stays & roommates",
-        icon: HomeIcon,
-        route: ROUTES.tabs.rooms,
-        accent: "#4F46E5",
-        background: "#EEF2FF",
-      },
-      {
-        label: "Rides",
-        description: "Shared rides & shuttles",
-        icon: BusIcon,
-        route: ROUTES.tabs.rides,
-        accent: "#0EA5E9",
-        background: "#E0F2FE",
-      },
-      {
         label: "Jobs",
         description: "Trusted openings & referrals",
         icon: BriefcaseIcon,
@@ -144,26 +129,26 @@ export default function HomeScreen() {
         background: "#FEF3C7",
       },
       {
-        label: "Immigration",
-        description: "Guides & community answers",
-        icon: CompassIcon,
+        label: "Community",
+        description: "Connect with your community",
+        icon: UsersIcon,
         route: ROUTES.tabs.community,
         accent: "#10B981",
         background: "#D1FAE5",
       },
       {
-        label: "Expenses",
-        description: "Track and split bills",
-        icon: DollarSignIcon,
-        route: ROUTES.tabs.expenses,
+        label: "Chat",
+        description: "Message other users",
+        icon: MessageIcon,
+        route: ROUTES.tabs.chat,
         accent: "#2563EB",
         background: "#DBEAFE",
       },
       {
-        label: "Deals",
-        description: "Crowdsourced savings nearby",
-        icon: ShoppingBagIcon,
-        route: ROUTES.tabs.utilities,
+        label: "Explore",
+        description: "Discover new opportunities",
+        icon: CompassIcon,
+        route: ROUTES.tabs.explore,
         accent: "#EC4899",
         background: "#FCE7F3",
       },
@@ -172,9 +157,9 @@ export default function HomeScreen() {
   );
 
   const quickFilters = [
-    { label: "Housing", icon: HomeIcon, route: ROUTES.tabs.rooms, color: "#4F46E5", background: "#EEF2FF" },
-    { label: "Rides", icon: BusIcon, route: ROUTES.tabs.rides, color: "#0EA5E9", background: "#E0F2FE" },
     { label: "Jobs", icon: BriefcaseIcon, route: ROUTES.tabs.jobs, color: "#F59E0B", background: "#FEF3C7" },
+    { label: "Community", icon: UsersIcon, route: ROUTES.tabs.community, color: "#10B981", background: "#D1FAE5" },
+    { label: "Chat", icon: MessageIcon, route: ROUTES.tabs.chat, color: "#2563EB", background: "#DBEAFE" },
   ];
 
   const nearbyUpdates = [
@@ -206,14 +191,14 @@ export default function HomeScreen() {
       description: "Flag scams or safety concerns",
       color: "#E0E7FF",
       textColor: "#3730A3",
-      route: ROUTES.tabs.admin,
+      route: ROUTES.tabs.community,
     },
     {
       label: "Talk to support",
       description: "Chat with ManaBandhu",
       color: "#ECFDF3",
       textColor: "#166534",
-      route: ROUTES.tabs.community,
+      route: ROUTES.tabs.chat,
     },
   ];
 

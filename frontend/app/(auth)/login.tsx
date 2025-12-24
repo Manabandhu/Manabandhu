@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import { navigateAfterAuth } from "@/lib/navigation";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
+import * as SecureStore from "expo-secure-store";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -40,6 +41,28 @@ export default function LoginScreen() {
     defaultValues: { email: "", password: "" },
   });
 
+  useEffect(() => {
+    const loadSavedCredentials = async () => {
+      try {
+        const savedEmail = await SecureStore.getItemAsync('remembered_email');
+        const savedPassword = await SecureStore.getItemAsync('remembered_password');
+        const wasRemembered = await SecureStore.getItemAsync('remember_me');
+        
+        if (wasRemembered === 'true' && savedEmail) {
+          form.setValue('email', savedEmail);
+          if (savedPassword) {
+            form.setValue('password', savedPassword);
+          }
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.log('Error loading saved credentials:', error);
+      }
+    };
+    
+    loadSavedCredentials();
+  }, []);
+
   const handleSubmit = async (data: LoginInput) => {
     try {
       setLoading(true);
@@ -50,6 +73,18 @@ export default function LoginScreen() {
       const user = result.user;
 
       if (user) {
+        // Save credentials if remember me is checked
+        if (rememberMe) {
+          await SecureStore.setItemAsync('remembered_email', sanitizedEmail);
+          await SecureStore.setItemAsync('remembered_password', data.password);
+          await SecureStore.setItemAsync('remember_me', 'true');
+        } else {
+          // Clear saved credentials if remember me is unchecked
+          await SecureStore.deleteItemAsync('remembered_email');
+          await SecureStore.deleteItemAsync('remembered_password');
+          await SecureStore.deleteItemAsync('remember_me');
+        }
+        
         await navigateAfterAuth();
       }
     } catch (error: unknown) {

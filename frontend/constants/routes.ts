@@ -22,15 +22,11 @@ export const ROUTES = {
   tabs: {
     root: "/(tabs)",
     home: "/(tabs)/home",
-    rooms: "/(tabs)/rooms",
-    rides: "/(tabs)/rides",
+    explore: "/(tabs)/explore",
     jobs: "/(tabs)/jobs",
     community: "/(tabs)/community",
     chat: "/(tabs)/chat",
-    expenses: "/(tabs)/expenses",
-    utilities: "/(tabs)/utilities",
     profile: "/(tabs)/profile",
-    admin: "/(tabs)/admin",
   },
   root: {
     index: "/",
