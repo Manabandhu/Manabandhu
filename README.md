@@ -68,7 +68,7 @@ npm run dev
 
 ### Frontend (.env in frontend/)
 ```
-EXPO_PUBLIC_API_URL=http://localhost:8080
+EXPO_PUBLIC_API_URL=http://localhost:9090
 EXPO_PUBLIC_FIREBASE_API_KEY=your_key
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
 EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
@@ -97,7 +97,7 @@ npm run deploy:gcp
 ## Development
 
 - Frontend runs on Expo dev server
-- Backend runs on http://localhost:8080
+- Backend runs on http://localhost:9090
 - PostgreSQL on Neon Cloud
 - Redis on Upstash (serverless)
 

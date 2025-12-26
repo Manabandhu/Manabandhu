@@ -63,8 +63,8 @@ public class SecurityConfig {
         } else {
             // Development fallback
             configuration.setAllowedOrigins(List.of(
-                "http://localhost:8081", 
-                "exp://localhost:8081",
+                "http://localhost:9091", 
+                "exp://localhost:9091",
                 "http://localhost:19006" // Expo web
             ));
         }

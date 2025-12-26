@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth } from '../firebase';
 import { toast } from '../toast';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
 
 const apiClient = axios.create({
   baseURL: API_URL,

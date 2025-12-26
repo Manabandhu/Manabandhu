@@ -34,7 +34,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/manabandhu
       REDIS_URL: redis://redis:6379
     ports:
-      - "8080:8080"
+      - "9090:9090"
     depends_on:
       - postgres
       - redis

@@ -54,7 +54,7 @@ JWT_SECRET=your-jwt-secret-key
 ./mvnw spring-boot:run
 ```
 
-The server will start at `http://localhost:8080`
+The server will start at `http://localhost:9090`
 
 ## Docker
 
@@ -62,7 +62,7 @@ The server will start at `http://localhost:8080`
 
 ```bash
 docker build -t manabandhu-backend .
-docker run -p 8080:8080 --env-file .env manabandhu-backend
+docker run -p 9090:9090 --env-file .env manabandhu-backend
 ```
 
 ### Using Docker Compose
