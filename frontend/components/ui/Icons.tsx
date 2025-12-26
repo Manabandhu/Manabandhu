@@ -478,3 +478,35 @@ export const ShareIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" })
     <Line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
+
+export const GridIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="3" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Rect x="14" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Rect x="3" y="14" width="7" height="7" rx="1" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Rect x="14" y="14" width="7" height="7" rx="1" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+export const ListIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Line x1="8" y1="6" x2="21" y2="6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="8" y1="12" x2="21" y2="12" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="8" y1="18" x2="21" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="3" y1="6" x2="3.01" y2="6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="3" y1="12" x2="3.01" y2="12" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Line x1="3" y1="18" x2="3.01" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+export const FilterIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Polyline points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+export const NavigationIcon: React.FC<IconProps> = ({ size = 20, color = "#6B7280" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Polygon points="3 11 22 2 13 21 11 13 3 11" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
