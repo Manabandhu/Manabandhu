@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet from "@gorhom/bottom-sheet";
@@ -12,8 +12,7 @@ import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon, PlusI
 
 export default function RoomFinderHome() {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<"list" | "map">("list");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
   const [filters, setFilters] = useState<RoomFilters>({});
   const [listings, setListings] = useState<RoomListingSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,22 +57,32 @@ export default function RoomFinderHome() {
     <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       {/* Header with Search */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-4 pt-3 pb-4">
-          <View className="mb-4">
-            <Text className="text-3xl font-bold text-gray-900">Find Your Room</Text>
-            <Text className="text-sm text-gray-500 mt-1">Discover rooms and homes near you</Text>
+        <View className="px-3 pt-2 pb-3">
+          <View className="mb-3 flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-900">Find Your Room</Text>
+              <Text className="text-xs text-gray-500 mt-0.5">Discover rooms and homes near you</Text>
+            </View>
+            {Platform.OS === 'web' && (
+              <TouchableOpacity
+                onPress={() => router.push("/rooms/create" as any)}
+                className="bg-indigo-600 px-4 py-2.5 rounded-xl shadow-sm"
+              >
+                <Text className="text-white font-semibold text-sm">+ Post Room</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Search Bar with Filters and View Toggle */}
-          <View className="flex-row items-center gap-2 mb-3">
-            <View className="flex-1 bg-gray-50 rounded-xl px-4 py-3 flex-row items-center border border-gray-200">
-              <SearchIcon size={20} color="#6B7280" />
+          <View className="flex-row items-center gap-1.5">
+            <View className="bg-gray-50 rounded-lg px-3 flex-row items-center border border-gray-200" style={{ flex: 2.5, height: 44 }}>
+              <SearchIcon size={18} color="#6B7280" />
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search by location, room type..."
+                placeholder="Search..."
                 placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-3 text-gray-900 text-base"
+                className="flex-1 ml-2 text-gray-900 text-sm"
                 returnKeyType="search"
               />
             </View>
@@ -86,52 +95,42 @@ export default function RoomFinderHome() {
                   console.error("Error opening sheet:", error);
                 }
               }}
-              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-3 py-3"
+              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5"
+              style={{ height: 44 }}
             >
-              <FilterIcon size={18} color="#4B5563" />
+              <FilterIcon size={16} color="#4B5563" />
             </TouchableOpacity>
 
-            {activeTab === "list" && (
-              <View className="flex-row bg-gray-100 rounded-lg p-1 items-center" style={{ height: 48 }}>
-                <TouchableOpacity
-                  onPress={() => setViewMode("list")}
-                  className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
-                >
-                  <ListIcon size={18} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setViewMode("grid")}
-                  className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
-                >
-                  <GridIcon size={18} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
-                </TouchableOpacity>
-              </View>
-            )}
+            <View className="flex-row bg-gray-100 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
+              <TouchableOpacity
+                onPress={() => setViewMode("list")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
+              >
+                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setViewMode("grid")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
+              >
+                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setViewMode("map")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white shadow-sm" : ""}`}
+              >
+                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Tab Toggle */}
-          <View className="flex-row gap-2 mt-4 bg-gray-100 rounded-xl p-1">
-          <TouchableOpacity
-            onPress={() => setActiveTab("list")}
-              className={`flex-1 py-2.5 rounded-lg ${activeTab === "list" ? "bg-white shadow-sm" : ""}`}
-          >
-              <Text className={`text-center font-semibold ${activeTab === "list" ? "text-indigo-600" : "text-gray-600"}`}>
-                List View
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setActiveTab("map")}
-              className={`flex-1 py-2.5 rounded-lg ${activeTab === "map" ? "bg-white shadow-sm" : ""}`}
-          >
-              <Text className={`text-center font-semibold ${activeTab === "map" ? "text-indigo-600" : "text-gray-600"}`}>
-                Map View
-            </Text>
-          </TouchableOpacity>
-        </View>
         </View>
       </View>
 
-      {activeTab === "list" ? (
+      {viewMode === "map" ? (
+        <View className="flex-1">
+          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}` as any)} />
+        </View>
+      ) : (
         <ScrollView
           className="flex-1 bg-gray-50"
           contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 16 }}
@@ -177,10 +176,6 @@ export default function RoomFinderHome() {
             </View>
           )}
         </ScrollView>
-      ) : (
-        <View className="flex-1">
-          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}` as any)} />
-        </View>
       )}
 
       <BottomSheet
@@ -211,21 +206,23 @@ export default function RoomFinderHome() {
         />
       </BottomSheet>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        onPress={() => router.push("/rooms/create" as any)}
-        className="absolute right-6 bg-indigo-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-        style={{
-          bottom: 24 + insets.bottom,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 4,
-          elevation: 8,
-        }}
-      >
-        <PlusIcon size={24} color="#FFFFFF" />
-      </TouchableOpacity>
+      {/* Floating Action Button - Mobile Only */}
+      {Platform.OS !== 'web' && (
+        <TouchableOpacity
+          onPress={() => router.push("/rooms/create" as any)}
+          className="absolute right-6 bg-indigo-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+          style={{
+            bottom: 24 + insets.bottom,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 8,
+          }}
+        >
+          <PlusIcon size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
