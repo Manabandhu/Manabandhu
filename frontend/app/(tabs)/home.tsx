@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Platform, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
 import * as Location from "expo-location";
+import { checkLocationPermission, requestLocationPermission } from "@/lib/permissions";
 import {
   MapPinIcon,
   BellIcon,
@@ -224,25 +225,116 @@ export default function HomeScreen() {
 
   const getCurrentLocation = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Location permission is required to get your current location.');
-        return;
+      // Check if permission is already granted
+      const hasPermission = await checkLocationPermission();
+      
+      if (!hasPermission) {
+        // Request permission
+        const granted = await requestLocationPermission();
+        if (!granted) {
+          Alert.alert(
+            'Location Permission',
+            'Location permission is needed to show nearby content. You can enable it later in settings.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
       const [address] = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
 
-      const cityState = `${address.city}, ${address.region}`;
-      setLocation(cityState);
-      setShowLocationModal(false);
+      if (address) {
+        const cityState = `${address.city || 'Unknown'}, ${address.region || 'Unknown'}`;
+        setLocation(cityState);
+        setShowLocationModal(false);
+      }
     } catch (error) {
-      Alert.alert('Error', 'Unable to get your current location. Please try again.');
+      console.error('Error getting location:', error);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. Please try again or select a city manually.',
+        [{ text: 'OK' }]
+      );
     }
   };
+
+  // Request location permission on component mount
+  useEffect(() => {
+    const requestLocationOnMount = async () => {
+      try {
+        // Check if we already have permission
+        const hasPermission = await checkLocationPermission();
+        
+        if (hasPermission) {
+          // If we have permission, get location automatically
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          
+          const [address] = await Location.reverseGeocodeAsync({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+
+          if (address) {
+            const cityState = `${address.city || 'Unknown'}, ${address.region || 'Unknown'}`;
+            setLocation(cityState);
+          }
+        } else {
+          // Request permission on first load
+          const granted = await requestLocationPermission();
+          
+          if (granted) {
+            // Get location if permission granted
+            const location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+            
+            const [address] = await Location.reverseGeocodeAsync({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+
+            if (address) {
+              const cityState = `${address.city || 'Unknown'}, ${address.region || 'Unknown'}`;
+              setLocation(cityState);
+            }
+          } else {
+            // Permission denied - show friendly message
+            Alert.alert(
+              'Location Access',
+              'To show nearby content and personalized updates, please enable location access in your device settings.',
+              [
+                { text: 'Maybe Later', style: 'cancel' },
+                { 
+                  text: 'Open Settings', 
+                  onPress: () => {
+                    // On iOS, this will open app settings
+                    if (Platform.OS === 'ios') {
+                      Linking.openURL('app-settings:');
+                    }
+                  }
+                }
+              ]
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Error requesting location on mount:', error);
+        // Silently fail - user can still select location manually
+      }
+    };
+
+    requestLocationOnMount();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F9FAFB]">
@@ -323,17 +415,20 @@ export default function HomeScreen() {
         >
           <View className="flex-1 bg-black/50 justify-end">
             <View className="bg-white rounded-t-3xl p-6">
-              <Text className="text-xl font-bold text-gray-900 mb-4">Select Location</Text>
+              <Text className="text-xl font-bold text-gray-900 mb-4">Change Location</Text>
               
               <TouchableOpacity
                 className="flex-row items-center bg-blue-50 rounded-2xl p-4 mb-4"
                 onPress={getCurrentLocation}
               >
                 <MapPinIcon size={20} color="#4F46E5" />
-                <Text className="ml-3 text-base font-semibold text-blue-600">Use Current Location</Text>
+                <View className="ml-3 flex-1">
+                  <Text className="text-base font-semibold text-blue-600">Use Current Location</Text>
+                  <Text className="text-xs text-gray-500 mt-1">Update location using GPS</Text>
+                </View>
               </TouchableOpacity>
 
-              <Text className="text-sm font-semibold text-gray-700 mb-3">Popular Cities</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-3">Or Select a City</Text>
               <ScrollView className="max-h-64">
                 {popularCities.map((city) => (
                   <TouchableOpacity

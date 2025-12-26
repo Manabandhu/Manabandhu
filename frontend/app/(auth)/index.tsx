@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Linking, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { Logo } from "@/components/ui/Logo";
@@ -15,6 +16,7 @@ import * as Haptics from "expo-haptics";
 
 export default function AuthIndex() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
@@ -70,7 +72,7 @@ export default function AuthIndex() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Section */}
-        <View style={styles.heroSection}>
+        <View style={[styles.heroSection, { paddingTop: Math.max(insets.top, 0) }]}>
           <LinearGradient
             colors={GRADIENTS.primary}
             start={{ x: 0.09, y: 0.21 }}

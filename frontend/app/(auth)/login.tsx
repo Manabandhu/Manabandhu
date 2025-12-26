@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,6 +32,7 @@ import { secureStorage } from "@/lib/storage";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -162,7 +164,7 @@ export default function LoginScreen() {
           colors={GRADIENTS.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.heroSection}
+          style={[styles.heroSection, { paddingTop: Math.max(insets.top, 32) }]}
         >
           {/* Decorative circles */}
           <View style={styles.circleDecoration1} />
@@ -335,7 +337,6 @@ const styles = StyleSheet.create({
     position: "relative",
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    paddingTop: 32,
     paddingBottom: 48,
     paddingHorizontal: 24,
     minHeight: 280,
