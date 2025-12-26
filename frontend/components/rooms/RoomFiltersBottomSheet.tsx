@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ListingFor, RoomFilters, RoomType } from "@/types";
@@ -17,9 +17,7 @@ export default function RoomFiltersBottomSheet({
   initialFilters,
   onApply,
   onClose,
-  sheetRef,
 }: RoomFiltersBottomSheetProps) {
-  const snapPoints = useMemo(() => ["25%", "60%"], []);
   const [minRent, setMinRent] = useState(initialFilters.minRent?.toString() ?? "");
   const [maxRent, setMaxRent] = useState(initialFilters.maxRent?.toString() ?? "");
   const [roomType, setRoomType] = useState<RoomType | undefined>(initialFilters.roomType);
@@ -64,9 +62,8 @@ export default function RoomFiltersBottomSheet({
   };
 
   return (
-    <BottomSheet ref={sheetRef} index={-1} snapPoints={snapPoints} onClose={onClose}>
-      <View className="flex-1 px-5 py-4">
-        <Text className="text-lg font-semibold text-gray-900 mb-4">Filters</Text>
+    <View className="flex-1 px-5 py-4">
+      <Text className="text-lg font-semibold text-gray-900 mb-4">Filters</Text>
         <View className="flex-row gap-3 mb-4">
           <View className="flex-1">
             <Text className="text-sm text-gray-600 mb-1">Min Rent</Text>
@@ -145,7 +142,6 @@ export default function RoomFiltersBottomSheet({
             <Text className="text-center text-white font-semibold">Apply</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </BottomSheet>
+    </View>
   );
 }

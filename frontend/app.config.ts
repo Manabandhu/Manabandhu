@@ -27,6 +27,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     package: "com.manabandhu.app",
+    config: {
+      googleMaps: {
+        apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || undefined,
+      },
+    },
   },
   web: {
     bundler: "metro",

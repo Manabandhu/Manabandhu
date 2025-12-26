@@ -4,7 +4,6 @@ import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "@/store/auth.store";
 import * as SplashScreen from "expo-splash-screen";
 import CustomSplashScreen from "@/components/ui/SplashScreen";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { FontProvider } from "@/components/FontProvider";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -62,20 +61,31 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <FontProvider>
-          <ErrorBoundary>
-            <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: "#ffffff" },
-              }}
-            >
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(onboarding)" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="index" />
-            </Stack>
-          </ErrorBoundary>
+          <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: "#ffffff" },
+            }}
+          >
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="index" />
+            <Stack.Screen name="rooms" />
+            <Stack.Screen name="jobs" />
+            <Stack.Screen name="rides" />
+            <Stack.Screen name="chat" />
+            <Stack.Screen name="qa" />
+            <Stack.Screen name="uscis" />
+            <Stack.Screen name="immigration" />
+            <Stack.Screen name="expenses" />
+            <Stack.Screen name="splitly" />
+            <Stack.Screen name="utilities" />
+            <Stack.Screen name="admin" />
+            <Stack.Screen name="profile" />
+            <Stack.Screen name="community" />
+          </Stack>
         </FontProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>

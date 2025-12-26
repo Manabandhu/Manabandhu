@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import RoomFiltersBottomSheet from "@/components/rooms/RoomFiltersBottomSheet";
 import RoomListingCard from "@/components/rooms/RoomListingCard";
@@ -10,7 +11,7 @@ import { roomsApi } from "@/lib/api/rooms";
 import { RoomFilters, RoomListingSummary } from "@/types";
 import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon } from "@/components/ui/Icons";
 
-export default function RoomFinderHome() {
+function RoomFinderContent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
@@ -204,26 +205,59 @@ export default function RoomFinderHome() {
       )}
 
       {isMounted && (
-        <RoomFiltersBottomSheet
-          sheetRef={sheetRef as React.RefObject<BottomSheet>}
-          initialFilters={filters}
-          onClose={() => {
-            try {
-              sheetRef.current?.close();
-            } catch (error) {
-              console.error("Error closing sheet:", error);
-            }
-          }}
-          onApply={(next) => {
-            setFilters(next);
-            try {
-              sheetRef.current?.close();
-            } catch (error) {
-              console.error("Error closing sheet:", error);
-            }
-          }}
-        />
+        <BottomSheet
+          ref={sheetRef}
+          index={-1}
+          snapPoints={["25%", "60%"]}
+          enablePanDownToClose
+          backgroundStyle={{ backgroundColor: "#fff" }}
+        >
+          <RoomFiltersBottomSheet
+            initialFilters={filters}
+            onClose={() => {
+              try {
+                sheetRef.current?.close();
+              } catch (error) {
+                console.error("Error closing sheet:", error);
+              }
+            }}
+            onApply={(next) => {
+              setFilters(next);
+              try {
+                sheetRef.current?.close();
+              } catch (error) {
+                console.error("Error closing sheet:", error);
+              }
+            }}
+            sheetRef={sheetRef as React.RefObject<BottomSheet>}
+          />
+        </BottomSheet>
       )}
     </SafeAreaView>
   );
+}
+
+export default function RoomFinderHome() {
+  const [hasNavigationContext, setHasNavigationContext] = useState(false);
+  
+  useEffect(() => {
+    // Check if navigation context is available
+    try {
+      const navigation = useNavigation();
+      setHasNavigationContext(true);
+    } catch {
+      // Navigation context not ready yet
+      setTimeout(() => setHasNavigationContext(true), 100);
+    }
+  }, []);
+  
+  if (!hasNavigationContext) {
+    return (
+      <SafeAreaView className="flex-1 bg-white justify-center items-center">
+        <Text className="text-gray-500">Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+  
+  return <RoomFinderContent />;
 }
