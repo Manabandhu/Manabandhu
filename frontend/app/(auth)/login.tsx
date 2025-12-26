@@ -27,7 +27,7 @@ import { navigateAfterAuth } from "@/lib/navigation";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
-import * as SecureStore from "expo-secure-store";
+import { secureStorage } from "@/lib/storage";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -44,9 +44,9 @@ export default function LoginScreen() {
   useEffect(() => {
     const loadSavedCredentials = async () => {
       try {
-        const savedEmail = await SecureStore.getItemAsync('remembered_email');
-        const savedPassword = await SecureStore.getItemAsync('remembered_password');
-        const wasRemembered = await SecureStore.getItemAsync('remember_me');
+        const savedEmail = await secureStorage.getItem('remembered_email');
+        const savedPassword = await secureStorage.getItem('remembered_password');
+        const wasRemembered = await secureStorage.getItem('remember_me');
         
         if (wasRemembered === 'true' && savedEmail) {
           form.setValue('email', savedEmail);
@@ -75,14 +75,14 @@ export default function LoginScreen() {
       if (user) {
         // Save credentials if remember me is checked
         if (rememberMe) {
-          await SecureStore.setItemAsync('remembered_email', sanitizedEmail);
-          await SecureStore.setItemAsync('remembered_password', data.password);
-          await SecureStore.setItemAsync('remember_me', 'true');
+          await secureStorage.setItem('remembered_email', sanitizedEmail);
+          await secureStorage.setItem('remembered_password', data.password);
+          await secureStorage.setItem('remember_me', 'true');
         } else {
           // Clear saved credentials if remember me is unchecked
-          await SecureStore.deleteItemAsync('remembered_email');
-          await SecureStore.deleteItemAsync('remembered_password');
-          await SecureStore.deleteItemAsync('remember_me');
+          await secureStorage.removeItem('remembered_email');
+          await secureStorage.removeItem('remembered_password');
+          await secureStorage.removeItem('remember_me');
         }
         
         await navigateAfterAuth();

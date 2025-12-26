@@ -1,11 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import * as SecureStore from "expo-secure-store";
 import { User } from "@/types";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { userApi } from "@/lib/api";
-import { Platform } from "react-native";
+import { secureStorage } from "@/lib/storage";
 
 const userDocCache = new Map<string, { data: User; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
@@ -25,46 +24,6 @@ interface AuthState {
   cleanup: () => void;
 }
 
-// Web-compatible storage fallback
-const webStorage = {
-  getItem: async (name: string): Promise<string | null> => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(name);
-    }
-    return null;
-  },
-  setItem: async (name: string, value: string): Promise<void> => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(name, value);
-    }
-  },
-  removeItem: async (name: string): Promise<void> => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(name);
-    }
-  },
-};
-
-const secureStorage = {
-  getItem: async (name: string): Promise<string | null> => {
-    if (Platform.OS === "web") {
-      return webStorage.getItem(name);
-    }
-    return await SecureStore.getItemAsync(name);
-  },
-  setItem: async (name: string, value: string): Promise<void> => {
-    if (Platform.OS === "web") {
-      return webStorage.setItem(name, value);
-    }
-    await SecureStore.setItemAsync(name, value);
-  },
-  removeItem: async (name: string): Promise<void> => {
-    if (Platform.OS === "web") {
-      return webStorage.removeItem(name);
-    }
-    await SecureStore.deleteItemAsync(name);
-  },
-};
 
 const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => {
   const uid = firebaseUser.uid;
