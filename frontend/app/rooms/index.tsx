@@ -1,22 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import RoomFiltersBottomSheet from "@/components/rooms/RoomFiltersBottomSheet";
 import RoomListingCard from "@/components/rooms/RoomListingCard";
 import RoomMapCanvas from "@/components/rooms/RoomMapCanvas";
 import { roomsApi } from "@/lib/api/rooms";
 import { RoomFilters, RoomListingSummary } from "@/types";
-import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon } from "@/components/ui/Icons";
+import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon, PlusIcon } from "@/components/ui/Icons";
 
-function RoomFinderContent() {
-  const router = useRouter();
+export default function RoomFinderHome() {
   const insets = useSafeAreaInsets();
-  const { tab } = useLocalSearchParams<{ tab?: string }>();
-  const initialTab = tab === "map" ? "map" : "list";
-  const [activeTab, setActiveTab] = useState<"list" | "map">(initialTab);
+  const [activeTab, setActiveTab] = useState<"list" | "map">("list");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [filters, setFilters] = useState<RoomFilters>({});
   const [listings, setListings] = useState<RoomListingSummary[]>([]);
@@ -24,7 +20,6 @@ function RoomFinderContent() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isMounted, setIsMounted] = useState(false);
   const sheetRef = useRef<BottomSheet>(null);
 
   const loadListings = async (currentFilters = filters) => {
@@ -47,10 +42,6 @@ function RoomFinderContent() {
   };
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
     loadListings(filters);
   }, [filters]);
 
@@ -68,17 +59,9 @@ function RoomFinderContent() {
       {/* Header with Search */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
         <View className="px-4 pt-3 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900">Find Your Room</Text>
-              <Text className="text-sm text-gray-500 mt-1">Discover rooms and homes near you</Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push("/rooms/create")}
-              className="bg-indigo-600 px-4 py-2.5 rounded-xl shadow-sm"
-            >
-              <Text className="text-white font-semibold text-sm">+ Post</Text>
-            </TouchableOpacity>
+          <View className="mb-4">
+            <Text className="text-3xl font-bold text-gray-900">Find Your Room</Text>
+            <Text className="text-sm text-gray-500 mt-1">Discover rooms and homes near you</Text>
           </View>
 
           {/* Search Bar */}
@@ -96,21 +79,19 @@ function RoomFinderContent() {
 
           {/* Quick Filters and View Toggle */}
           <View className="flex-row items-center justify-between">
-            <View className="flex-row gap-2 flex-1">
-              <TouchableOpacity
-                onPress={() => sheetRef.current?.expand()}
-                className="flex-row items-center bg-white border border-gray-300 rounded-lg px-4 py-2.5"
-              >
-                <FilterIcon size={18} color="#4B5563" />
-                <Text className="text-gray-700 font-medium ml-2 text-sm">Filters</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push("/rooms/my-listings")}
-                className="flex-row items-center bg-gray-100 rounded-lg px-4 py-2.5"
-              >
-                <Text className="text-gray-700 font-medium text-sm">My Listings</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={() => {
+                try {
+                  sheetRef.current?.snapToIndex(0);
+                } catch (error) {
+                  console.error("Error opening sheet:", error);
+                }
+              }}
+              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-4 py-2.5"
+            >
+              <FilterIcon size={18} color="#4B5563" />
+              <Text className="text-gray-700 font-medium ml-2 text-sm">Filters</Text>
+            </TouchableOpacity>
 
             {activeTab === "list" && (
               <View className="flex-row bg-gray-100 rounded-lg p-1 ml-2">
@@ -178,7 +159,7 @@ function RoomFinderContent() {
                   : "Be the first to post a room in your neighborhood."}
               </Text>
               <TouchableOpacity
-                onPress={() => router.push("/rooms/create")}
+                onPress={() => router.push("/rooms/create" as any)}
                 className="mt-6 bg-indigo-600 px-6 py-3 rounded-xl shadow-sm"
               >
                 <Text className="text-white font-semibold">Post a listing</Text>
@@ -192,7 +173,7 @@ function RoomFinderContent() {
               key={listing.id}
               listing={listing}
                   viewMode={viewMode}
-              onPress={() => router.push(`/rooms/detail?id=${listing.id}`)}
+              onPress={() => router.push(`/rooms/detail?id=${listing.id}` as any)}
             />
           ))}
             </View>
@@ -200,64 +181,53 @@ function RoomFinderContent() {
         </ScrollView>
       ) : (
         <View className="flex-1">
-          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}`)} />
+          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}` as any)} />
         </View>
       )}
 
-      {isMounted && (
-        <BottomSheet
-          ref={sheetRef}
-          index={-1}
-          snapPoints={["25%", "60%"]}
-          enablePanDownToClose
-          backgroundStyle={{ backgroundColor: "#fff" }}
-        >
-          <RoomFiltersBottomSheet
-            initialFilters={filters}
-            onClose={() => {
-              try {
-                sheetRef.current?.close();
-              } catch (error) {
-                console.error("Error closing sheet:", error);
-              }
-            }}
-            onApply={(next) => {
-              setFilters(next);
-              try {
-                sheetRef.current?.close();
-              } catch (error) {
-                console.error("Error closing sheet:", error);
-              }
-            }}
-            sheetRef={sheetRef as React.RefObject<BottomSheet>}
-          />
-        </BottomSheet>
-      )}
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={["25%", "60%"]}
+        enablePanDownToClose
+        backgroundStyle={{ backgroundColor: "#fff" }}
+      >
+        <RoomFiltersBottomSheet
+          initialFilters={filters}
+          onClose={() => {
+            try {
+              sheetRef.current?.close();
+            } catch (error) {
+              console.error("Error closing sheet:", error);
+            }
+          }}
+          onApply={(next) => {
+            setFilters(next);
+            try {
+              sheetRef.current?.close();
+            } catch (error) {
+              console.error("Error closing sheet:", error);
+            }
+          }}
+          sheetRef={sheetRef as React.RefObject<BottomSheet>}
+        />
+      </BottomSheet>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/rooms/create" as any)}
+        className="absolute right-6 bg-indigo-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        style={{
+          bottom: 24 + insets.bottom,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+          elevation: 8,
+        }}
+      >
+        <PlusIcon size={24} color="#FFFFFF" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
-}
-
-export default function RoomFinderHome() {
-  const [hasNavigationContext, setHasNavigationContext] = useState(false);
-  
-  useEffect(() => {
-    // Check if navigation context is available
-    try {
-      const navigation = useNavigation();
-      setHasNavigationContext(true);
-    } catch {
-      // Navigation context not ready yet
-      setTimeout(() => setHasNavigationContext(true), 100);
-    }
-  }, []);
-  
-  if (!hasNavigationContext) {
-    return (
-      <SafeAreaView className="flex-1 bg-white justify-center items-center">
-        <Text className="text-gray-500">Loading...</Text>
-      </SafeAreaView>
-    );
-  }
-  
-  return <RoomFinderContent />;
 }

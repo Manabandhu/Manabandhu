@@ -91,32 +91,199 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
     );
   }
 
-  // Web fallback - use Google Maps embed
+  // Web fallback - use Google Maps embed or static visualization
   if (Platform.OS === 'web') {
+    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || (typeof window !== 'undefined' && (window as any).__GOOGLE_MAPS_API_KEY__);
     const center = `${initialRegion.latitude},${initialRegion.longitude}`;
-    const markers = coordinates.map(({ lat, lng }) => `${lat},${lng}`).join('|');
-    const mapUrl = `https://www.google.com/maps/embed/v1/view?key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&center=${center}&zoom=13`;
     
-    return (
-      <View className="flex-1 relative">
-        <View className="flex-1 bg-gray-100 rounded-3xl overflow-hidden">
-          {process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+    // Try to use Google Maps embed if API key is available
+    if (apiKey) {
+      const mapUrl = `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${center}&zoom=13`;
+      
+      return (
+        <View className="flex-1 relative">
+          <View className="flex-1 bg-gray-100 rounded-3xl overflow-hidden">
             <iframe
               src={mapUrl}
               style={{ width: '100%', height: '100%', border: 0 }}
               allowFullScreen
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             />
-          ) : (
-            <View className="flex-1 items-center justify-center">
-              <MapPinIcon size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 text-base mt-4">Map view requires Google Maps API key</Text>
-              <Text className="text-gray-400 text-sm mt-2">Please configure EXPO_PUBLIC_GOOGLE_MAPS_API_KEY</Text>
-            </View>
+          </View>
+          {/* Markers overlay for web */}
+          <View className="absolute inset-0 pointer-events-none">
+            {coordinates.map(({ listing, lat, lng }) => {
+              if (!initialRegion) return null;
+              const x = ((lng - initialRegion.longitude) / initialRegion.longitudeDelta + 0.5) * 100;
+              const y = ((initialRegion.latitude - lat) / initialRegion.latitudeDelta + 0.5) * 100;
+              const clampedX = Math.min(Math.max(x, 5), 95);
+              const clampedY = Math.min(Math.max(y, 5), 95);
+
+              const statusColor = listing.status === "AVAILABLE" 
+                ? "#10B981" 
+                : listing.status === "IN_TALKS" 
+                ? "#EAB308" 
+                : "#9CA3AF";
+
+              const isSelected = selectedListing?.id === listing.id;
+
+              return (
+                <TouchableOpacity
+                  key={listing.id}
+                  onPress={() => handleMarkerPress(listing)}
+                  className="absolute items-center pointer-events-auto"
+                  style={{
+                    left: `${clampedX}%`,
+                    top: `${clampedY}%`,
+                    transform: [{ translateX: -20 }, { translateY: -40 }],
+                  }}
+                >
+                  <View 
+                    style={{
+                      backgroundColor: 'white',
+                      borderWidth: 2,
+                      borderColor: isSelected ? '#4F46E5' : '#6366F1',
+                      borderRadius: 12,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      marginBottom: 4,
+                    }}
+                  >
+                    <Text 
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: isSelected ? '#312E81' : '#4338CA',
+                      }}
+                    >
+                      ₹{listing.rentMonthly}
+                    </Text>
+                  </View>
+                  <View 
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
+                      backgroundColor: statusColor,
+                      borderWidth: 3,
+                      borderColor: 'white',
+                    }}
+                  />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Bottom Sheet for Listing Details */}
+          {selectedListing && (
+            <BottomSheet
+              ref={bottomSheetRef}
+              index={-1}
+              snapPoints={snapPoints}
+              enablePanDownToClose
+              backgroundStyle={{ backgroundColor: "#fff" }}
+            >
+              <View className="flex-1 px-4">
+                <View className="items-center mb-4">
+                  <View className="w-12 h-1 bg-gray-300 rounded-full" />
+                </View>
+                
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {/* Listing Image */}
+                  <View className="relative mb-4 rounded-2xl overflow-hidden" style={{ height: 200 }}>
+                    {selectedListing.imageUrls?.[0] ? (
+                      <Image 
+                        source={{ uri: selectedListing.imageUrls[0] }} 
+                        className="w-full h-full" 
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 items-center justify-center">
+                        <HomeIcon size={48} color="#9CA3AF" />
+                      </View>
+                    )}
+                    <View className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                      <Text className="text-2xl font-bold text-indigo-600">₹{selectedListing.rentMonthly}</Text>
+                      <Text className="text-xs text-gray-500">per month</Text>
+                    </View>
+                  </View>
+
+                  {/* Listing Info */}
+                  <View className="mb-4">
+                    <Text className="text-2xl font-bold text-gray-900 mb-2">{selectedListing.title}</Text>
+                    <View className="flex-row items-center mb-3">
+                      <MapPinIcon size={18} color="#6B7280" />
+                      <Text className="text-base text-gray-600 ml-2">{selectedListing.approxAreaLabel}</Text>
+                    </View>
+                    
+                    <View className="flex-row flex-wrap gap-2 mb-4">
+                      <View className="bg-indigo-50 px-3 py-1.5 rounded-lg">
+                        <Text className="text-sm font-semibold text-indigo-700">{selectedListing.roomType}</Text>
+                      </View>
+                      {selectedListing.listingFor && (
+                        <View className="bg-purple-50 px-3 py-1.5 rounded-lg">
+                          <Text className="text-sm font-semibold text-purple-700">{selectedListing.listingFor}</Text>
+                        </View>
+                      )}
+                      <View className={`px-3 py-1.5 rounded-lg ${
+                        selectedListing.status === "AVAILABLE" 
+                          ? "bg-green-100" 
+                          : selectedListing.status === "IN_TALKS" 
+                          ? "bg-yellow-100" 
+                          : "bg-gray-100"
+                      }`}>
+                        <Text className={`text-sm font-semibold ${
+                          selectedListing.status === "AVAILABLE" 
+                            ? "text-green-700" 
+                            : selectedListing.status === "IN_TALKS" 
+                            ? "text-yellow-700" 
+                            : "text-gray-700"
+                        }`}>
+                          {selectedListing.status}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Action Button */}
+                  <TouchableOpacity
+                    onPress={handleViewDetails}
+                    className="bg-indigo-600 rounded-xl py-4 items-center mb-6 shadow-lg"
+                  >
+                    <Text className="text-white font-bold text-lg">View Full Details</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+            </BottomSheet>
           )}
         </View>
-        {/* Markers overlay for web */}
-        <View className="absolute inset-0 pointer-events-none">
+      );
+    }
+    
+    // Fallback: Show a visual map representation without API key
+    return (
+      <View className="flex-1 relative">
+        <View className="flex-1 bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-50 rounded-3xl overflow-hidden border border-blue-200 shadow-lg relative">
+          {/* Map Grid Background */}
+          <View className="absolute inset-0 opacity-30">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <View key={`h-${i}`} className="absolute w-full border-t border-blue-200" style={{ top: `${(i + 1) * 12.5}%` }} />
+            ))}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <View key={`v-${i}`} className="absolute h-full border-l border-blue-200" style={{ left: `${(i + 1) * 12.5}%` }} />
+            ))}
+          </View>
+
+          {/* Streets/Roads */}
+          <View className="absolute inset-0">
+            <View className="absolute w-full h-1 bg-blue-300/40 rounded-full" style={{ top: "30%", left: "10%", width: "80%" }} />
+            <View className="absolute w-full h-1 bg-blue-300/40 rounded-full" style={{ top: "60%", left: "5%", width: "90%" }} />
+            <View className="absolute h-full w-1 bg-blue-300/40 rounded-full" style={{ left: "40%", top: "20%", height: "60%" }} />
+            <View className="absolute h-full w-1 bg-blue-300/40 rounded-full" style={{ left: "70%", top: "10%", height: "70%" }} />
+          </View>
+
+          {/* Markers */}
           {coordinates.map(({ listing, lat, lng }) => {
             if (!initialRegion) return null;
             const x = ((lng - initialRegion.longitude) / initialRegion.longitudeDelta + 0.5) * 100;
@@ -125,10 +292,10 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
             const clampedY = Math.min(Math.max(y, 5), 95);
 
             const statusColor = listing.status === "AVAILABLE" 
-              ? "#10B981" 
+              ? "bg-green-500" 
               : listing.status === "IN_TALKS" 
-              ? "#EAB308" 
-              : "#9CA3AF";
+              ? "bg-yellow-500" 
+              : "bg-gray-400";
 
             const isSelected = selectedListing?.id === listing.id;
 
@@ -136,44 +303,24 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
               <TouchableOpacity
                 key={listing.id}
                 onPress={() => handleMarkerPress(listing)}
-                className="absolute items-center pointer-events-auto"
+                className="absolute items-center"
                 style={{
                   left: `${clampedX}%`,
                   top: `${clampedY}%`,
                   transform: [{ translateX: -20 }, { translateY: -40 }],
                 }}
               >
-                <View 
-                  style={{
-                    backgroundColor: 'white',
-                    borderWidth: 2,
-                    borderColor: isSelected ? '#4F46E5' : '#6366F1',
-                    borderRadius: 12,
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    marginBottom: 4,
-                  }}
-                >
-                  <Text 
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 'bold',
-                      color: isSelected ? '#312E81' : '#4338CA',
-                    }}
-                  >
+                {/* Price Badge */}
+                <View className={`bg-white border-2 ${isSelected ? 'border-indigo-600' : 'border-indigo-500'} rounded-xl px-3 py-1.5 shadow-xl mb-1`}>
+                  <Text className={`text-sm font-bold ${isSelected ? 'text-indigo-800' : 'text-indigo-700'}`}>
                     ₹{listing.rentMonthly}
                   </Text>
                 </View>
-                <View 
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: statusColor,
-                    borderWidth: 3,
-                    borderColor: 'white',
-                  }}
-                />
+                {/* Marker Pin */}
+                <View className="items-center">
+                  <View className={`w-7 h-7 ${statusColor} rounded-full border-3 border-white shadow-xl ${isSelected ? 'ring-2 ring-indigo-400' : ''}`} />
+                  <View className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${isSelected ? 'border-t-indigo-600' : 'border-t-indigo-500'}`} style={{ marginTop: -3 }} />
+                </View>
               </TouchableOpacity>
             );
           })}

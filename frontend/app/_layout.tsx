@@ -72,19 +72,6 @@ export default function RootLayout() {
             <Stack.Screen name="(onboarding)" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="index" />
-            <Stack.Screen name="rooms" />
-            <Stack.Screen name="jobs" />
-            <Stack.Screen name="rides" />
-            <Stack.Screen name="chat" />
-            <Stack.Screen name="qa" />
-            <Stack.Screen name="uscis" />
-            <Stack.Screen name="immigration" />
-            <Stack.Screen name="expenses" />
-            <Stack.Screen name="splitly" />
-            <Stack.Screen name="utilities" />
-            <Stack.Screen name="admin" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="community" />
           </Stack>
         </FontProvider>
       </GestureHandlerRootView>
