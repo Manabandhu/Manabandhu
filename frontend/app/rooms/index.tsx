@@ -64,21 +64,20 @@ export default function RoomFinderHome() {
             <Text className="text-sm text-gray-500 mt-1">Discover rooms and homes near you</Text>
           </View>
 
-          {/* Search Bar */}
-          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-3 border border-gray-200">
-            <SearchIcon size={20} color="#6B7280" />
-            <TextInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Search by location, room type..."
-              placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-gray-900 text-base"
-              returnKeyType="search"
-            />
-          </View>
-
-          {/* Quick Filters and View Toggle */}
-          <View className="flex-row items-center justify-between">
+          {/* Search Bar with Filters and View Toggle */}
+          <View className="flex-row items-center gap-2 mb-3">
+            <View className="flex-1 bg-gray-50 rounded-xl px-4 py-3 flex-row items-center border border-gray-200">
+              <SearchIcon size={20} color="#6B7280" />
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search by location, room type..."
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 ml-3 text-gray-900 text-base"
+                returnKeyType="search"
+              />
+            </View>
+            
             <TouchableOpacity
               onPress={() => {
                 try {
@@ -87,23 +86,22 @@ export default function RoomFinderHome() {
                   console.error("Error opening sheet:", error);
                 }
               }}
-              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-4 py-2.5"
+              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-3 py-3"
             >
               <FilterIcon size={18} color="#4B5563" />
-              <Text className="text-gray-700 font-medium ml-2 text-sm">Filters</Text>
             </TouchableOpacity>
 
             {activeTab === "list" && (
-              <View className="flex-row bg-gray-100 rounded-lg p-1 ml-2">
+              <View className="flex-row bg-gray-100 rounded-lg p-1 items-center" style={{ height: 48 }}>
                 <TouchableOpacity
                   onPress={() => setViewMode("list")}
-                  className={`px-3 py-1.5 rounded-md ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
+                  className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
                 >
                   <ListIcon size={18} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setViewMode("grid")}
-                  className={`px-3 py-1.5 rounded-md ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
+                  className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
                 >
                   <GridIcon size={18} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
                 </TouchableOpacity>
