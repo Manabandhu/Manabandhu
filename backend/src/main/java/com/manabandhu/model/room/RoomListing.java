@@ -50,7 +50,7 @@ public class RoomListing {
     @Column
     private LocalDate leaseEndDate;
 
-    @Column(nullable = false)
+    @Column(name = "lease_extendable", nullable = false)
     private boolean leaseExtendable = false;
 
     @Column(nullable = false)

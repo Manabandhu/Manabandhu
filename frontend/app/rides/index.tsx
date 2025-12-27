@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform, Modal, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
@@ -9,7 +9,7 @@ import { RideFilters, RidePostSummary, RidePostType } from "@/types";
 import RideCard from "@/components/rides/RideCard";
 import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
 import RideMapPreview from "@/components/rides/RideMapPreview";
-import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon } from "@/components/ui/Icons";
+import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from "@/components/ui/Icons";
 
 const TAB_CONFIG: { label: string; type: RidePostType }[] = [
   { label: "Available Rides", type: "OFFER" },
@@ -27,10 +27,8 @@ export default function RidesHome() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
+  const [showActionModal, setShowActionModal] = useState(false);
   const sheetRef = useRef<BottomSheet>(null);
-  const actionSheetRef = useRef<BottomSheet>(null);
-  
-  const actionSheetSnapPoints = useMemo(() => ["30%"], []);
 
   const navigateTo = (path: string) => {
     try {
@@ -126,20 +124,7 @@ export default function RidesHome() {
             </View>
             {Platform.OS === 'web' && (
               <TouchableOpacity
-                onPress={() => {
-                  if (actionSheetRef.current) {
-                    try {
-                      actionSheetRef.current.expand();
-                    } catch (error) {
-                      console.error("Error opening action sheet:", error);
-                      try {
-                        actionSheetRef.current.snapToIndex(0);
-                      } catch (fallbackError) {
-                        console.error("Error with snapToIndex fallback:", fallbackError);
-                      }
-                    }
-                  }
-                }}
+                onPress={() => setShowActionModal(true)}
                 className="bg-blue-600 px-4 py-2.5 rounded-xl shadow-sm"
               >
                 <Text className="text-white font-semibold text-sm">+ Create Ride</Text>
@@ -325,72 +310,79 @@ export default function RidesHome() {
         />
       </BottomSheet>
 
-      {/* Action Sheet for FAB */}
-      <BottomSheet
-        ref={actionSheetRef}
-        index={-1}
-        snapPoints={actionSheetSnapPoints}
-        enablePanDownToClose
-        enableDynamicSizing={false}
-        backgroundStyle={{ backgroundColor: "#fff" }}
+      {/* Action Modal Popup for FAB */}
+      <Modal
+        visible={showActionModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowActionModal(false)}
       >
-        <View className="flex-1 px-5 py-4">
-          <View className="items-center mb-4">
-            <View className="w-12 h-1 bg-gray-300 rounded-full" />
-          </View>
-          <Text className="text-lg font-semibold text-gray-900 mb-6 text-center">
-            Create a Ride Post
-          </Text>
-          
-          <View className="gap-3">
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo("/rides/offer");
-                try {
-                  actionSheetRef.current?.close();
-                } catch (error) {
-                  console.error("Error closing sheet:", error);
-                }
-              }}
-              className="bg-blue-600 rounded-xl p-4 flex-row items-center shadow-sm"
-              activeOpacity={0.8}
-            >
-              <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-4">
-                <CarIcon size={24} color="#FFFFFF" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white font-semibold text-base">Offer a Ride</Text>
-                <Text className="text-blue-100 text-sm mt-0.5">
-                  Share your ride with others
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center px-4"
+          onPress={() => setShowActionModal(false)}
+        >
+          <Pressable
+            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View className="px-6 py-5">
+              {/* Header */}
+              <View className="flex-row justify-between items-center mb-5">
+                <Text className="text-xl font-bold text-gray-900">
+                  Create a Ride Post
                 </Text>
+                <TouchableOpacity
+                  onPress={() => setShowActionModal(false)}
+                  className="w-8 h-8 items-center justify-center"
+                >
+                  <XIcon size={20} color="#6B7280" />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                navigateTo("/rides/request");
-                try {
-                  actionSheetRef.current?.close();
-                } catch (error) {
-                  console.error("Error closing sheet:", error);
-                }
-              }}
-              className="bg-indigo-600 rounded-xl p-4 flex-row items-center shadow-sm"
-              activeOpacity={0.8}
-            >
-              <View className="w-12 h-12 bg-indigo-500 rounded-full items-center justify-center mr-4">
-                <MapPinIcon size={24} color="#FFFFFF" />
+              {/* Options */}
+              <View className="gap-3">
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowActionModal(false);
+                    navigateTo("/rides/offer");
+                  }}
+                  className="bg-blue-600 rounded-xl p-4 flex-row items-center shadow-sm"
+                  activeOpacity={0.8}
+                >
+                  <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-4">
+                    <CarIcon size={24} color="#FFFFFF" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-semibold text-base">Offer a Ride</Text>
+                    <Text className="text-blue-100 text-sm mt-0.5">
+                      Share your ride with others
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowActionModal(false);
+                    navigateTo("/rides/request");
+                  }}
+                  className="bg-indigo-600 rounded-xl p-4 flex-row items-center shadow-sm"
+                  activeOpacity={0.8}
+                >
+                  <View className="w-12 h-12 bg-indigo-500 rounded-full items-center justify-center mr-4">
+                    <MapPinIcon size={24} color="#FFFFFF" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-semibold text-base">Request a Ride</Text>
+                    <Text className="text-indigo-100 text-sm mt-0.5">
+                      Find someone to share a ride with
+                    </Text>
+                  </View>
+                </TouchableOpacity>
               </View>
-              <View className="flex-1">
-                <Text className="text-white font-semibold text-base">Request a Ride</Text>
-                <Text className="text-indigo-100 text-sm mt-0.5">
-                  Find someone to share a ride with
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </BottomSheet>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Floating Action Button - Mobile Only */}
       {Platform.OS !== 'web' && (
@@ -404,26 +396,7 @@ export default function RidesHome() {
           }}
         >
           <TouchableOpacity
-            onPress={() => {
-              console.log("FAB button pressed on iOS");
-              if (actionSheetRef.current) {
-                try {
-                  // Use expand() method which is more reliable on iOS
-                  console.log("Attempting to expand bottom sheet");
-                  actionSheetRef.current.expand();
-                } catch (error) {
-                  console.error("Error opening action sheet:", error);
-                  // Fallback to snapToIndex if expand doesn't work
-                  try {
-                    actionSheetRef.current.snapToIndex(0);
-                  } catch (fallbackError) {
-                    console.error("Error with snapToIndex fallback:", fallbackError);
-                  }
-                }
-              } else {
-                console.warn("actionSheetRef.current is null");
-              }
-            }}
+            onPress={() => setShowActionModal(true)}
             activeOpacity={0.8}
             className="w-16 h-16 rounded-full items-center justify-center shadow-lg"
             style={{

@@ -18,6 +18,7 @@ export default function RoomDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const { format } = useCurrency();
 
   const loadListing = async () => {
@@ -100,7 +101,6 @@ export default function RoomDetail() {
   const locationLabel = listing.approxAreaLabel;
   const screenWidth = Dimensions.get("window").width;
   const images = listing.imageUrls || [];
-  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   
   // Filter out failed images - keep both URI and original index
   const validImagesWithIndex = images
