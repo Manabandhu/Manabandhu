@@ -1,14 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SplitIcon, UsersIcon, DollarSignIcon, PlusIcon, CalendarIcon, ArrowRightIcon } from '@/components/ui/Icons';
 import { useCurrency } from '@/lib/currency';
+import { splitlyAPI, SplitGroup } from '@/lib/api/splitly';
 
-interface Group {
-  id: string;
-  name: string;
-  members: string[];
+interface GroupWithBalance extends SplitGroup {
   totalExpenses: number;
   yourBalance: number;
 }
@@ -22,49 +20,58 @@ interface RecentActivity {
   group: string;
 }
 
-const mockGroups: Group[] = [
-  {
-    id: '1',
-    name: 'Roommates',
-    members: ['You', 'John', 'Sarah'],
-    totalExpenses: 450.00,
-    yourBalance: -25.50
-  },
-  {
-    id: '2',
-    name: 'Weekend Trip',
-    members: ['You', 'Mike', 'Lisa', 'Tom'],
-    totalExpenses: 320.00,
-    yourBalance: 15.75
-  }
-];
-
-const mockActivity: RecentActivity[] = [
-  {
-    id: '1',
-    type: 'expense',
-    description: 'Groceries',
-    amount: 85.50,
-    date: '2024-12-20',
-    group: 'Roommates'
-  },
-  {
-    id: '2',
-    type: 'payment',
-    description: 'Paid John',
-    amount: 42.25,
-    date: '2024-12-19',
-    group: 'Roommates'
-  }
-];
-
 export default function Splitly() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { format } = useCurrency();
-  const [groups] = useState<Group[]>(mockGroups);
-  const [activity] = useState<RecentActivity[]>(mockActivity);
+  const [groups, setGroups] = useState<GroupWithBalance[]>([]);
+  const [activity] = useState<RecentActivity[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadGroups();
+  }, []);
+
+  const loadGroups = async () => {
+    try {
+      setLoading(true);
+      const groupsData = await splitlyAPI.getUserGroups();
+      
+      // Load balances for each group
+      const groupsWithBalances = await Promise.all(
+        groupsData.map(async (group) => {
+          try {
+            const balances = await splitlyAPI.getGroupBalances(group.id);
+            const expenses = await splitlyAPI.getGroupExpenses(group.id, 0, 1);
+            
+            const yourBalance = balances.find(b => b.status === 'owed')?.balance || 
+                               -balances.find(b => b.status === 'owes')?.balance || 0;
+            
+            return {
+              ...group,
+              totalExpenses: expenses.totalElements > 0 ? expenses.content[0]?.amount || 0 : 0,
+              yourBalance,
+            };
+          } catch (error) {
+            console.error(`Failed to load balance for group ${group.id}:`, error);
+            return {
+              ...group,
+              totalExpenses: 0,
+              yourBalance: 0,
+            };
+          }
+        })
+      );
+      
+      setGroups(groupsWithBalances);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   const totalBalance = useMemo(() => {
     return groups.reduce((sum, group) => sum + group.yourBalance, 0);
@@ -76,10 +83,7 @@ export default function Splitly() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadGroups();
   };
 
   const formatDate = (dateString: string) => {
@@ -169,7 +173,7 @@ export default function Splitly() {
               <TouchableOpacity
                 key={group.id}
                 className="bg-white rounded-2xl p-4 mb-3 shadow-md border border-gray-100"
-                onPress={() => router.push(`/splitly/group/${group.id}`)}
+                onPress={() => {/* TODO: Navigate to group detail */}}
                 activeOpacity={0.7}
               >
                 <View className="flex-row justify-between items-start mb-3">

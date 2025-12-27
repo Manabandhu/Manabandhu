@@ -28,27 +28,16 @@ export default function CommentsBottomSheet({ visible, onClose, postId, postTitl
     
     setLoading(true);
     try {
-      // TODO: Implement actual API call when available
-      // const response = await communityAPI.getPostComments(postId);
-      // setComments(response);
-      
-      // Mock data for now
-      setComments([
-        {
-          id: 1,
-          content: "Great post! Thanks for sharing.",
-          authorName: "John Doe",
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          content: "I completely agree with this perspective.",
-          authorName: "Jane Smith",
-          createdAt: new Date(Date.now() - 3600000).toISOString()
-        }
-      ]);
+      const response = await communityAPI.getPostComments(postId);
+      setComments(response.content.map(c => ({
+        id: c.id,
+        content: c.content,
+        authorName: c.authorName,
+        createdAt: c.createdAt
+      })));
     } catch (error) {
       console.error('Failed to load comments:', error);
+      Alert.alert('Error', 'Failed to load comments');
     } finally {
       setLoading(false);
     }
@@ -62,20 +51,15 @@ export default function CommentsBottomSheet({ visible, onClose, postId, postTitl
 
     setSubmitting(true);
     try {
-      // TODO: Implement actual API call when available
-      // const comment = await communityAPI.addComment(postId, { content: newComment.trim() });
+      const comment = await communityAPI.addComment(postId, newComment.trim());
       
-      // Mock response for now
-      const mockComment: Comment = {
-        id: Date.now(),
-        content: newComment.trim(),
-        authorName: "You",
-        createdAt: new Date().toISOString()
-      };
-      
-      setComments(prev => [mockComment, ...prev]);
+      setComments(prev => [{
+        id: comment.id,
+        content: comment.content,
+        authorName: comment.authorName,
+        createdAt: comment.createdAt
+      }, ...prev]);
       setNewComment('');
-      Alert.alert('Success', 'Comment added successfully!');
     } catch (error) {
       console.error('Failed to add comment:', error);
       Alert.alert('Error', 'Failed to add comment. Please try again.');

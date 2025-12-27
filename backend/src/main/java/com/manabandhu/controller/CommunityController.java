@@ -1,9 +1,13 @@
 package com.manabandhu.controller;
 
+import com.manabandhu.dto.CommentDTO;
 import com.manabandhu.dto.CommunityPostDTO;
+import com.manabandhu.dto.CreateCommentRequest;
 import com.manabandhu.service.CommunityService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +65,34 @@ public class CommunityController {
             Authentication authentication) {
         String userId = authentication.getName();
         communityService.deletePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/{postId}/comments")
+    public ResponseEntity<CommentDTO> addComment(
+            @PathVariable Long postId,
+            @Valid @RequestBody CreateCommentRequest request,
+            Authentication authentication) {
+        String authorId = authentication.getName();
+        CommentDTO comment = communityService.addComment(postId, authorId, request);
+        return ResponseEntity.ok(comment);
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<Page<CommentDTO>> getPostComments(
+            @PathVariable Long postId,
+            Pageable pageable) {
+        Page<CommentDTO> comments = communityService.getPostComments(postId, pageable);
+        return ResponseEntity.ok(comments);
+    }
+
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            Authentication authentication) {
+        String userId = authentication.getName();
+        communityService.deleteComment(commentId, userId);
         return ResponseEntity.ok().build();
     }
 }

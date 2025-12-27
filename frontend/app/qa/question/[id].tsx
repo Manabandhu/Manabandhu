@@ -35,12 +35,9 @@ export default function QuestionDetailScreen() {
 
   const loadQuestionAndAnswers = async () => {
     try {
-      // TODO: Get user token from auth store
-      const userToken = 'dummy-token'; // Replace with actual token
-      
       const [questionData, answersData] = await Promise.all([
-        qaApi.getQuestion(id!, userToken),
-        qaApi.getAnswers(id!, userToken),
+        qaApi.getQuestion(id!),
+        qaApi.getAnswers(id!),
       ]);
       
       setQuestion(questionData);
@@ -67,10 +64,7 @@ export default function QuestionDetailScreen() {
 
     setIsSubmitting(true);
     try {
-      // TODO: Get user token from auth store
-      const userToken = 'dummy-token'; // Replace with actual token
-      
-      await qaApi.createAnswer(id!, { body: answerText.trim() }, userToken);
+      await qaApi.createAnswer(id!, { body: answerText.trim() });
       setAnswerText('');
       loadQuestionAndAnswers();
       Alert.alert('Success', 'Your answer has been posted!');
@@ -96,14 +90,11 @@ export default function QuestionDetailScreen() {
 
   const reportContent = async (reason: 'SPAM' | 'MISINFORMATION' | 'HARASSMENT') => {
     try {
-      // TODO: Get user token from auth store
-      const userToken = 'dummy-token'; // Replace with actual token
-      
       await qaApi.reportContent({
         contentType: 'QUESTION',
         contentId: id!,
         reason,
-      }, userToken);
+      });
       Alert.alert('Success', 'Question reported successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to report question');
@@ -199,7 +190,6 @@ export default function QuestionDetailScreen() {
               canAccept={question.isAuthor && !answer.isAccepted && question.status !== 'CLOSED'}
               onVote={loadQuestionAndAnswers}
               onAccept={loadQuestionAndAnswers}
-              userToken="dummy-token" // TODO: Replace with actual token
             />
           ))}
         </View>

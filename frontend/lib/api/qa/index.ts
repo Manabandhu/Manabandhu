@@ -10,6 +10,7 @@ import {
   QuestionsFilter 
 } from '@/types/qa';
 import { toast } from '@/lib/toast';
+import { getAuthToken } from '../auth-token';
 
 export interface ApiError {
   status: number;
@@ -94,7 +95,12 @@ class QaApiService {
     }
   }
 
-  async getQuestions(filter: QuestionsFilter = {}, token?: string) {
+  private async getAuthHeaders() {
+    const token = await getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  async getQuestions(filter: QuestionsFilter = {}) {
     const params = new URLSearchParams();
     if (filter.search) params.append('search', filter.search);
     if (filter.tags?.length) filter.tags.forEach(tag => params.append('tags', tag));
@@ -110,20 +116,20 @@ class QaApiService {
       number: number;
       size: number;
     }>(`/questions?${params.toString()}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: await this.getAuthHeaders(),
     });
   }
 
-  async getQuestion(id: string, token?: string) {
+  async getQuestion(id: string) {
     return this.request<Question>(`/questions/${id}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: await this.getAuthHeaders(),
     });
   }
 
-  async createQuestion(data: QuestionRequest, token: string) {
+  async createQuestion(data: QuestionRequest) {
     const result = await this.request<Question>('/questions', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -131,16 +137,16 @@ class QaApiService {
     return result;
   }
 
-  async getAnswers(questionId: string, token?: string) {
+  async getAnswers(questionId: string) {
     return this.request<Answer[]>(`/questions/${questionId}/answers`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: await this.getAuthHeaders(),
     });
   }
 
-  async createAnswer(questionId: string, data: AnswerRequest, token: string) {
+  async createAnswer(questionId: string, data: AnswerRequest) {
     const result = await this.request<Answer>(`/questions/${questionId}/answers`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -148,27 +154,27 @@ class QaApiService {
     return result;
   }
 
-  async acceptAnswer(answerId: string, token: string) {
+  async acceptAnswer(answerId: string) {
     await this.request<void>(`/answers/${answerId}/accept`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: await this.getAuthHeaders(),
     });
     
     toast.showSuccess('Answer accepted successfully!');
   }
 
-  async vote(data: VoteRequest, token: string) {
+  async vote(data: VoteRequest) {
     await this.request<void>('/votes', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
     }, false); // Don't show error toast for votes as they're frequent
   }
 
-  async reportContent(data: ReportRequest, token: string) {
+  async reportContent(data: ReportRequest) {
     await this.request<void>('/report', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: await this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -179,15 +185,15 @@ class QaApiService {
     return this.request<Tag[]>('/tags');
   }
 
-  async getUserQuestions(userId: string, token?: string) {
+  async getUserQuestions(userId: string) {
     return this.request<Question[]>(`/users/${userId}/questions`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: await this.getAuthHeaders(),
     });
   }
 
-  async getUserAnswers(userId: string, token?: string) {
+  async getUserAnswers(userId: string) {
     return this.request<Answer[]>(`/users/${userId}/answers`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: await this.getAuthHeaders(),
     });
   }
 }

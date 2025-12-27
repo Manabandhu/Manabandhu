@@ -1,8 +1,13 @@
 package com.manabandhu.service;
 
+import com.manabandhu.dto.CommentDTO;
 import com.manabandhu.dto.CommunityPostDTO;
+import com.manabandhu.dto.CreateCommentRequest;
+import com.manabandhu.model.community.Comment;
 import com.manabandhu.model.community.CommunityPost;
+import com.manabandhu.repository.CommentRepository;
 import com.manabandhu.repository.CommunityPostRepository;
+import com.manabandhu.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +23,12 @@ public class CommunityService {
 
     @Autowired
     private CommunityPostRepository postRepository;
+    
+    @Autowired
+    private CommentRepository commentRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     public Page<CommunityPostDTO> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -54,5 +65,54 @@ public class CommunityService {
         }
         
         postRepository.delete(post);
+    }
+
+    public CommentDTO addComment(Long postId, String authorId, CreateCommentRequest request) {
+        CommunityPost post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        Comment comment = new Comment();
+        comment.setPostId(postId);
+        comment.setAuthorId(authorId);
+        comment.setContent(request.getContent());
+        comment = commentRepository.save(comment);
+        
+        // Update post comment count
+        post.setComments(post.getComments() + 1);
+        postRepository.save(post);
+        
+        // Get author name
+        String authorName = userRepository.findByFirebaseUid(authorId)
+            .map(user -> user.getName())
+            .orElse("Anonymous");
+        
+        return new CommentDTO(comment, authorName);
+    }
+
+    public Page<CommentDTO> getPostComments(Long postId, Pageable pageable) {
+        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
+        return comments.map(comment -> {
+            String authorName = userRepository.findByFirebaseUid(comment.getAuthorId())
+                .map(user -> user.getName())
+                .orElse("Anonymous");
+            return new CommentDTO(comment, authorName);
+        });
+    }
+
+    public void deleteComment(Long commentId, String userId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+        
+        if (!comment.getAuthorId().equals(userId)) {
+            throw new RuntimeException("Not authorized to delete this comment");
+        }
+        
+        // Update post comment count
+        CommunityPost post = postRepository.findById(comment.getPostId())
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setComments(Math.max(0, post.getComments() - 1));
+        postRepository.save(post);
+        
+        commentRepository.delete(comment);
     }
 }

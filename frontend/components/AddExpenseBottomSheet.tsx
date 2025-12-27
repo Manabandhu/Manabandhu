@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SplitIcon } from '@/components/ui/Icons';
+import { expensesAPI, ExpenseCategory } from '@/lib/api/expenses';
 
 interface AddExpenseBottomSheetProps {
   visible: boolean;
@@ -11,13 +12,17 @@ interface AddExpenseBottomSheetProps {
 
 export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded }: AddExpenseBottomSheetProps) {
   const router = useRouter();
+  const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<ExpenseCategory>(ExpenseCategory.OTHER);
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
+    setTitle('');
     setAmount('');
     setDescription('');
+    setCategory(ExpenseCategory.OTHER);
   };
 
   const handleClose = () => {
@@ -26,15 +31,26 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
   };
 
   const handleSave = async () => {
-    if (!amount.trim() || !description.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!title.trim() || !amount.trim()) {
+      Alert.alert('Error', 'Please fill in title and amount');
+      return;
+    }
+
+    const amountValue = parseFloat(amount);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Implement expense API call
-      // await expensesAPI.createExpense({ amount: parseFloat(amount), description });
+      await expensesAPI.createExpense({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        amount: amountValue,
+        category: category,
+        expenseDate: new Date().toISOString(),
+      });
       
       resetForm();
       onClose();
@@ -71,13 +87,13 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
             <Text className="text-lg font-semibold">Add Expense</Text>
             <TouchableOpacity 
               onPress={handleSave}
-              disabled={loading || !amount.trim() || !description.trim()}
+              disabled={loading || !amount.trim() || !title.trim()}
               className={`px-4 py-2 rounded-full ${
-                loading || !amount.trim() || !description.trim() ? 'bg-gray-300' : 'bg-blue-600'
+                loading || !amount.trim() || !title.trim() ? 'bg-gray-300' : 'bg-blue-600'
               }`}
             >
               <Text className={`font-semibold ${
-                loading || !amount.trim() || !description.trim() ? 'text-gray-500' : 'text-white'
+                loading || !amount.trim() || !title.trim() ? 'text-gray-500' : 'text-white'
               }`}>
                 {loading ? 'Saving...' : 'Save'}
               </Text>
@@ -86,6 +102,16 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
 
           {/* Form */}
           <ScrollView className="px-4 py-4" showsVerticalScrollIndicator={false}>
+            <View className="mb-4">
+              <Text className="text-gray-700 font-medium mb-2">Title *</Text>
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                placeholder="e.g. Groceries, Uber ride"
+                className="border border-gray-300 rounded-lg px-3 py-3 text-gray-900"
+              />
+            </View>
+
             <View className="mb-4">
               <Text className="text-gray-700 font-medium mb-2">Amount *</Text>
               <TextInput
@@ -98,13 +124,35 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-700 font-medium mb-2">Description *</Text>
+              <Text className="text-gray-700 font-medium mb-2">Description</Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="What was this expense for?"
+                placeholder="Optional description"
+                multiline
                 className="border border-gray-300 rounded-lg px-3 py-3 text-gray-900"
               />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-gray-700 font-medium mb-2">Category *</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
+                {Object.values(ExpenseCategory).map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setCategory(cat)}
+                    className={`px-4 py-2 rounded-full ${
+                      category === cat ? 'bg-indigo-600' : 'bg-gray-100'
+                    }`}
+                  >
+                    <Text className={`font-semibold text-sm ${
+                      category === cat ? 'text-white' : 'text-gray-700'
+                    }`}>
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
 
             <View className="bg-gray-50 rounded-xl p-4 mb-6">

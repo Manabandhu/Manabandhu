@@ -10,22 +10,20 @@ interface AnswerCardProps {
   canAccept?: boolean;
   onVote?: () => void;
   onAccept?: () => void;
-  userToken?: string;
 }
 
 export const AnswerCard: React.FC<AnswerCardProps> = ({ 
   answer, 
   canAccept, 
   onVote, 
-  onAccept,
-  userToken 
+  onAccept
 }) => {
   const [isVoting, setIsVoting] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
 
   const handleVote = async (voteType: 'UPVOTE' | 'DOWNVOTE') => {
-    if (!userToken || isVoting) return;
+    if (isVoting) return;
     
     setIsVoting(true);
     try {
@@ -33,7 +31,7 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
         targetType: 'ANSWER',
         targetId: answer.id,
         voteType,
-      }, userToken);
+      });
       onVote?.();
     } catch (error) {
       // Error is handled by the API service
@@ -43,11 +41,11 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
   };
 
   const handleAccept = async () => {
-    if (!userToken || isAccepting) return;
+    if (isAccepting) return;
     
     setIsAccepting(true);
     try {
-      await qaApi.acceptAnswer(answer.id, userToken);
+      await qaApi.acceptAnswer(answer.id);
       onAccept?.();
     } catch (error) {
       // Error is handled by the API service
@@ -79,7 +77,7 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
   };
 
   const reportContent = async (reason: 'SPAM' | 'MISINFORMATION' | 'HARASSMENT') => {
-    if (!userToken || isReporting) return;
+    if (isReporting) return;
     
     setIsReporting(true);
     try {
@@ -87,7 +85,7 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
         contentType: 'ANSWER',
         contentId: answer.id,
         reason,
-      }, userToken);
+      });
     } catch (error) {
       // Error is handled by the API service
     } finally {
@@ -117,7 +115,7 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
           <TouchableOpacity
             style={[styles.voteButton, answer.userVote === 'UPVOTE' && styles.activeUpvote]}
             onPress={() => handleVote('UPVOTE')}
-            disabled={isVoting || !userToken}
+            disabled={isVoting}
           >
             <Text style={[styles.voteText, answer.userVote === 'UPVOTE' && styles.activeVoteText]}>
               ↑ {answer.upvotes}
@@ -127,7 +125,7 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({
           <TouchableOpacity
             style={[styles.voteButton, answer.userVote === 'DOWNVOTE' && styles.activeDownvote]}
             onPress={() => handleVote('DOWNVOTE')}
-            disabled={isVoting || !userToken}
+            disabled={isVoting}
           >
             <Text style={[styles.voteText, answer.userVote === 'DOWNVOTE' && styles.activeVoteText]}>
               ↓ {answer.downvotes}

@@ -57,14 +57,11 @@ export default function AskQuestionScreen() {
 
     setIsSubmitting(true);
     try {
-      // TODO: Get user token from auth store
-      const userToken = 'dummy-token'; // Replace with actual token
-      
       await qaApi.createQuestion({
         title: title.trim(),
         body: body.trim(),
         tags: selectedTags,
-      }, userToken);
+      });
 
       router.back();
     } catch (error) {

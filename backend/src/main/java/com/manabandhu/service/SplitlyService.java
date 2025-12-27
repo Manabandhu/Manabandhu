@@ -93,8 +93,49 @@ public class SplitlyService {
     }
 
     public List<UserBalanceDTO> getGroupBalances(Long groupId) {
-        // TODO: Implement balance calculation logic
-        return List.of();
+        SplitGroup group = splitGroupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group not found"));
+        
+        List<User> members = group.getMembers();
+        List<SplitExpense> expenses = splitExpenseRepository.findByGroupIdOrderByCreatedAtDesc(groupId, Pageable.unpaged())
+            .getContent();
+        
+        // Calculate balances: positive = owed money, negative = owes money
+        java.util.Map<Long, Double> balances = new java.util.HashMap<>();
+        
+        // Initialize all members with 0 balance
+        for (User member : members) {
+            balances.put(member.getId(), 0.0);
+        }
+        
+        // Process each expense
+        for (SplitExpense expense : expenses) {
+            // Get all splits for this expense
+            List<ExpenseSplit> splits = expenseSplitRepository.findByExpenseId(expense.getId());
+            
+            // The person who paid gets credited with the full amount
+            Long paidById = expense.getPaidBy().getId();
+            balances.put(paidById, balances.get(paidById) + expense.getAmount());
+            
+            // Each person who owes gets debited with their share
+            for (ExpenseSplit split : splits) {
+                Long userId = split.getUser().getId();
+                balances.put(userId, balances.get(userId) - split.getAmount());
+            }
+        }
+        
+        // Convert to DTOs
+        return members.stream()
+            .map(member -> {
+                UserBalanceDTO dto = new UserBalanceDTO();
+                dto.setUser(member.getName());
+                Double balance = balances.get(member.getId());
+                dto.setBalance(Math.abs(balance));
+                dto.setStatus(balance >= 0 ? "owed" : "owes");
+                return dto;
+            })
+            .filter(dto -> dto.getBalance() > 0.01) // Only show non-zero balances
+            .collect(Collectors.toList());
     }
 
     public void settleExpense(Long expenseId) {

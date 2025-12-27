@@ -80,6 +80,42 @@ class CommunityAPI {
     if (!response.ok) throw new Error('Failed to update post');
     return response.json();
   }
+
+  async getPostComments(postId: number, page = 0, size = 50): Promise<{ content: Comment[]; totalElements: number }> {
+    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments?page=${page}&size=${size}`, {
+      headers: await this.getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch comments');
+    return response.json();
+  }
+
+  async addComment(postId: number, content: string): Promise<Comment> {
+    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: await this.getAuthHeaders(),
+      body: JSON.stringify({ content }),
+    });
+    if (!response.ok) throw new Error('Failed to add comment');
+    return response.json();
+  }
+
+  async deleteComment(postId: number, commentId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: await this.getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to delete comment');
+  }
+}
+
+export interface Comment {
+  id: number;
+  postId: number;
+  authorId: string;
+  authorName: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const communityAPI = new CommunityAPI();

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { splitlyAPI } from '@/lib/api/splitly';
 
 export default function CreateGroup() {
   const router = useRouter();
@@ -39,13 +40,16 @@ export default function CreateGroup() {
 
     setLoading(true);
     try {
-      // TODO: Implement API call to create group
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
+      await splitlyAPI.createGroup({
+        name: groupName.trim(),
+        memberEmails: validMembers,
+      });
       
       Alert.alert('Success', 'Group created successfully!', [
         { text: 'OK', onPress: () => router.back() }
       ]);
     } catch (error) {
+      console.error('Failed to create group:', error);
       Alert.alert('Error', 'Failed to create group. Please try again.');
     } finally {
       setLoading(false);

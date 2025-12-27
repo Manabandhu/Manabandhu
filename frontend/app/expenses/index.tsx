@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Alert, Modal, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,33 +22,17 @@ import {
 } from "@/components/ui/Icons";
 import AddExpenseBottomSheet from "@/components/AddExpenseBottomSheet";
 import { useCurrency } from "@/lib/currency";
+import { expensesAPI, Expense, ExpenseCategory } from "@/lib/api/expenses";
 
-interface Expense {
-  id: string;
-  title: string;
-  amount: number;
-  category: string;
-  date: string;
-  paidBy: string;
-  isRecurring?: boolean;
-  recurringPeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-}
-
-const mockExpenses: Expense[] = [
-  { id: '1', title: 'Groceries', amount: 85.50, category: 'Food', date: '2024-12-20', paidBy: 'You', isRecurring: false },
-  { id: '2', title: 'Uber ride', amount: 25.00, category: 'Transport', date: '2024-12-19', paidBy: 'John', isRecurring: false },
-  { id: '3', title: 'Dinner', amount: 120.00, category: 'Food', date: '2024-12-18', paidBy: 'Sarah', isRecurring: false },
-  { id: '4', title: 'Netflix Subscription', amount: 15.99, category: 'Entertainment', date: '2024-12-15', paidBy: 'You', isRecurring: true, recurringPeriod: 'monthly' },
-  { id: '5', title: 'Electricity Bill', amount: 75.00, category: 'Utilities', date: '2024-12-10', paidBy: 'You', isRecurring: true, recurringPeriod: 'monthly' },
-];
+// Expense interface is imported from API
 
 const categories = [
-  { id: 'Food', label: 'Food', icon: UtensilsIcon, color: '#F59E0B' },
-  { id: 'Transport', label: 'Transport', icon: BusIcon, color: '#3B82F6' },
-  { id: 'Utilities', label: 'Utilities', icon: SettingsIcon, color: '#10B981' },
-  { id: 'Entertainment', label: 'Entertainment', icon: ActivityIcon, color: '#8B5CF6' },
-  { id: 'Shopping', label: 'Shopping', icon: ShoppingBagIcon, color: '#EC4899' },
-  { id: 'Other', label: 'Other', icon: CreditCardIcon, color: '#6B7280' },
+  { id: ExpenseCategory.FOOD, label: 'Food', icon: UtensilsIcon, color: '#F59E0B' },
+  { id: ExpenseCategory.TRANSPORT, label: 'Transport', icon: BusIcon, color: '#3B82F6' },
+  { id: ExpenseCategory.UTILITIES, label: 'Utilities', icon: SettingsIcon, color: '#10B981' },
+  { id: ExpenseCategory.ENTERTAINMENT, label: 'Entertainment', icon: ActivityIcon, color: '#8B5CF6' },
+  { id: ExpenseCategory.HEALTHCARE, label: 'Healthcare', icon: ActivityIcon, color: '#EC4899' },
+  { id: ExpenseCategory.OTHER, label: 'Other', icon: CreditCardIcon, color: '#6B7280' },
 ];
 
 type PeriodFilter = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'all';
@@ -58,7 +42,7 @@ export default function ExpensesDashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { format, symbol } = useCurrency();
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [showAddExpenseSheet, setShowAddExpenseSheet] = useState(false);
@@ -66,47 +50,65 @@ export default function ExpensesDashboard() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [showSortModal, setShowSortModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadExpenses();
+  }, []);
+
+  const loadExpenses = async () => {
+    try {
+      setLoading(true);
+      const response = await expensesAPI.getAllExpenses(0, 100);
+      setExpenses(response.content);
+    } catch (error) {
+      console.error('Failed to load expenses:', error);
+      Alert.alert('Error', 'Failed to load expenses');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   // Calculate statistics based on period
   const stats = useMemo(() => {
     const now = new Date();
     let periodExpenses = expenses;
 
-    // Filter by period
-    if (selectedPeriod !== 'all') {
-      const periodStart = new Date();
-      switch (selectedPeriod) {
-        case 'daily':
-          periodStart.setHours(0, 0, 0, 0);
-          break;
-        case 'weekly':
-          periodStart.setDate(now.getDate() - now.getDay());
-          periodStart.setHours(0, 0, 0, 0);
-          break;
-        case 'monthly':
-          periodStart.setDate(1);
-          periodStart.setHours(0, 0, 0, 0);
-          break;
-        case 'yearly':
-          periodStart.setMonth(0, 1);
-          periodStart.setHours(0, 0, 0, 0);
-          break;
+      // Filter by period
+      if (selectedPeriod !== 'all') {
+        const periodStart = new Date();
+        switch (selectedPeriod) {
+          case 'daily':
+            periodStart.setHours(0, 0, 0, 0);
+            break;
+          case 'weekly':
+            periodStart.setDate(now.getDate() - now.getDay());
+            periodStart.setHours(0, 0, 0, 0);
+            break;
+          case 'monthly':
+            periodStart.setDate(1);
+            periodStart.setHours(0, 0, 0, 0);
+            break;
+          case 'yearly':
+            periodStart.setMonth(0, 1);
+            periodStart.setHours(0, 0, 0, 0);
+            break;
+        }
+        periodExpenses = expenses.filter(e => new Date(e.expenseDate) >= periodStart);
       }
-      periodExpenses = expenses.filter(e => new Date(e.date) >= periodStart);
-    }
 
     const total = periodExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const yourExpenses = periodExpenses.filter(e => e.paidBy === 'You').reduce((sum, e) => sum + e.amount, 0);
-    const othersExpenses = periodExpenses.filter(e => e.paidBy !== 'You').reduce((sum, e) => sum + e.amount, 0);
-    const yourShare = total / 3; // Assuming 3 people split
-    const recurring = periodExpenses.filter(e => e.isRecurring).length;
+    const yourExpenses = periodExpenses.reduce((sum, e) => sum + e.amount, 0); // All expenses are user's
+    const yourShare = total; // For personal expenses, share equals total
+    const recurring = 0; // Not tracking recurring in current model
     const categoryBreakdown = categories.reduce((acc, cat) => {
       acc[cat.id] = periodExpenses.filter(e => e.category === cat.id).reduce((sum, e) => sum + e.amount, 0);
       return acc;
     }, {} as Record<string, number>);
     const topCategory = Object.entries(categoryBreakdown).sort((a, b) => b[1] - a[1])[0];
 
-    return { total, yourExpenses, othersExpenses, yourShare, recurring, topCategory: topCategory?.[0] || 'None' };
+    return { total, yourExpenses, othersExpenses: 0, yourShare, recurring, topCategory: topCategory?.[0] || 'None' };
   }, [expenses, selectedPeriod]);
 
   // Filter and sort expenses
@@ -118,8 +120,8 @@ export default function ExpensesDashboard() {
       // Search filter
       const searchMatch = !searchQuery || 
         expense.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        expense.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        expense.paidBy?.toLowerCase().includes(searchQuery.toLowerCase());
+        getCategoryLabel(expense.category)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        expense.description?.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Period filter
       if (selectedPeriod !== 'all') {
@@ -159,12 +161,12 @@ export default function ExpensesDashboard() {
         case 'amount_low':
           return a.amount - b.amount;
         case 'category':
-          return a.category.localeCompare(b.category);
+          return getCategoryLabel(a.category).localeCompare(getCategoryLabel(b.category));
         case 'date':
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
+          return new Date(a.expenseDate).getTime() - new Date(b.expenseDate).getTime();
         case 'recent':
         default:
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          return new Date(b.expenseDate).getTime() - new Date(a.expenseDate).getTime();
       }
     });
 
@@ -173,13 +175,10 @@ export default function ExpensesDashboard() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadExpenses();
   };
 
-  const handleDelete = (id: string, title: string) => {
+  const handleDelete = async (id: number, title: string) => {
     Alert.alert(
       "Delete Expense",
       `Are you sure you want to delete "${title}"?`,
@@ -188,23 +187,33 @@ export default function ExpensesDashboard() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            setExpenses(expenses.filter(e => e.id !== id));
-            Alert.alert("Success", "Expense deleted successfully.");
+          onPress: async () => {
+            try {
+              await expensesAPI.deleteExpense(id);
+              setExpenses(expenses.filter(e => e.id !== id));
+              Alert.alert("Success", "Expense deleted successfully.");
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete expense");
+            }
           },
         },
       ]
     );
   };
 
-  const getCategoryIcon = (categoryId: string) => {
+  const getCategoryIcon = (categoryId: ExpenseCategory | string) => {
     const category = categories.find(c => c.id === categoryId);
     return category?.icon || CreditCardIcon;
   };
 
-  const getCategoryColor = (categoryId: string) => {
+  const getCategoryColor = (categoryId: ExpenseCategory | string) => {
     const category = categories.find(c => c.id === categoryId);
     return category?.color || '#6B7280';
+  };
+
+  const getCategoryLabel = (categoryId: ExpenseCategory | string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category?.label || categoryId;
   };
 
   return (
@@ -374,7 +383,6 @@ export default function ExpensesDashboard() {
           filteredAndSortedExpenses.map((expense) => {
             const CategoryIcon = getCategoryIcon(expense.category);
             const categoryColor = getCategoryColor(expense.category);
-            const isYou = expense.paidBy === 'You';
 
             return (
               <View
@@ -398,13 +406,6 @@ export default function ExpensesDashboard() {
                           <Text className="text-lg font-bold text-gray-900 mr-2">
                             {expense.title}
                           </Text>
-                          {expense.isRecurring && (
-                            <View className="bg-purple-100 px-2 py-0.5 rounded-full">
-                              <Text className="text-purple-700 text-xs font-semibold">
-                                {expense.recurringPeriod?.charAt(0).toUpperCase() + expense.recurringPeriod?.slice(1)}
-                              </Text>
-                            </View>
-                          )}
                         </View>
                         <View className="flex-row items-center">
                           <View 
@@ -412,12 +413,9 @@ export default function ExpensesDashboard() {
                             style={{ backgroundColor: `${categoryColor}20` }}
                           >
                             <Text className="text-xs font-medium" style={{ color: categoryColor }}>
-                              {expense.category}
+                              {getCategoryLabel(expense.category)}
                             </Text>
                           </View>
-                          <Text className="text-gray-500 text-xs">
-                            {isYou ? 'You paid' : `Paid by ${expense.paidBy}`}
-                          </Text>
                         </View>
                       </View>
                       <Text className="text-2xl font-bold text-indigo-600">
@@ -429,7 +427,7 @@ export default function ExpensesDashboard() {
                       <View className="flex-row items-center">
                         <CalendarIcon size={14} color="#6B7280" />
                         <Text className="text-gray-500 text-sm ml-2">
-                          {new Date(expense.date).toLocaleDateString('en-US', { 
+                          {new Date(expense.expenseDate).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric', 
                             year: 'numeric' 
@@ -440,13 +438,13 @@ export default function ExpensesDashboard() {
                       {/* Action Buttons */}
                       <View className="flex-row items-center gap-2">
                         <TouchableOpacity
-                          onPress={() => {/* TODO: Navigate to edit */}}
+                          onPress={() => router.push(`/expenses/edit/${expense.id}`)}
                           className="bg-indigo-50 px-3 py-1.5 rounded-lg"
                         >
                           <EditIcon size={14} color="#4F46E5" />
                         </TouchableOpacity>
                         <TouchableOpacity
-                          onPress={() => handleDelete(expense.id, expense.title)}
+                          onPress={() => handleDelete(expense.id as number, expense.title)}
                           className="bg-red-50 px-3 py-1.5 rounded-lg"
                         >
                           <TrashIcon size={14} color="#EF4444" />
@@ -522,7 +520,7 @@ export default function ExpensesDashboard() {
         visible={showAddExpenseSheet}
         onClose={() => setShowAddExpenseSheet(false)}
         onExpenseAdded={() => {
-          // TODO: Refresh expenses from API
+          loadExpenses();
           setShowAddExpenseSheet(false);
         }}
       />
