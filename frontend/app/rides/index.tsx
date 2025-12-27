@@ -28,6 +28,7 @@ export default function RidesHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
+  const [showInitialPrompt, setShowInitialPrompt] = useState(true);
   const sheetRef = useRef<BottomSheet>(null);
 
   const navigateTo = (path: string) => {
@@ -36,6 +37,12 @@ export default function RidesHome() {
     } catch (err) {
       console.error("Navigation error:", err);
     }
+  };
+
+  const handleInitialSelection = (type: RidePostType) => {
+    setActiveTab(type);
+    setFilters((prev) => ({ ...prev, type }));
+    setShowInitialPrompt(false);
   };
 
   const filteredRides = useMemo(() => {
@@ -114,6 +121,71 @@ export default function RidesHome() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+      {/* Initial Prompt Modal */}
+      <Modal
+        visible={showInitialPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <Pressable
+          className="flex-1 bg-black/60 justify-center items-center px-4"
+          onPress={() => {}}
+        >
+          <Pressable
+            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View className="px-6 py-6">
+              {/* Header */}
+              <View className="mb-6">
+                <Text className="text-2xl font-bold text-gray-900 text-center">
+                  What are you looking for?
+                </Text>
+                <Text className="text-sm text-gray-600 mt-2 text-center">
+                  Choose an option to get started
+                </Text>
+              </View>
+
+              {/* Options */}
+              <View className="gap-3">
+                <TouchableOpacity
+                  onPress={() => handleInitialSelection("OFFER")}
+                  className="bg-blue-600 rounded-xl p-5 flex-row items-center shadow-sm"
+                  activeOpacity={0.8}
+                >
+                  <View className="w-14 h-14 bg-blue-500 rounded-full items-center justify-center mr-4">
+                    <CarIcon size={28} color="#FFFFFF" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-bold text-lg">Looking for a Ride</Text>
+                    <Text className="text-blue-100 text-sm mt-1">
+                      Find available rides from drivers
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleInitialSelection("REQUEST")}
+                  className="bg-indigo-600 rounded-xl p-5 flex-row items-center shadow-sm"
+                  activeOpacity={0.8}
+                >
+                  <View className="w-14 h-14 bg-indigo-500 rounded-full items-center justify-center mr-4">
+                    <MapPinIcon size={28} color="#FFFFFF" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-bold text-lg">Providing a Ride</Text>
+                    <Text className="text-indigo-100 text-sm mt-1">
+                      Respond to ride requests from passengers
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {/* Header with Search */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
         <View className="px-3 pt-2 pb-3">
