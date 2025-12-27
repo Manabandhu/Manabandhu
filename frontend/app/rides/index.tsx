@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform } from "react-native";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ridesApi } from "@/lib/api/rides";
@@ -8,7 +9,7 @@ import { RideFilters, RidePostSummary, RidePostType } from "@/types";
 import RideCard from "@/components/rides/RideCard";
 import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
 import RideMapPreview from "@/components/rides/RideMapPreview";
-import { CarIcon, MapPinIcon, SearchIcon } from "@/components/ui/Icons";
+import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon } from "@/components/ui/Icons";
 
 const TAB_CONFIG: { label: string; type: RidePostType }[] = [
   { label: "Available Rides", type: "OFFER" },
@@ -16,9 +17,9 @@ const TAB_CONFIG: { label: string; type: RidePostType }[] = [
 ];
 
 export default function RidesHome() {
-  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<RidePostType>("OFFER");
-  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
   const [rides, setRides] = useState<RidePostSummary[]>([]);
   const [filters, setFilters] = useState<RideFilters>({ type: "OFFER" });
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,14 @@ export default function RidesHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
+
+  const navigateTo = (path: string) => {
+    try {
+      router.push(path as any);
+    } catch (err) {
+      console.error("Navigation error:", err);
+    }
+  };
 
   const filteredRides = useMemo(() => {
     const trimmed = searchQuery.trim().toLowerCase();
@@ -101,171 +110,225 @@ export default function RidesHome() {
     loadLocation();
   }, []);
 
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <View className="flex-1 justify-center items-center py-20">
-          <Text className="text-gray-500">Loading rides...</Text>
-        </View>
-      );
-    }
-
-    if (error) {
-      return (
-        <View className="bg-red-50 border border-red-100 rounded-xl p-4">
-          <Text className="text-red-600 text-sm">{error}</Text>
-        </View>
-      );
-    }
-
-    if (filteredRides.length === 0) {
-      return (
-        <View className="flex-1 justify-center items-center py-20">
-          <View className="w-16 h-16 rounded-full bg-gray-100 items-center justify-center mb-4">
-            <CarIcon size={28} color="#9CA3AF" />
-          </View>
-          <Text className="text-gray-500 text-lg">No rides available</Text>
-          <Text className="text-gray-400 text-sm mt-2">Try updating your filters or search</Text>
-        </View>
-      );
-    }
-
-    return filteredRides.map((ride) => (
-      <RideCard
-        key={ride.id}
-        ride={ride}
-        onPress={() => {
-          setSelectedRideId(ride.id);
-          router.push(`/rides/detail?id=${ride.id}`);
-        }}
-      />
-    ));
-  };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1 bg-gray-50 px-4 py-6"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-3xl font-bold text-gray-900">Rides</Text>
-          <TouchableOpacity
-            className="bg-blue-600 px-4 py-2 rounded-full"
-            onPress={() =>
-              router.push(activeTab === "OFFER" ? "/rides/offer" : "/rides/request")
-            }
-          >
-            <Text className="text-white font-semibold">
-              {activeTab === "OFFER" ? "+ Offer" : "+ Request"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <Text className="text-sm text-gray-500 mb-5">Discover offers and requests near you</Text>
-
-        <View className="flex-row items-center bg-white rounded-xl px-4 py-3 mb-4 shadow-sm">
-          <SearchIcon size={20} color="#6B7280" />
-          <TextInput
-            className="flex-1 ml-3 text-gray-900"
-            placeholder="Search pickup, drop-off, or notes..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-          {TAB_CONFIG.map((tab) => (
-            <TouchableOpacity
-              key={tab.type}
-              className={`px-4 py-2 rounded-full mr-3 ${
-                activeTab === tab.type ? "bg-blue-600" : "bg-white"
-              }`}
-              onPress={() => setActiveTab(tab.type)}
-            >
-              <Text
-                className={`font-medium ${
-                  activeTab === tab.type ? "text-white" : "text-gray-700"
-                }`}
+    <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+      {/* Header with Search */}
+      <View className="bg-white border-b border-gray-200 shadow-sm">
+        <View className="px-3 pt-2 pb-3">
+          <View className="mb-3 flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-900">Find Your Ride</Text>
+              <Text className="text-xs text-gray-500 mt-0.5">Discover rides and carpool opportunities</Text>
+            </View>
+            {Platform.OS === 'web' && (
+              <TouchableOpacity
+                onPress={() => navigateTo(activeTab === "OFFER" ? "/rides/offer" : "/rides/request")}
+                className="bg-blue-600 px-4 py-2.5 rounded-xl shadow-sm"
               >
-                {tab.label}
-              </Text>
+                <Text className="text-white font-semibold text-sm">
+                  {activeTab === "OFFER" ? "+ Offer Ride" : "+ Request Ride"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Search Bar with Filters and View Toggle */}
+          <View className="flex-row items-center gap-1.5">
+            <View className="bg-gray-50 rounded-lg px-3 flex-row items-center border border-gray-200" style={{ flex: 2.5, height: 44 }}>
+              <SearchIcon size={18} color="#6B7280" />
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search pickup, drop-off, or notes..."
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 ml-2 text-gray-900 text-sm"
+                returnKeyType="search"
+              />
+            </View>
+            
+            <TouchableOpacity
+              onPress={() => {
+                try {
+                  sheetRef.current?.snapToIndex(0);
+                } catch (error) {
+                  console.error("Error opening sheet:", error);
+                }
+              }}
+              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5"
+              style={{ height: 44 }}
+            >
+              <FilterIcon size={16} color="#4B5563" />
             </TouchableOpacity>
-          ))}
+
+            <View className="flex-row bg-gray-100 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
+              <TouchableOpacity
+                onPress={() => setViewMode("list")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white" : ""}`}
+              >
+                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setViewMode("grid")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white" : ""}`}
+              >
+                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setViewMode("map")}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white" : ""}`}
+              >
+                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : "#6B7280"} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Tab Selector */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3">
+            {TAB_CONFIG.map((tab) => (
+              <TouchableOpacity
+                key={tab.type}
+                className={`px-4 py-2 rounded-full mr-3 ${
+                  activeTab === tab.type ? "bg-blue-600" : "bg-gray-100"
+                }`}
+                onPress={() => setActiveTab(tab.type)}
+              >
+                <Text
+                  className={`font-medium text-sm ${
+                    activeTab === tab.type ? "text-white" : "text-gray-700"
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+
+      {viewMode === "map" ? (
+        <View className="flex-1">
+          {selectedRide ? (
+            <View className="p-4">
+              <RideMapPreview
+                pickup={{
+                  lat: selectedRide.pickupLat,
+                  lng: selectedRide.pickupLng,
+                  color: "#10B981",
+                }}
+                drop={{
+                  lat: selectedRide.dropLat,
+                  lng: selectedRide.dropLng,
+                  color: "#F97316",
+                }}
+              />
+            </View>
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <CarIcon size={48} color="#9CA3AF" />
+              <Text className="text-gray-500 mt-4">Select a ride to view on map</Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 bg-gray-50"
+          contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 8, paddingBottom: 20 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {loading && (
+            <View className="items-center py-20">
+              <Text className="text-gray-500 text-base">Loading rides...</Text>
+            </View>
+          )}
+          {error && (
+            <View className="bg-red-50 border border-red-200 rounded-xl p-4 mx-4 mt-4">
+              <Text className="text-red-600 text-sm">{error}</Text>
+            </View>
+          )}
+          {!loading && filteredRides.length === 0 && (
+            <View className="items-center py-20 px-4">
+              <CarIcon size={48} color="#9CA3AF" />
+              <Text className="text-gray-700 text-xl font-semibold mt-4">No rides found</Text>
+              <Text className="text-gray-500 mt-2 text-center text-sm">
+                {searchQuery 
+                  ? "Try adjusting your search or filters"
+                  : "Be the first to post a ride in your area."}
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigateTo(activeTab === "OFFER" ? "/rides/offer" : "/rides/request")}
+                className="mt-6 bg-blue-600 px-6 py-3 rounded-xl shadow-sm"
+              >
+                <Text className="text-white font-semibold">
+                  {activeTab === "OFFER" ? "Offer a Ride" : "Request a Ride"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {!loading && filteredRides.length > 0 && (
+            <View className={viewMode === "grid" ? "flex-row flex-wrap justify-between" : "px-2"}>
+              {filteredRides.map((ride) => (
+                <RideCard
+                  key={ride.id}
+                  ride={ride}
+                  viewMode={viewMode}
+                  onPress={() => {
+                    setSelectedRideId(ride.id);
+                    navigateTo(`/rides/detail?id=${ride.id}`);
+                  }}
+                />
+              ))}
+            </View>
+          )}
         </ScrollView>
+      )}
 
-        <View className="flex-row items-center gap-3 mb-5">
-          <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-full px-4 py-2"
-            onPress={() => sheetRef.current?.expand()}
-          >
-            <Text className="text-gray-700 font-medium">Filters</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-full px-4 py-2"
-            onPress={() => router.push("/rides/my-rides")}
-          >
-            <Text className="text-gray-700 font-medium">My Rides</Text>
-          </TouchableOpacity>
-          <View className="ml-auto flex-row bg-gray-100 rounded-full p-1">
-            <TouchableOpacity
-              onPress={() => setViewMode("list")}
-              className={`px-3 py-1 rounded-full ${
-                viewMode === "list" ? "bg-white" : ""
-              }`}
-            >
-              <Text className={`text-sm font-medium ${viewMode === "list" ? "text-gray-900" : "text-gray-500"}`}>
-                List
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setViewMode("map")}
-              className={`px-3 py-1 rounded-full ${
-                viewMode === "map" ? "bg-white" : ""
-              }`}
-            >
-              <Text className={`text-sm font-medium ${viewMode === "map" ? "text-gray-900" : "text-gray-500"}`}>
-                Map
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={["25%", "60%"]}
+        enablePanDownToClose
+        backgroundStyle={{ backgroundColor: "#fff" }}
+      >
+        <RideFiltersSheet
+          sheetRef={sheetRef}
+          initialFilters={filters}
+          onApply={(updated) => {
+            setFilters(updated);
+            try {
+              sheetRef.current?.close();
+            } catch (error) {
+              console.error("Error closing sheet:", error);
+            }
+          }}
+          onClose={() => {
+            try {
+              sheetRef.current?.close();
+            } catch (error) {
+              console.error("Error closing sheet:", error);
+            }
+          }}
+        />
+      </BottomSheet>
 
-        {viewMode === "map" && selectedRide ? (
-          <View className="mb-4">
-            <RideMapPreview
-              pickup={{
-                lat: selectedRide.pickupLat,
-                lng: selectedRide.pickupLng,
-                color: "#10B981",
-              }}
-              drop={{
-                lat: selectedRide.dropLat,
-                lng: selectedRide.dropLng,
-                color: "#F97316",
-              }}
-            />
-          </View>
-        ) : null}
-
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-sm text-gray-500">{filteredRides.length} results</Text>
-          <View className="flex-row items-center">
-            <MapPinIcon size={16} color="#6B7280" />
-            <Text className="text-gray-500 ml-1 text-sm">Nearby</Text>
-          </View>
-        </View>
-        {renderContent()}
-      </ScrollView>
-
-      <RideFiltersSheet
-        sheetRef={sheetRef}
-        initialFilters={filters}
-        onApply={(updated) => {
-          setFilters(updated);
-          sheetRef.current?.close();
-        }}
-        onClose={() => sheetRef.current?.close()}
-      />
-    </View>
+      {/* Floating Action Button - Mobile Only */}
+      {Platform.OS !== 'web' && (
+        <TouchableOpacity
+          onPress={() => navigateTo(activeTab === "OFFER" ? "/rides/offer" : "/rides/request")}
+          className="absolute right-6 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          style={{
+            bottom: 24 + insets.bottom,
+            backgroundColor: "#2563EB", // Blue color for rides
+            shadowColor: "#2563EB",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 6,
+            elevation: 10,
+          }}
+        >
+          <CarIcon size={28} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
+    </SafeAreaView>
   );
 }
