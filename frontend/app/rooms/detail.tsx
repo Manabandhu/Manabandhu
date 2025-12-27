@@ -98,7 +98,18 @@ export default function RoomDetail() {
   const locationLabel = listing.approxAreaLabel;
   const screenWidth = Dimensions.get("window").width;
   const images = listing.imageUrls || [];
-  const hasMultipleImages = images.length > 1;
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  
+  // Filter out failed images - keep both URI and original index
+  const validImagesWithIndex = images
+    .map((uri, index) => ({ uri, originalIndex: index }))
+    .filter(({ originalIndex }) => !failedImages.has(originalIndex));
+  const validImages = validImagesWithIndex.map(item => item.uri);
+  const hasMultipleImages = validImages.length > 1;
+
+  const handleImageError = (originalIndex: number) => {
+    setFailedImages(prev => new Set(prev).add(originalIndex));
+  };
 
   const handleImageScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -117,25 +128,26 @@ export default function RoomDetail() {
           scrollEventThrottle={16}
           style={{ height: 240 }}
         >
-          {images.length > 0 ? (
-            images.map((uri, index) => (
+          {validImages.length > 0 ? (
+            validImagesWithIndex.map(({ uri, originalIndex }, displayIndex) => (
               <Image 
-                key={`${uri}-${index}`} 
+                key={`${uri}-${originalIndex}`} 
                 source={{ uri }} 
                 style={{ width: screenWidth, height: 240 }}
                 resizeMode="cover"
+                onError={() => handleImageError(originalIndex)}
               />
             ))
           ) : (
             <View style={{ width: screenWidth, height: 240 }} className="bg-gray-100 items-center justify-center">
               <HomeIcon size={32} color="#9CA3AF" />
-              <Text className="text-gray-400 mt-2">No images yet</Text>
+              <Text className="text-gray-400 mt-2">No images available</Text>
             </View>
           )}
         </ScrollView>
         {hasMultipleImages && (
           <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-2">
-            {images.map((_, index) => (
+            {validImages.map((_, index) => (
               <View
                 key={index}
                 className={`h-2 rounded-full ${

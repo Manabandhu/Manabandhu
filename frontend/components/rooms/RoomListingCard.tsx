@@ -13,9 +13,20 @@ interface RoomListingCardProps {
 export default function RoomListingCard({ listing, onPress, viewMode = "list" }: RoomListingCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const scrollViewRef = useRef<ScrollView>(null);
   const images = listing.imageUrls || [];
-  const hasMultipleImages = images.length > 1;
+  
+  // Filter out failed images - keep both URI and original index
+  const validImagesWithIndex = images
+    .map((uri, index) => ({ uri, originalIndex: index }))
+    .filter(({ originalIndex }) => !failedImages.has(originalIndex));
+  const validImages = validImagesWithIndex.map(item => item.uri);
+  const hasMultipleImages = validImages.length > 1;
+  
+  const handleImageError = (originalIndex: number) => {
+    setFailedImages(prev => new Set(prev).add(originalIndex));
+  };
   
   const statusStyle =
     listing.status === "AVAILABLE"
@@ -48,7 +59,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
         onLayout={handleCardLayout}
       >
         <View className="relative">
-          {images.length > 0 ? (
+          {validImages.length > 0 ? (
             <ScrollView
               ref={scrollViewRef}
               horizontal
@@ -58,12 +69,13 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
               scrollEventThrottle={16}
               style={{ height: 160 }}
             >
-              {images.map((uri, index) => (
+              {validImagesWithIndex.map(({ uri, originalIndex }, displayIndex) => (
                 <Image
-                  key={index}
+                  key={originalIndex}
                   source={{ uri }}
                   style={{ width: imageWidth, height: 160 }}
                   resizeMode="cover"
+                  onError={() => handleImageError(originalIndex)}
                 />
               ))}
             </ScrollView>
@@ -80,7 +92,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           </View>
           {hasMultipleImages && (
             <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-1.5">
-              {images.map((_, index) => (
+              {validImages.map((_, index) => (
                 <View
                   key={index}
                   className={`h-1.5 rounded-full ${
@@ -133,7 +145,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
     >
       <View className="flex-row" style={{ minHeight: 140 }}>
         <View className="relative" style={{ width: 140, height: 140 }}>
-          {images.length > 0 ? (
+          {validImages.length > 0 ? (
             <>
               <ScrollView
                 ref={scrollViewRef}
@@ -144,18 +156,19 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
                 scrollEventThrottle={16}
                 style={{ width: 140, height: 140 }}
               >
-                {images.map((uri, index) => (
+                {validImagesWithIndex.map(({ uri, originalIndex }, displayIndex) => (
                   <Image
-                    key={index}
+                    key={originalIndex}
                     source={{ uri }}
                     style={{ width: 140, height: 140 }}
                     resizeMode="cover"
+                    onError={() => handleImageError(originalIndex)}
                   />
                 ))}
               </ScrollView>
               {hasMultipleImages && (
                 <View className="absolute bottom-2 left-0 right-0 flex-row justify-center gap-1">
-                  {images.map((_, index) => (
+                  {validImages.map((_, index) => (
                     <View
                       key={index}
                       className={`h-1 rounded-full ${
