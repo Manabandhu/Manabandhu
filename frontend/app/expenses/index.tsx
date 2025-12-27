@@ -125,7 +125,7 @@ export default function ExpensesDashboard() {
       
       // Period filter
       if (selectedPeriod !== 'all') {
-        const expenseDate = new Date(expense.date);
+        const expenseDate = new Date(expense.expenseDate);
         const now = new Date();
         const periodStart = new Date();
         
@@ -438,7 +438,11 @@ export default function ExpensesDashboard() {
                       {/* Action Buttons */}
                       <View className="flex-row items-center gap-2">
                         <TouchableOpacity
-                          onPress={() => router.push(`/expenses/edit/${expense.id}`)}
+                          onPress={() => {
+                            if (router) {
+                              router.push(`/expenses/edit/${expense.id}` as any);
+                            }
+                          }}
                           className="bg-indigo-50 px-3 py-1.5 rounded-lg"
                         >
                           <EditIcon size={14} color="#4F46E5" />
@@ -462,7 +466,11 @@ export default function ExpensesDashboard() {
         <View className="mt-6 mb-8">
           <TouchableOpacity 
             className="bg-green-600 rounded-xl p-4 flex-row items-center justify-center mb-3 shadow-md"
-            onPress={() => router.push('/splitly')}
+            onPress={() => {
+              if (router) {
+                router.push('/splitly');
+              }
+            }}
           >
             <SplitIcon size={20} color="#FFFFFF" />
             <Text className="text-white font-semibold ml-2">Split with Splitly</Text>
