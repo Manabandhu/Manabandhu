@@ -9,6 +9,7 @@ export interface User {
 	country?: string;
 	city?: string;
 	role?: UserRole;
+	currency?: string;
 	onboardingCompleted: boolean;
 	createdAt: string;
 	updatedAt: string;

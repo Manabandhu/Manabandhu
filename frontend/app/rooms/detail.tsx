@@ -6,6 +6,7 @@ import { roomsApi } from "@/lib/api/rooms";
 import { ListingStatus, RoomListing, RoomReview } from "@/types";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
+import { useCurrency } from "@/lib/currency";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 
@@ -17,6 +18,7 @@ export default function RoomDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { format } = useCurrency();
 
   const loadListing = async () => {
     if (!id) return;
@@ -162,7 +164,7 @@ export default function RoomDetail() {
       <View className="px-6 py-5 gap-4">
         <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <Text className="text-2xl font-bold text-gray-900">{listing.title}</Text>
-          <Text className="text-blue-600 text-lg mt-1">₹{listing.rentMonthly}/month</Text>
+          <Text className="text-blue-600 text-lg mt-1">{format(listing.rentMonthly)}/month</Text>
           <View className="flex-row items-center mt-3">
             <MapPinIcon size={16} color="#9CA3AF" />
             <Text className="text-gray-500 ml-1">{locationLabel}</Text>

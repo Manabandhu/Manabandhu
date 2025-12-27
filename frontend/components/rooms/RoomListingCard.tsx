@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, ScrollView, Dimensions } from "rea
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { RoomListingSummary } from "@/types";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
+import { useCurrency } from "@/lib/currency";
 
 interface RoomListingCardProps {
   listing: RoomListingSummary;
@@ -16,6 +17,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const scrollViewRef = useRef<ScrollView>(null);
   const images = listing.imageUrls || [];
+  const { format } = useCurrency();
   
   // Filter out failed images - keep both URI and original index
   const validImagesWithIndex = images
@@ -115,7 +117,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           </View>
           <View className="flex-row items-baseline justify-between mt-2">
             <View>
-              <Text className="text-lg font-bold text-indigo-600">₹{listing.rentMonthly}</Text>
+              <Text className="text-lg font-bold text-indigo-600">{format(listing.rentMonthly)}</Text>
               <Text className="text-xs text-gray-500">per month</Text>
             </View>
           </View>
@@ -207,7 +209,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
 
           <View>
             <View className="flex-row items-baseline mb-2">
-              <Text className="text-xl font-bold text-indigo-600">₹{listing.rentMonthly}</Text>
+              <Text className="text-xl font-bold text-indigo-600">{format(listing.rentMonthly)}</Text>
               <Text className="text-xs text-gray-500 ml-1">per month</Text>
             </View>
 

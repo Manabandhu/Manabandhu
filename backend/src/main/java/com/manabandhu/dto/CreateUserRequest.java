@@ -25,4 +25,5 @@ public class CreateUserRequest {
     private String city;
     private String role;
     private String photoUrl;
+    private String currency;
 }

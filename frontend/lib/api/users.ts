@@ -11,6 +11,7 @@ export interface User {
   city?: string;
   role?: string;
   photoUrl?: string;
+  currency?: string;
   isActive: boolean;
 }
 
@@ -23,6 +24,7 @@ export interface CreateUserRequest {
   city?: string;
   role?: string;
   photoUrl?: string;
+  currency?: string;
 }
 
 export const userApi = {

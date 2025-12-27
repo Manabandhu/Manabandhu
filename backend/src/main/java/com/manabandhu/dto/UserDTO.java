@@ -20,6 +20,7 @@ public class UserDTO {
     private String city;
     private String role;
     private String photoUrl;
+    private String currency;
     private AuthProvider authProvider;
     private String proxyName;
     private Boolean isActive;

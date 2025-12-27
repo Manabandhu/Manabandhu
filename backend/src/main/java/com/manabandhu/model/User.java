@@ -43,6 +43,8 @@ public class User {
 
     private String photoUrl;
 
+    private String currency = "USD";
+
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider = AuthProvider.EMAIL;
 

@@ -4,6 +4,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { RoomListingSummary } from "@/types";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
+import { useCurrency } from "@/lib/currency";
 // Platform-specific imports - Metro will resolve .native.ts or .web.ts automatically
 // @ts-ignore - Platform-specific file resolution
 import { MapView, Marker, PROVIDER_GOOGLE } from "./MapComponents";
@@ -37,6 +38,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
   const [selectedListing, setSelectedListing] = useState<RoomListingSummary | null>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+  const { format } = useCurrency();
 
   const coordinates = useMemo(() => listings.map((listing) => ({
     listing,
@@ -158,7 +160,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                         color: isSelected ? '#312E81' : '#4338CA',
                       }}
                     >
-                      ₹{listing.rentMonthly}
+                      {format(listing.rentMonthly)}
                     </Text>
                   </View>
                   <View 
@@ -205,7 +207,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                       </View>
                     )}
                     <View className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                      <Text className="text-2xl font-bold text-indigo-600">₹{selectedListing.rentMonthly}</Text>
+                      <Text className="text-2xl font-bold text-indigo-600">{format(selectedListing.rentMonthly)}</Text>
                       <Text className="text-xs text-gray-500">per month</Text>
                     </View>
                   </View>
@@ -314,7 +316,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                 {/* Price Badge */}
                 <View className={`bg-white border-2 ${isSelected ? 'border-indigo-600' : 'border-indigo-500'} rounded-xl px-3 py-1.5 shadow-xl mb-1`}>
                   <Text className={`text-sm font-bold ${isSelected ? 'text-indigo-800' : 'text-indigo-700'}`}>
-                    ₹{listing.rentMonthly}
+                    {format(listing.rentMonthly)}
                   </Text>
                 </View>
                 {/* Marker Pin */}
@@ -479,7 +481,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                       color: isSelected ? '#312E81' : '#4338CA',
                     }}
                   >
-                    ₹{listing.rentMonthly}
+                    {format(listing.rentMonthly)}
                   </Text>
                 </View>
                 {/* Custom Pin */}

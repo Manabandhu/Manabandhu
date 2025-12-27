@@ -53,6 +53,7 @@ const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => 
       country: userData?.country || undefined,
       city: userData?.city || undefined,
       role: userData?.role || undefined,
+      currency: userData?.currency || "USD",
       onboardingCompleted: userData?.onboardingCompleted || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -79,6 +79,7 @@ public class UserService {
             user.setCity(request.getCity());
             user.setRole(request.getRole());
             user.setPhotoUrl(request.getPhotoUrl());
+            user.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
             user.setProxyName(generateProxyName());
             
             User savedUser = userRepository.save(user);
@@ -109,6 +110,9 @@ public class UserService {
             user.setCity(request.getCity());
             user.setRole(request.getRole());
             user.setPhotoUrl(request.getPhotoUrl());
+            if (request.getCurrency() != null) {
+                user.setCurrency(request.getCurrency());
+            }
             
             User updatedUser = userRepository.save(user);
             log.info("User updated successfully: {}", firebaseUid);
@@ -199,6 +203,7 @@ public class UserService {
         dto.setCity(user.getCity());
         dto.setRole(user.getRole());
         dto.setPhotoUrl(user.getPhotoUrl());
+        dto.setCurrency(user.getCurrency());
         dto.setAuthProvider(user.getAuthProvider());
         dto.setProxyName(user.getProxyName());
         dto.setIsActive(user.getIsActive());

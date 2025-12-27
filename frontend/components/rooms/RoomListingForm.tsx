@@ -5,6 +5,7 @@ import { ListingFor, RoomListing, RoomType, VisitType } from "@/types";
 import { formatRoomType, formatListingFor } from "@/lib/rooms/format";
 import { AmenityIcon, UtilityIcon } from "./AmenityIcon";
 import { CheckIcon } from "@/components/ui/Icons";
+import { useCurrency } from "@/lib/currency";
 
 export interface RoomListingFormValues {
   title: string;
@@ -67,6 +68,7 @@ const UTILITIES = [
 
 export default function RoomListingForm({ initialValues, onSubmit, submitLabel, loading }: RoomListingFormProps) {
   const [step, setStep] = useState(1);
+  const { symbol } = useCurrency();
 
   const initialImages = useMemo(() => {
     if (!initialValues?.imageUrls?.length) return [];
@@ -338,7 +340,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                   onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
-                  placeholder="₹"
+                  placeholder={symbol}
                   placeholderTextColor="#9CA3AF"
                 />
               </View>
@@ -352,7 +354,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                   onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
-                  placeholder="₹"
+                  placeholder={symbol}
                   placeholderTextColor="#9CA3AF"
                 />
               </View>

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Modal } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import { BellIcon, LockIcon, HelpIcon, FileIcon, TypeIcon } from '@/components/ui/Icons';
 import { useFontStore } from '@/store/font.store';
 import { useScaledFont } from '@/lib/useScaledFont';
+import { useAuthStore } from '@/store/auth.store';
+import { userApi } from '@/lib/api/users';
+import { getAvailableCurrencies, getCurrencySymbol, useCurrency } from '@/lib/currency';
+import { auth } from '@/lib/firebase';
 
 export default function Settings() {
   const router = useRouter();
@@ -12,8 +16,33 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(false);
   const { scale, setScale, resetScale } = useFontStore();
   const { scaleFont } = useScaledFont();
+  const { user, updateUserProfile } = useAuthStore();
+  const { currency: currentCurrency } = useCurrency();
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [savingCurrency, setSavingCurrency] = useState(false);
+  const availableCurrencies = getAvailableCurrencies();
 
   const fontPercentage = Math.round((scale - 1) * 100);
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    if (!user || !auth.currentUser) return;
+    
+    setSavingCurrency(true);
+    try {
+      await userApi.updateCurrentUser({
+        firebaseUid: auth.currentUser.uid,
+        name: user.displayName || user.email || 'User',
+        currency: newCurrency,
+      });
+      await updateUserProfile({ currency: newCurrency });
+      setShowCurrencyModal(false);
+      Alert.alert('Success', 'Currency preference updated successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update currency preference');
+    } finally {
+      setSavingCurrency(false);
+    }
+  };
 
   const settingsGroups = [
     {
@@ -44,6 +73,18 @@ export default function Settings() {
           type: 'font-slider',
           value: scale,
           percentage: fontPercentage
+        }
+      ]
+    },
+    {
+      title: 'Preferences',
+      items: [
+        {
+          icon: null,
+          label: 'Currency',
+          type: 'navigation',
+          value: currentCurrency,
+          onPress: () => setShowCurrencyModal(true)
         }
       ]
     },
@@ -168,6 +209,13 @@ export default function Settings() {
                           trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
                           thumbColor={item.value ? '#FFFFFF' : '#FFFFFF'}
                         />
+                      ) : item.type === 'navigation' && item.value ? (
+                        <View className="flex-row items-center">
+                          <Text className="text-gray-500 text-sm mr-2" style={{ fontSize: scaleFont(14) }}>
+                            {getCurrencySymbol(item.value)} {item.value}
+                          </Text>
+                          <Text className="text-gray-400" style={{ fontSize: scaleFont(18) }}>›</Text>
+                        </View>
                       ) : (
                         <Text className="text-gray-400" style={{ fontSize: scaleFont(18) }}>›</Text>
                       )}
@@ -184,6 +232,60 @@ export default function Settings() {
           <Text className="text-gray-400 text-sm" style={{ fontSize: scaleFont(14) }}>ManaBandhu v1.0.0</Text>
         </View>
       </ScrollView>
+
+      {/* Currency Selection Modal */}
+      <Modal
+        visible={showCurrencyModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCurrencyModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6 max-h-[80%]">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-bold text-gray-900" style={{ fontSize: scaleFont(20) }}>
+                Select Currency
+              </Text>
+              <TouchableOpacity onPress={() => setShowCurrencyModal(false)}>
+                <Text className="text-blue-600 text-lg" style={{ fontSize: scaleFont(18) }}>Done</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {availableCurrencies.map((curr) => (
+                <TouchableOpacity
+                  key={curr.code}
+                  onPress={() => handleCurrencyChange(curr.code)}
+                  disabled={savingCurrency}
+                  className={`p-4 rounded-xl mb-2 ${
+                    currentCurrency === curr.code ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1">
+                      <Text className="text-base font-semibold text-gray-900" style={{ fontSize: scaleFont(16) }}>
+                        {curr.name}
+                      </Text>
+                      <Text className="text-sm text-gray-500 mt-1" style={{ fontSize: scaleFont(14) }}>
+                        {curr.code}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Text className="text-lg font-bold text-gray-700 mr-2" style={{ fontSize: scaleFont(18) }}>
+                        {curr.symbol}
+                      </Text>
+                      {currentCurrency === curr.code && (
+                        <View className="w-6 h-6 bg-blue-500 rounded-full items-center justify-center">
+                          <Text className="text-white text-xs font-bold">✓</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

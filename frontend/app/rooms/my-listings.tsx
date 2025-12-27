@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { roomsApi } from "@/lib/api/rooms";
 import { ListingStatus, RoomListingSummary } from "@/types";
 import { formatRoomStatus } from "@/lib/rooms/format";
+import { useCurrency } from "@/lib/currency";
 
 const TABS: { label: string; statuses: ListingStatus[] }[] = [
   { label: "Active", statuses: ["AVAILABLE"] },
@@ -18,6 +19,7 @@ export default function MyListings() {
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { format } = useCurrency();
 
   const loadListings = async () => {
     try {
@@ -97,7 +99,7 @@ export default function MyListings() {
                 <Text className="text-lg font-semibold text-gray-900">{listing.title}</Text>
                 <Text className="text-gray-500 mt-1">{listing.approxAreaLabel}</Text>
               </View>
-              <Text className="text-blue-600 font-semibold">₹{listing.rentMonthly}</Text>
+              <Text className="text-blue-600 font-semibold">{format(listing.rentMonthly)}</Text>
             </View>
             <View className="flex-row items-center mt-3">
               <View className="bg-gray-100 px-3 py-1 rounded-full">
