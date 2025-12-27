@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Alert, Animated, StyleSheet } from "react-native";
+import { View, Text, Alert, Animated, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import RoomListingForm, { RoomListingFormValues } from "@/components/rooms/RoomListingForm";
 import { roomsApi } from "@/lib/api/rooms";
@@ -166,9 +166,15 @@ export default function CreateRoomListing() {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 py-6">
-      <Text className="text-2xl font-bold text-gray-900 mb-4">Create Listing</Text>
-      <RoomListingForm submitLabel="Publish listing" loading={loading} onSubmit={handleSubmit} />
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-white"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <View className="flex-1 px-6 py-6">
+        <Text className="text-2xl font-bold text-gray-900 mb-4">Create Listing</Text>
+        <RoomListingForm submitLabel="Publish listing" loading={loading} onSubmit={handleSubmit} />
+      </View>
+    </KeyboardAvoidingView>
   );
 }

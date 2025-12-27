@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image, Animated } from "react-native";
+import React, { useMemo, useState, useRef } from "react";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image, Animated, KeyboardAvoidingView, Platform } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { ListingFor, RoomListing, RoomType, VisitType } from "@/types";
 import { formatRoomType, formatListingFor } from "@/lib/rooms/format";
@@ -202,11 +202,26 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
 
   const progress = (step / 3) * 100;
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const handleInputFocus = () => {
+    // Small delay to ensure keyboard is shown, then scroll to end
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 200);
+  };
+
   return (
-    <View className="flex-1">
-      {/* Progress Bar */}
-      <View className="mb-6">
-        <View className="flex-row items-center justify-between mb-2">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      enabled={Platform.OS === "ios"}
+    >
+      <View className="flex-1">
+        {/* Progress Bar */}
+        <View className="mb-6">
+          <View className="flex-row items-center justify-between mb-2">
           <Text className="text-sm font-semibold text-gray-700">Step {step} of 3</Text>
           <Text className="text-xs text-gray-500">{Math.round(progress)}% Complete</Text>
         </View>
@@ -242,7 +257,14 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
         ))}
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 100 : 150 }}
+        keyboardDismissMode="interactive"
+      >
         {step === 1 && (
           <View className="gap-5">
             <View>
@@ -250,6 +272,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.title}
                 onChangeText={(value) => updateField("title", value)}
+                onFocus={handleInputFocus}
                 placeholder="e.g., Spacious 2BHK with balcony"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -301,6 +324,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.peopleAllowed}
                   onChangeText={(value) => updateField("peopleAllowed", value)}
+                  onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -311,6 +335,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.rentMonthly}
                   onChangeText={(value) => updateField("rentMonthly", value)}
+                  onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholder="₹"
@@ -324,6 +349,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.deposit}
                   onChangeText={(value) => updateField("deposit", value)}
+                  onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholder="₹"
@@ -335,6 +361,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.leaseStartDate}
                   onChangeText={(value) => updateField("leaseStartDate", value)}
+                  onFocus={handleInputFocus}
                   placeholder="YYYY-MM-DD"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -346,6 +373,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.leaseEndDate}
                 onChangeText={(value) => updateField("leaseEndDate", value)}
+                onFocus={handleInputFocus}
                 placeholder="YYYY-MM-DD"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -361,6 +389,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.approxAreaLabel}
                 onChangeText={(value) => updateField("approxAreaLabel", value)}
+                onFocus={handleInputFocus}
                 placeholder="e.g., Indiranagar, Bengaluru"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -372,6 +401,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.latApprox}
                   onChangeText={(value) => updateField("latApprox", value)}
+                  onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -382,6 +412,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={form.lngApprox}
                   onChangeText={(value) => updateField("lngApprox", value)}
+                  onFocus={handleInputFocus}
                   keyboardType="numeric"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -407,6 +438,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                   <TextInput
                     value={form.latExact}
                     onChangeText={(value) => updateField("latExact", value)}
+                    onFocus={handleInputFocus}
                     keyboardType="numeric"
                     className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                     placeholderTextColor="#9CA3AF"
@@ -417,6 +449,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                   <TextInput
                     value={form.lngExact}
                     onChangeText={(value) => updateField("lngExact", value)}
+                    onFocus={handleInputFocus}
                     keyboardType="numeric"
                     className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                     placeholderTextColor="#9CA3AF"
@@ -429,6 +462,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.nearbyLocalities}
                 onChangeText={(value) => updateField("nearbyLocalities", value)}
+                onFocus={handleInputFocus}
                 placeholder="e.g., HSR, Koramangala"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -439,6 +473,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.nearbySchools}
                 onChangeText={(value) => updateField("nearbySchools", value)}
+                onFocus={handleInputFocus}
                 placeholder="e.g., National Public School"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -449,6 +484,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <TextInput
                 value={form.nearbyCompanies}
                 onChangeText={(value) => updateField("nearbyCompanies", value)}
+                onFocus={handleInputFocus}
                 placeholder="e.g., Google, Amazon"
                 className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                 placeholderTextColor="#9CA3AF"
@@ -512,6 +548,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={manualUtilities}
                   onChangeText={setManualUtilities}
+                  onFocus={handleInputFocus}
                   placeholder="e.g., cable TV, heating"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -558,6 +595,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <TextInput
                   value={manualAmenities}
                   onChangeText={setManualAmenities}
+                  onFocus={handleInputFocus}
                   placeholder="e.g., rooftop access, garden"
                   className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
                   placeholderTextColor="#9CA3AF"
@@ -589,16 +627,17 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
 
             <View>
               <Text className="text-base font-semibold text-gray-900 mb-2">Description</Text>
-              <TextInput
-                value={form.description}
-                onChangeText={(value) => updateField("description", value)}
-                placeholder="Share details about the room, neighborhood, and what makes it special..."
-                multiline
-                numberOfLines={5}
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white h-32"
-                placeholderTextColor="#9CA3AF"
-                textAlignVertical="top"
-              />
+                <TextInput
+                  value={form.description}
+                  onChangeText={(value) => updateField("description", value)}
+                  onFocus={handleInputFocus}
+                  placeholder="Share details about the room, neighborhood, and what makes it special..."
+                  multiline
+                  numberOfLines={5}
+                  className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white h-32"
+                  placeholderTextColor="#9CA3AF"
+                  textAlignVertical="top"
+                />
             </View>
 
             <View>
@@ -668,6 +707,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
           </TouchableOpacity>
         )}
       </View>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
