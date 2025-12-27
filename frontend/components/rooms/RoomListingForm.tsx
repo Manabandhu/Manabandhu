@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { ListingFor, RoomListing, RoomType, VisitType } from "@/types";
+import { formatRoomType, formatListingFor } from "@/lib/rooms/format";
 
 export interface RoomListingFormValues {
   title: string;
@@ -148,7 +149,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                       form.listingFor === type ? "bg-blue-600 border-blue-600" : "border-gray-200"
                     }`}
                   >
-                    <Text className={`${form.listingFor === type ? "text-white" : "text-gray-600"}`}>{type}</Text>
+                    <Text className={`${form.listingFor === type ? "text-white" : "text-gray-600"}`}>{formatListingFor(type)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -164,7 +165,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                       form.roomType === type ? "bg-blue-600 border-blue-600" : "border-gray-200"
                     }`}
                   >
-                    <Text className={`${form.roomType === type ? "text-white" : "text-gray-600"}`}>{type}</Text>
+                    <Text className={`${form.roomType === type ? "text-white" : "text-gray-600"}`}>{formatRoomType(type)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

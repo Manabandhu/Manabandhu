@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView, Dimensions } from "react-native";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { RoomListingSummary } from "@/types";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 
 interface RoomListingCardProps {
   listing: RoomListingSummary;
@@ -74,7 +75,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           <View className={`absolute top-3 right-3 px-2 py-1 rounded-lg ${statusStyle.bg}`}>
             <View className="flex-row items-center">
               <View className={`w-2 h-2 rounded-full ${statusStyle.dot} mr-1.5`} />
-              <Text className={`text-xs font-semibold ${statusStyle.text}`}>{listing.status}</Text>
+              <Text className={`text-xs font-semibold ${statusStyle.text}`}>{formatRoomStatus(listing.status)}</Text>
             </View>
           </View>
           {hasMultipleImages && (
@@ -108,11 +109,11 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           </View>
           <View className="flex-row flex-wrap gap-1.5 mt-2">
             <View className="bg-indigo-50 px-2 py-0.5 rounded-md">
-              <Text className="text-xs font-medium text-indigo-700">{listing.roomType}</Text>
+              <Text className="text-xs font-medium text-indigo-700">{formatRoomType(listing.roomType)}</Text>
             </View>
             {listing.listingFor && (
               <View className="bg-purple-50 px-2 py-0.5 rounded-md">
-                <Text className="text-xs font-medium text-purple-700">{listing.listingFor}</Text>
+                <Text className="text-xs font-medium text-purple-700">{formatListingFor(listing.listingFor)}</Text>
               </View>
             )}
           </View>
@@ -173,7 +174,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           <View className={`absolute top-2 left-2 px-2 py-0.5 rounded-md ${statusStyle.bg}`}>
             <View className="flex-row items-center">
               <View className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} mr-1`} />
-              <Text className={`text-xs font-semibold ${statusStyle.text}`}>{listing.status}</Text>
+              <Text className={`text-xs font-semibold ${statusStyle.text}`}>{formatRoomStatus(listing.status)}</Text>
             </View>
           </View>
         </View>
@@ -199,11 +200,11 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
 
             <View className="flex-row flex-wrap gap-1.5">
               <View className="bg-indigo-50 px-2 py-1 rounded-md">
-                <Text className="text-xs font-medium text-indigo-700">{listing.roomType}</Text>
+                <Text className="text-xs font-medium text-indigo-700">{formatRoomType(listing.roomType)}</Text>
               </View>
               {listing.listingFor && (
                 <View className="bg-purple-50 px-2 py-1 rounded-md">
-                  <Text className="text-xs font-medium text-purple-700">{listing.listingFor}</Text>
+                  <Text className="text-xs font-medium text-purple-700">{formatListingFor(listing.listingFor)}</Text>
                 </View>
               )}
             </View>

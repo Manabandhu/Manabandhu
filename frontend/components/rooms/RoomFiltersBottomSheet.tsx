@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ListingFor, RoomFilters, RoomType } from "@/types";
+import { formatRoomType, formatListingFor } from "@/lib/rooms/format";
 
 interface RoomFiltersBottomSheetProps {
   initialFilters: RoomFilters;
@@ -97,7 +98,7 @@ export default function RoomFiltersBottomSheet({
                 type === roomType ? "bg-blue-600 border-blue-600" : "border-gray-200"
               }`}
             >
-              <Text className={`${type === roomType ? "text-white" : "text-gray-700"}`}>{type}</Text>
+              <Text className={`${type === roomType ? "text-white" : "text-gray-700"}`}>{formatRoomType(type)}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -112,7 +113,7 @@ export default function RoomFiltersBottomSheet({
                 type === listingFor ? "bg-blue-600 border-blue-600" : "border-gray-200"
               }`}
             >
-              <Text className={`${type === listingFor ? "text-white" : "text-gray-700"}`}>{type}</Text>
+              <Text className={`${type === listingFor ? "text-white" : "text-gray-700"}`}>{formatListingFor(type)}</Text>
             </TouchableOpacity>
           ))}
         </View>

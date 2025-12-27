@@ -5,6 +5,7 @@ import { openMapsDirections } from "@/lib/maps";
 import { roomsApi } from "@/lib/api/rooms";
 import { ListingStatus, RoomListing, RoomReview } from "@/types";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 
@@ -156,13 +157,13 @@ export default function RoomDetail() {
           </View>
           <View className="flex-row flex-wrap gap-2 mt-3">
             <View className="bg-blue-50 px-3 py-1 rounded-full">
-              <Text className="text-xs font-medium text-blue-700">{listing.roomType}</Text>
+              <Text className="text-xs font-medium text-blue-700">{formatRoomType(listing.roomType)}</Text>
             </View>
             <View className="bg-purple-50 px-3 py-1 rounded-full">
-              <Text className="text-xs font-medium text-purple-700">{listing.listingFor}</Text>
+              <Text className="text-xs font-medium text-purple-700">{formatListingFor(listing.listingFor)}</Text>
             </View>
             <View className="bg-gray-100 px-3 py-1 rounded-full">
-              <Text className="text-xs font-medium text-gray-700">{listing.status}</Text>
+              <Text className="text-xs font-medium text-gray-700">{formatRoomStatus(listing.status)}</Text>
             </View>
           </View>
         </View>
@@ -200,7 +201,7 @@ export default function RoomDetail() {
                     listing.status === status ? "bg-blue-600 border-blue-600" : "border-gray-200"
                   }`}
                 >
-                  <Text className={`${listing.status === status ? "text-white" : "text-gray-700"}`}>{status}</Text>
+                  <Text className={`${listing.status === status ? "text-white" : "text-gray-700"}`}>{formatRoomStatus(status)}</Text>
                 </TouchableOpacity>
               ))}
             </View>

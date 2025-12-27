@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Platform }
 import BottomSheet from "@gorhom/bottom-sheet";
 import { RoomListingSummary } from "@/types";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 // Platform-specific imports - Metro will resolve .native.ts or .web.ts automatically
 // @ts-ignore - Platform-specific file resolution
 import { MapView, Marker, PROVIDER_GOOGLE } from "./MapComponents";
@@ -219,11 +220,11 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                     
                     <View className="flex-row flex-wrap gap-2 mb-4">
                       <View className="bg-indigo-50 px-3 py-1.5 rounded-lg">
-                        <Text className="text-sm font-semibold text-indigo-700">{selectedListing.roomType}</Text>
+                        <Text className="text-sm font-semibold text-indigo-700">{formatRoomType(selectedListing.roomType)}</Text>
                       </View>
                       {selectedListing.listingFor && (
                         <View className="bg-purple-50 px-3 py-1.5 rounded-lg">
-                          <Text className="text-sm font-semibold text-purple-700">{selectedListing.listingFor}</Text>
+                          <Text className="text-sm font-semibold text-purple-700">{formatListingFor(selectedListing.listingFor)}</Text>
                         </View>
                       )}
                       <View className={`px-3 py-1.5 rounded-lg ${
@@ -240,7 +241,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                             ? "text-yellow-700" 
                             : "text-gray-700"
                         }`}>
-                          {selectedListing.status}
+                          {formatRoomStatus(selectedListing.status)}
                         </Text>
                       </View>
                     </View>
@@ -370,11 +371,11 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                   
                   <View className="flex-row flex-wrap gap-2 mb-4">
                     <View className="bg-indigo-50 px-3 py-1.5 rounded-lg">
-                      <Text className="text-sm font-semibold text-indigo-700">{selectedListing.roomType}</Text>
+                      <Text className="text-sm font-semibold text-indigo-700">{formatRoomType(selectedListing.roomType)}</Text>
                     </View>
                     {selectedListing.listingFor && (
                       <View className="bg-purple-50 px-3 py-1.5 rounded-lg">
-                        <Text className="text-sm font-semibold text-purple-700">{selectedListing.listingFor}</Text>
+                        <Text className="text-sm font-semibold text-purple-700">{formatListingFor(selectedListing.listingFor)}</Text>
                       </View>
                     )}
                     <View className={`px-3 py-1.5 rounded-lg ${
@@ -391,7 +392,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                           ? "text-yellow-700" 
                           : "text-gray-700"
                       }`}>
-                        {selectedListing.status}
+                        {formatRoomStatus(selectedListing.status)}
                       </Text>
                     </View>
                   </View>
@@ -565,11 +566,11 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                   
                   <View className="flex-row flex-wrap gap-2 mb-4">
                     <View className="bg-indigo-50 px-3 py-1.5 rounded-lg">
-                      <Text className="text-sm font-semibold text-indigo-700">{selectedListing.roomType}</Text>
+                      <Text className="text-sm font-semibold text-indigo-700">{formatRoomType(selectedListing.roomType)}</Text>
                     </View>
                     {selectedListing.listingFor && (
                       <View className="bg-purple-50 px-3 py-1.5 rounded-lg">
-                        <Text className="text-sm font-semibold text-purple-700">{selectedListing.listingFor}</Text>
+                        <Text className="text-sm font-semibold text-purple-700">{formatListingFor(selectedListing.listingFor)}</Text>
                       </View>
                     )}
                     <View className={`px-3 py-1.5 rounded-lg ${
@@ -586,7 +587,7 @@ export default function RoomMapCanvas({ listings, onSelect }: RoomMapCanvasProps
                           ? "text-yellow-700" 
                           : "text-gray-700"
                       }`}>
-                        {selectedListing.status}
+                        {formatRoomStatus(selectedListing.status)}
                       </Text>
                     </View>
                   </View>

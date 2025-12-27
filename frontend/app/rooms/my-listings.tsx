@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from 
 import { useRouter } from "expo-router";
 import { roomsApi } from "@/lib/api/rooms";
 import { ListingStatus, RoomListingSummary } from "@/types";
+import { formatRoomStatus } from "@/lib/rooms/format";
 
 const TABS: { label: string; statuses: ListingStatus[] }[] = [
   { label: "Active", statuses: ["AVAILABLE"] },
@@ -100,7 +101,7 @@ export default function MyListings() {
             </View>
             <View className="flex-row items-center mt-3">
               <View className="bg-gray-100 px-3 py-1 rounded-full">
-                <Text className="text-xs text-gray-700 font-medium">{listing.status}</Text>
+                <Text className="text-xs text-gray-700 font-medium">{formatRoomStatus(listing.status)}</Text>
               </View>
             </View>
             {listing.status === "HIDDEN" && (
