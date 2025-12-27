@@ -590,14 +590,6 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 )}
               </View>
             </View>
-            {/* Web-specific note */}
-            {Platform.OS === "web" && (
-              <View className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-2">
-                <Text className="text-xs text-blue-700">
-                  <Text className="font-semibold">Note:</Text> On web, the browser's native date picker is used for date selection.
-                </Text>
-              </View>
-            )}
             <View className="bg-gray-50 p-4 rounded-xl">
               <View className="flex-row items-center justify-between">
                 <View className="flex-1">
