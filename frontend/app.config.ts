@@ -50,6 +50,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     "@react-native-google-signin/google-signin",
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/icon.png",
+        color: "#6366f1",
+        sounds: [],
+      },
+    ],
   ],
   scheme: "manabandhu",
   extra: {

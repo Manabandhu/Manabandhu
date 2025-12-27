@@ -9,14 +9,17 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TIMING } from "@/constants/timing";
 import { Platform } from "react-native";
+import { registerForPushNotifications, setupNotificationListeners } from "@/lib/notifications";
+import { useRouter } from "expo-router";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { initializeAuth, isLoading, cleanup } = useAuthStore();
+  const { initializeAuth, isLoading, cleanup, isAuthenticated } = useAuthStore();
   const [showCustomSplash, setShowCustomSplash] = useState(true);
   const [appIsReady, setAppIsReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const prepare = async () => {
@@ -43,6 +46,62 @@ export default function RootLayout() {
       cleanup();
     };
   }, []);
+
+  // Set up push notifications when user is authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let cleanup: (() => void) | undefined;
+
+    const setupNotifications = async () => {
+      try {
+        // Register for push notifications
+        await registerForPushNotifications();
+
+        // Set up notification listeners
+        cleanup = setupNotificationListeners(
+          (notification) => {
+            // Handle notification received while app is in foreground
+            console.log('Notification received:', notification);
+          },
+          (response) => {
+            // Handle notification tap
+            const data = response.notification.request.content.data;
+            if (data?.type) {
+              // Navigate based on notification type
+              switch (data.type) {
+                case 'RIDE_REQUESTED':
+                  if (data.ridePostId) {
+                    router.push(`/rides/detail?id=${data.ridePostId}`);
+                  }
+                  break;
+                case 'USCIS_STATUS_CHANGE':
+                  if (data.caseId) {
+                    router.push(`/uscis/case/${data.caseId}`);
+                  } else {
+                    router.push('/uscis');
+                  }
+                  break;
+                default:
+                  // Navigate to home or notifications screen
+                  router.push('/(tabs)/home');
+              }
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Error setting up notifications:', error);
+      }
+    };
+
+    setupNotifications();
+
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, [isAuthenticated, router]);
 
   const handleSplashComplete = () => {
     setShowCustomSplash(false);

@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { userApi } from '@/lib/api/users';
 import { getAvailableCurrencies, getCurrencySymbol, useCurrency } from '@/lib/currency';
 import { auth } from '@/lib/firebase';
+import { registerForPushNotifications, unregisterPushToken, getPushToken, getNotificationPermissions } from '@/lib/notifications';
 
 export default function Settings() {
   const router = useRouter();
@@ -23,6 +24,42 @@ export default function Settings() {
   const availableCurrencies = getAvailableCurrencies();
 
   const fontPercentage = Math.round((scale - 1) * 100);
+
+  // Check notification permissions on mount
+  useEffect(() => {
+    const checkNotifications = async () => {
+      const permissions = await getNotificationPermissions();
+      setNotifications(permissions.status === 'granted');
+    };
+    checkNotifications();
+  }, []);
+
+  const handleNotificationToggle = async (value: boolean) => {
+    try {
+      if (value) {
+        // Request permissions and register
+        const token = await registerForPushNotifications();
+        if (token) {
+          setNotifications(true);
+          Alert.alert('Success', 'Push notifications enabled');
+        } else {
+          Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+          setNotifications(false);
+        }
+      } else {
+        // Unregister token
+        const token = await getPushToken();
+        if (token) {
+          await unregisterPushToken(token);
+        }
+        setNotifications(false);
+        Alert.alert('Notifications Disabled', 'Push notifications have been disabled');
+      }
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+      Alert.alert('Error', 'Failed to update notification settings');
+    }
+  };
 
   const handleCurrencyChange = async (newCurrency: string) => {
     if (!user || !auth.currentUser) return;
@@ -53,7 +90,7 @@ export default function Settings() {
           label: 'Push Notifications',
           type: 'toggle',
           value: notifications,
-          onToggle: setNotifications
+          onToggle: handleNotificationToggle
         }
       ]
     },
