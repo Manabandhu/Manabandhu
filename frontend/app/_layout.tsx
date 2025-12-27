@@ -72,6 +72,7 @@ export default function RootLayout() {
             <Stack.Screen name="(onboarding)" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="rooms" />
+            <Stack.Screen name="expenses" />
             <Stack.Screen name="index" />
           </Stack>
         </FontProvider>
