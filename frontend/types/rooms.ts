@@ -14,6 +14,7 @@ export interface RoomListing {
   deposit?: number | null;
   leaseStartDate?: string | null;
   leaseEndDate?: string | null;
+  leaseExtendable?: boolean;
   utilitiesIncluded: boolean;
   utilities: string[];
   amenities: string[];

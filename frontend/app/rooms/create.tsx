@@ -51,6 +51,7 @@ export default function CreateRoomListing() {
         deposit: values.deposit ? Number(values.deposit) : null,
         leaseStartDate: values.leaseStartDate || null,
         leaseEndDate: values.leaseEndDate || null,
+        leaseExtendable: values.leaseExtendable,
         utilitiesIncluded: values.utilitiesIncluded,
         utilities: values.utilities
           ? values.utilities.split(",").map((item) => item.trim()).filter(Boolean)

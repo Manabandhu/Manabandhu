@@ -51,6 +51,9 @@ public class RoomListing {
     private LocalDate leaseEndDate;
 
     @Column(nullable = false)
+    private boolean leaseExtendable = false;
+
+    @Column(nullable = false)
     private boolean utilitiesIncluded;
 
     @ElementCollection
@@ -239,6 +242,14 @@ public class RoomListing {
 
     public void setLeaseEndDate(LocalDate leaseEndDate) {
         this.leaseEndDate = leaseEndDate;
+    }
+
+    public boolean isLeaseExtendable() {
+        return leaseExtendable;
+    }
+
+    public void setLeaseExtendable(boolean leaseExtendable) {
+        this.leaseExtendable = leaseExtendable;
     }
 
     public boolean isUtilitiesIncluded() {

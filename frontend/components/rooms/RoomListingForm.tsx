@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image, Animated, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image, Animated, KeyboardAvoidingView, Platform, Modal } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { ListingFor, RoomListing, RoomType, VisitType } from "@/types";
 import { formatRoomType, formatListingFor } from "@/lib/rooms/format";
 import { AmenityIcon, UtilityIcon } from "./AmenityIcon";
@@ -16,6 +17,7 @@ export interface RoomListingFormValues {
   deposit: string;
   leaseStartDate: string;
   leaseEndDate: string;
+  leaseExtendable: boolean;
   utilitiesIncluded: boolean;
   utilities: string;
   amenities: string;
@@ -69,11 +71,32 @@ const UTILITIES = [
 export default function RoomListingForm({ initialValues, onSubmit, submitLabel, loading }: RoomListingFormProps) {
   const [step, setStep] = useState(1);
   const { symbol } = useCurrency();
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const initialImages = useMemo(() => {
     if (!initialValues?.imageUrls?.length) return [];
     return initialValues.imageUrls.map((uri) => ({ uri, isRemote: true }));
   }, [initialValues]);
+
+  // Helper to parse date string to Date object
+  const parseDate = (dateString: string | null | undefined): Date | null => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
+  // Helper to format date to YYYY-MM-DD
+  const formatDate = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const initialStartDate = parseDate(initialValues?.leaseStartDate) || new Date();
+  const initialEndDate = parseDate(initialValues?.leaseEndDate) || new Date();
 
   const [form, setForm] = useState<RoomListingFormValues>({
     title: initialValues?.title ?? "",
@@ -84,6 +107,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
     deposit: initialValues?.deposit?.toString() ?? "",
     leaseStartDate: initialValues?.leaseStartDate ?? "",
     leaseEndDate: initialValues?.leaseEndDate ?? "",
+    leaseExtendable: (initialValues as any)?.leaseExtendable ?? false,
     utilitiesIncluded: initialValues?.utilitiesIncluded ?? false,
     utilities: initialValues?.utilities?.join(", ") ?? "",
     amenities: initialValues?.amenities?.join(", ") ?? "",
@@ -103,6 +127,9 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
     nearbyCompanies: initialValues?.nearbyCompanies?.join(", ") ?? "",
     images: initialImages,
   });
+
+  const [startDate, setStartDate] = useState<Date>(initialStartDate);
+  const [endDate, setEndDate] = useState<Date>(initialEndDate);
 
   // Separate icon-based selections from manual entries
   const [manualAmenities, setManualAmenities] = useState("");
@@ -358,28 +385,232 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                   placeholderTextColor="#9CA3AF"
                 />
               </View>
+            </View>
+            <View className="flex-row gap-3">
               <View className="flex-1">
                 <Text className="text-base font-semibold text-gray-900 mb-2">Lease Start</Text>
-                <TextInput
-                  value={form.leaseStartDate}
-                  onChangeText={(value) => updateField("leaseStartDate", value)}
-                  onFocus={handleInputFocus}
-                  placeholder="YYYY-MM-DD"
-                  className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
-                  placeholderTextColor="#9CA3AF"
-                />
+                {Platform.OS === "web" ? (
+                  // Web: Use native HTML5 date input (browser date picker)
+                  // @ts-ignore - Web-specific HTML input element
+                  <input
+                    type="date"
+                    value={form.leaseStartDate}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateField("leaseStartDate", value);
+                      if (value) {
+                        setStartDate(new Date(value));
+                      }
+                    }}
+                    min={new Date().toISOString().split("T")[0]}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "1px solid #D1D5DB",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      backgroundColor: "white",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <TouchableOpacity
+                      onPress={() => setShowStartDatePicker(true)}
+                      className="border border-gray-300 rounded-xl px-4 py-3 bg-white"
+                    >
+                      <Text className={`text-base ${form.leaseStartDate ? "text-gray-900" : "text-gray-400"}`}>
+                        {form.leaseStartDate || "Select start date"}
+                      </Text>
+                    </TouchableOpacity>
+                    {Platform.OS === "ios" ? (
+                      <Modal
+                        visible={showStartDatePicker}
+                        transparent={true}
+                        animationType="slide"
+                        onRequestClose={() => setShowStartDatePicker(false)}
+                      >
+                        <View className="flex-1 justify-end bg-black/50">
+                          <View className="bg-white rounded-t-3xl p-4">
+                            <View className="flex-row justify-between items-center mb-4">
+                              <TouchableOpacity onPress={() => setShowStartDatePicker(false)}>
+                                <Text className="text-blue-600 text-lg">Cancel</Text>
+                              </TouchableOpacity>
+                              <Text className="text-lg font-semibold">Select Start Date</Text>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  updateField("leaseStartDate", formatDate(startDate));
+                                  setShowStartDatePicker(false);
+                                }}
+                              >
+                                <Text className="text-blue-600 text-lg font-semibold">Done</Text>
+                              </TouchableOpacity>
+                            </View>
+                            <DateTimePicker
+                              value={startDate}
+                              mode="date"
+                              display="spinner"
+                              onChange={(event, selectedDate) => {
+                                if (selectedDate) {
+                                  setStartDate(selectedDate);
+                                }
+                              }}
+                              minimumDate={new Date()}
+                            />
+                          </View>
+                        </View>
+                      </Modal>
+                    ) : (
+                      showStartDatePicker && (
+                        <DateTimePicker
+                          value={startDate}
+                          mode="date"
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            setShowStartDatePicker(false);
+                            if (selectedDate) {
+                              setStartDate(selectedDate);
+                              updateField("leaseStartDate", formatDate(selectedDate));
+                            }
+                          }}
+                          minimumDate={new Date()}
+                        />
+                      )
+                    )}
+                  </>
+                )}
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-2">Lease End</Text>
+                {Platform.OS === "web" ? (
+                  // Web: Use native HTML5 date input (browser date picker)
+                  // @ts-ignore - Web-specific HTML input element
+                  <input
+                    type="date"
+                    value={form.leaseEndDate}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateField("leaseEndDate", value);
+                      if (value) {
+                        const newEndDate = new Date(value);
+                        setEndDate(newEndDate);
+                        // Ensure end date is after start date
+                        if (form.leaseStartDate && newEndDate < new Date(form.leaseStartDate)) {
+                          setStartDate(newEndDate);
+                          updateField("leaseStartDate", value);
+                        }
+                      }
+                    }}
+                    min={form.leaseStartDate || new Date().toISOString().split("T")[0]}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "1px solid #D1D5DB",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      backgroundColor: "white",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <TouchableOpacity
+                      onPress={() => setShowEndDatePicker(true)}
+                      className="border border-gray-300 rounded-xl px-4 py-3 bg-white"
+                    >
+                      <Text className={`text-base ${form.leaseEndDate ? "text-gray-900" : "text-gray-400"}`}>
+                        {form.leaseEndDate || "Select end date"}
+                      </Text>
+                    </TouchableOpacity>
+                    {Platform.OS === "ios" ? (
+                      <Modal
+                        visible={showEndDatePicker}
+                        transparent={true}
+                        animationType="slide"
+                        onRequestClose={() => setShowEndDatePicker(false)}
+                      >
+                        <View className="flex-1 justify-end bg-black/50">
+                          <View className="bg-white rounded-t-3xl p-4">
+                            <View className="flex-row justify-between items-center mb-4">
+                              <TouchableOpacity onPress={() => setShowEndDatePicker(false)}>
+                                <Text className="text-blue-600 text-lg">Cancel</Text>
+                              </TouchableOpacity>
+                              <Text className="text-lg font-semibold">Select End Date</Text>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  updateField("leaseEndDate", formatDate(endDate));
+                                  // Ensure end date is after start date
+                                  if (endDate < startDate) {
+                                    setStartDate(endDate);
+                                    updateField("leaseStartDate", formatDate(endDate));
+                                  }
+                                  setShowEndDatePicker(false);
+                                }}
+                              >
+                                <Text className="text-blue-600 text-lg font-semibold">Done</Text>
+                              </TouchableOpacity>
+                            </View>
+                            <DateTimePicker
+                              value={endDate}
+                              mode="date"
+                              display="spinner"
+                              onChange={(event, selectedDate) => {
+                                if (selectedDate) {
+                                  setEndDate(selectedDate);
+                                }
+                              }}
+                              minimumDate={startDate || new Date()}
+                            />
+                          </View>
+                        </View>
+                      </Modal>
+                    ) : (
+                      showEndDatePicker && (
+                        <DateTimePicker
+                          value={endDate}
+                          mode="date"
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            setShowEndDatePicker(false);
+                            if (selectedDate) {
+                              setEndDate(selectedDate);
+                              updateField("leaseEndDate", formatDate(selectedDate));
+                              // Ensure end date is after start date
+                              if (selectedDate < startDate) {
+                                setStartDate(selectedDate);
+                                updateField("leaseStartDate", formatDate(selectedDate));
+                              }
+                            }
+                          }}
+                          minimumDate={startDate || new Date()}
+                        />
+                      )
+                    )}
+                  </>
+                )}
               </View>
             </View>
-            <View>
-              <Text className="text-base font-semibold text-gray-900 mb-2">Lease End</Text>
-              <TextInput
-                value={form.leaseEndDate}
-                onChangeText={(value) => updateField("leaseEndDate", value)}
-                onFocus={handleInputFocus}
-                placeholder="YYYY-MM-DD"
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
-                placeholderTextColor="#9CA3AF"
-              />
+            {/* Web-specific note */}
+            {Platform.OS === "web" && (
+              <View className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-2">
+                <Text className="text-xs text-blue-700">
+                  <Text className="font-semibold">Note:</Text> On web, the browser's native date picker is used for date selection.
+                </Text>
+              </View>
+            )}
+            <View className="bg-gray-50 p-4 rounded-xl">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-gray-900">Lease Can Be Extended</Text>
+                  <Text className="text-sm text-gray-500 mt-1">Allow tenants to extend the lease period</Text>
+                </View>
+                <Switch
+                  value={form.leaseExtendable}
+                  onValueChange={(value) => updateField("leaseExtendable", value)}
+                  trackColor={{ false: "#D1D5DB", true: "#4F46E5" }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
             </View>
           </View>
         )}
@@ -713,3 +944,4 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
     </KeyboardAvoidingView>
   );
 }
+

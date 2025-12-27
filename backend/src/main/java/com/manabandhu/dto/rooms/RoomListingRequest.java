@@ -34,6 +34,8 @@ public class RoomListingRequest {
 
     private LocalDate leaseEndDate;
 
+    private boolean leaseExtendable;
+
     private boolean utilitiesIncluded;
 
     private List<String> utilities;
@@ -132,6 +134,14 @@ public class RoomListingRequest {
 
     public void setLeaseEndDate(LocalDate leaseEndDate) {
         this.leaseEndDate = leaseEndDate;
+    }
+
+    public boolean isLeaseExtendable() {
+        return leaseExtendable;
+    }
+
+    public void setLeaseExtendable(boolean leaseExtendable) {
+        this.leaseExtendable = leaseExtendable;
     }
 
     public boolean isUtilitiesIncluded() {

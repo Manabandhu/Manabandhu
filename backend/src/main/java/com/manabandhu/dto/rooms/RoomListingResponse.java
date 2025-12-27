@@ -20,6 +20,7 @@ public class RoomListingResponse {
     private BigDecimal deposit;
     private LocalDate leaseStartDate;
     private LocalDate leaseEndDate;
+    private boolean leaseExtendable;
     private boolean utilitiesIncluded;
     private List<String> utilities;
     private List<String> amenities;
@@ -55,6 +56,7 @@ public class RoomListingResponse {
         this.deposit = listing.getDeposit();
         this.leaseStartDate = listing.getLeaseStartDate();
         this.leaseEndDate = listing.getLeaseEndDate();
+        this.leaseExtendable = listing.isLeaseExtendable();
         this.utilitiesIncluded = listing.isUtilitiesIncluded();
         this.utilities = listing.getUtilities();
         this.amenities = listing.getAmenities();
@@ -118,6 +120,10 @@ public class RoomListingResponse {
 
     public LocalDate getLeaseEndDate() {
         return leaseEndDate;
+    }
+
+    public boolean isLeaseExtendable() {
+        return leaseExtendable;
     }
 
     public boolean isUtilitiesIncluded() {

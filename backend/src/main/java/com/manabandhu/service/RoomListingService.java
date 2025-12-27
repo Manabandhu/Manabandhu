@@ -381,6 +381,7 @@ public class RoomListingService {
         listing.setDeposit(request.getDeposit());
         listing.setLeaseStartDate(request.getLeaseStartDate());
         listing.setLeaseEndDate(request.getLeaseEndDate());
+        listing.setLeaseExtendable(request.isLeaseExtendable());
         listing.setUtilitiesIncluded(request.isUtilitiesIncluded());
         listing.setUtilities(new ArrayList<>(Optional.ofNullable(request.getUtilities()).orElseGet(List::of)));
         listing.setAmenities(new ArrayList<>(Optional.ofNullable(request.getAmenities()).orElseGet(List::of)));
