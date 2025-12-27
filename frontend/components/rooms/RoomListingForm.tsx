@@ -431,12 +431,12 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                         onRequestClose={() => setShowStartDatePicker(false)}
                       >
                         <View className="flex-1 justify-end bg-black/50">
-                          <View className="bg-white rounded-t-3xl p-4">
-                            <View className="flex-row justify-between items-center mb-4">
+                          <View className="bg-white rounded-t-3xl" style={{ backgroundColor: '#FFFFFF' }}>
+                            <View className="flex-row justify-between items-center px-4 pt-4 pb-3 border-b border-gray-200">
                               <TouchableOpacity onPress={() => setShowStartDatePicker(false)}>
-                                <Text className="text-blue-600 text-lg">Cancel</Text>
+                                <Text className="text-blue-600 text-lg font-semibold">Cancel</Text>
                               </TouchableOpacity>
-                              <Text className="text-lg font-semibold">Select Start Date</Text>
+                              <Text className="text-lg font-semibold text-gray-900">Select Start Date</Text>
                               <TouchableOpacity
                                 onPress={() => {
                                   updateField("leaseStartDate", formatDate(startDate));
@@ -446,17 +446,20 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                                 <Text className="text-blue-600 text-lg font-semibold">Done</Text>
                               </TouchableOpacity>
                             </View>
-                            <DateTimePicker
-                              value={startDate}
-                              mode="date"
-                              display="spinner"
-                              onChange={(event, selectedDate) => {
-                                if (selectedDate) {
-                                  setStartDate(selectedDate);
-                                }
-                              }}
-                              minimumDate={new Date()}
-                            />
+                            <View style={{ backgroundColor: '#FFFFFF', paddingVertical: 12 }}>
+                              <DateTimePicker
+                                value={startDate}
+                                mode="date"
+                                display="spinner"
+                                onChange={(event, selectedDate) => {
+                                  if (selectedDate) {
+                                    setStartDate(selectedDate);
+                                  }
+                                }}
+                                minimumDate={new Date()}
+                                style={{ backgroundColor: '#FFFFFF', height: 200 }}
+                              />
+                            </View>
                           </View>
                         </View>
                       </Modal>
@@ -530,12 +533,12 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                         onRequestClose={() => setShowEndDatePicker(false)}
                       >
                         <View className="flex-1 justify-end bg-black/50">
-                          <View className="bg-white rounded-t-3xl p-4">
-                            <View className="flex-row justify-between items-center mb-4">
+                          <View className="bg-white rounded-t-3xl" style={{ backgroundColor: '#FFFFFF' }}>
+                            <View className="flex-row justify-between items-center px-4 pt-4 pb-3 border-b border-gray-200">
                               <TouchableOpacity onPress={() => setShowEndDatePicker(false)}>
-                                <Text className="text-blue-600 text-lg">Cancel</Text>
+                                <Text className="text-blue-600 text-lg font-semibold">Cancel</Text>
                               </TouchableOpacity>
-                              <Text className="text-lg font-semibold">Select End Date</Text>
+                              <Text className="text-lg font-semibold text-gray-900">Select End Date</Text>
                               <TouchableOpacity
                                 onPress={() => {
                                   updateField("leaseEndDate", formatDate(endDate));
@@ -550,17 +553,20 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                                 <Text className="text-blue-600 text-lg font-semibold">Done</Text>
                               </TouchableOpacity>
                             </View>
-                            <DateTimePicker
-                              value={endDate}
-                              mode="date"
-                              display="spinner"
-                              onChange={(event, selectedDate) => {
-                                if (selectedDate) {
-                                  setEndDate(selectedDate);
-                                }
-                              }}
-                              minimumDate={startDate || new Date()}
-                            />
+                            <View style={{ backgroundColor: '#FFFFFF', paddingVertical: 12 }}>
+                              <DateTimePicker
+                                value={endDate}
+                                mode="date"
+                                display="spinner"
+                                onChange={(event, selectedDate) => {
+                                  if (selectedDate) {
+                                    setEndDate(selectedDate);
+                                  }
+                                }}
+                                minimumDate={startDate || new Date()}
+                                style={{ backgroundColor: '#FFFFFF', height: 200 }}
+                              />
+                            </View>
                           </View>
                         </View>
                       </Modal>

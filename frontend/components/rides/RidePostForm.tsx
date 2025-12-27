@@ -4,6 +4,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { PricingMode, RidePost, RidePostType, RideRequirements } from "@/types";
 import { validatePerMile } from "@/lib/rides/pricing";
 import { MapPinIcon, CalendarIcon, UsersIcon, DollarSignIcon, TypeIcon, NavigationIcon } from "@/components/ui/Icons";
+import LocationPicker from "./LocationPicker";
 
 interface RidePostFormProps {
   type: RidePostType;
@@ -52,12 +53,16 @@ const formatDisplayDateTime = (isoString: string): string => {
 
 export default function RidePostForm({ type, initial, onSubmit, submitLabel }: RidePostFormProps) {
   const [title, setTitle] = useState(initial?.title ?? "");
-  const [pickupLabel, setPickupLabel] = useState(initial?.pickupLabel ?? "");
-  const [pickupLat, setPickupLat] = useState(initial?.pickupLat?.toString() ?? "");
-  const [pickupLng, setPickupLng] = useState(initial?.pickupLng?.toString() ?? "");
-  const [dropLabel, setDropLabel] = useState(initial?.dropLabel ?? "");
-  const [dropLat, setDropLat] = useState(initial?.dropLat?.toString() ?? "");
-  const [dropLng, setDropLng] = useState(initial?.dropLng?.toString() ?? "");
+  const [pickupLocation, setPickupLocation] = useState({
+    label: initial?.pickupLabel ?? "",
+    lat: initial?.pickupLat,
+    lng: initial?.pickupLng,
+  });
+  const [dropLocation, setDropLocation] = useState({
+    label: initial?.dropLabel ?? "",
+    lat: initial?.dropLat,
+    lng: initial?.dropLng,
+  });
   const [departAt, setDepartAt] = useState(initial?.departAt ?? "");
   const [seats, setSeats] = useState(
     type === "OFFER" ? String(initial?.seatsTotal ?? "") : String(initial?.seatsNeeded ?? "")
@@ -87,12 +92,12 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
   const distancePreview = useMemo(
     () =>
       haversineMiles(
-        toNumber(pickupLat),
-        toNumber(pickupLng),
-        toNumber(dropLat),
-        toNumber(dropLng)
+        pickupLocation.lat,
+        pickupLocation.lng,
+        dropLocation.lat,
+        dropLocation.lng
       ),
-    [pickupLat, pickupLng, dropLat, dropLng]
+    [pickupLocation, dropLocation]
   );
 
   const handleDateChange = (event: any, date?: Date) => {
@@ -129,12 +134,12 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
   const submit = async () => {
     setError(null);
     const seatValue = toNumber(seats);
-    if (!pickupLabel || !dropLabel) {
+    if (!pickupLocation.label || !dropLocation.label) {
       setError("Pickup and drop locations are required.");
       return;
     }
-    if (!pickupLat || !pickupLng || !dropLat || !dropLng) {
-      setError("Pickup and drop coordinates are required.");
+    if (!pickupLocation.lat || !pickupLocation.lng || !dropLocation.lat || !dropLocation.lng) {
+      setError("Please select valid pickup and drop locations using the map picker.");
       return;
     }
     if (!departAt) {
@@ -166,12 +171,12 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
     const payload: Partial<RidePost> = {
       postType: type,
       title: title || undefined,
-      pickupLabel,
-      pickupLat: toNumber(pickupLat),
-      pickupLng: toNumber(pickupLng),
-      dropLabel,
-      dropLat: toNumber(dropLat),
-      dropLng: toNumber(dropLng),
+      pickupLabel: pickupLocation.label,
+      pickupLat: pickupLocation.lat,
+      pickupLng: pickupLocation.lng,
+      dropLabel: dropLocation.label,
+      dropLat: dropLocation.lat,
+      dropLng: dropLocation.lng,
       departAt,
       pricingMode,
       priceFixed: pricingMode === "FIXED" ? toNumber(priceFixed) : undefined,
@@ -212,78 +217,30 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
       <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
         <View className="flex-row items-center mb-3">
           <MapPinIcon size={18} color="#2563EB" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Pickup Location *</Text>
+          <Text className="text-base font-semibold text-gray-900 ml-2">Pickup Location</Text>
         </View>
-        <TextInput
-          value={pickupLabel}
-          onChangeText={setPickupLabel}
+        <LocationPicker
+          label=""
           placeholder="e.g., Downtown station, Airport"
-          placeholderTextColor="#9CA3AF"
-          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50 mb-3"
+          value={pickupLocation}
+          onChange={setPickupLocation}
+          required
         />
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <Text className="text-sm text-gray-600 mb-2">Latitude *</Text>
-            <TextInput
-              value={pickupLat}
-              onChangeText={setPickupLat}
-              keyboardType="numeric"
-              placeholder="37.7749"
-              placeholderTextColor="#9CA3AF"
-              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
-            />
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm text-gray-600 mb-2">Longitude *</Text>
-            <TextInput
-              value={pickupLng}
-              onChangeText={setPickupLng}
-              keyboardType="numeric"
-              placeholder="-122.4194"
-              placeholderTextColor="#9CA3AF"
-              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
-            />
-          </View>
-        </View>
       </View>
 
       {/* Drop Location Section */}
       <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
         <View className="flex-row items-center mb-3">
           <NavigationIcon size={18} color="#10B981" />
-          <Text className="text-base font-semibold text-gray-900 ml-2">Drop-off Location *</Text>
+          <Text className="text-base font-semibold text-gray-900 ml-2">Drop-off Location</Text>
         </View>
-        <TextInput
-          value={dropLabel}
-          onChangeText={setDropLabel}
+        <LocationPicker
+          label=""
           placeholder="e.g., Airport terminal, City center"
-          placeholderTextColor="#9CA3AF"
-          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50 mb-3"
+          value={dropLocation}
+          onChange={setDropLocation}
+          required
         />
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <Text className="text-sm text-gray-600 mb-2">Latitude *</Text>
-            <TextInput
-              value={dropLat}
-              onChangeText={setDropLat}
-              keyboardType="numeric"
-              placeholder="37.6152"
-              placeholderTextColor="#9CA3AF"
-              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
-            />
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm text-gray-600 mb-2">Longitude *</Text>
-            <TextInput
-              value={dropLng}
-              onChangeText={setDropLng}
-              keyboardType="numeric"
-              placeholder="-122.3899"
-              placeholderTextColor="#9CA3AF"
-              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
-            />
-          </View>
-        </View>
       </View>
 
       {/* Departure Time Section */}
@@ -316,12 +273,12 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
           <>
             <Modal visible={showDatePicker} transparent animationType="slide">
               <View className="flex-1 bg-black/50 justify-end">
-                <View className="bg-white rounded-t-3xl p-4">
-                  <View className="flex-row justify-between items-center mb-4">
+                <View className="bg-white rounded-t-3xl" style={{ backgroundColor: '#FFFFFF' }}>
+                  <View className="flex-row justify-between items-center px-4 pt-4 pb-3 border-b border-gray-200">
                     <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                      <Text className="text-blue-600 text-lg">Cancel</Text>
+                      <Text className="text-blue-600 text-lg font-semibold">Cancel</Text>
                     </TouchableOpacity>
-                    <Text className="text-lg font-semibold">Select Date</Text>
+                    <Text className="text-lg font-semibold text-gray-900">Select Date</Text>
                     <TouchableOpacity
                       onPress={() => {
                         handleDateChange(null, selectedDate);
@@ -331,24 +288,27 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
                       <Text className="text-blue-600 text-lg font-semibold">Done</Text>
                     </TouchableOpacity>
                   </View>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="spinner"
-                    onChange={handleDateChange}
-                    minimumDate={new Date()}
-                  />
+                  <View style={{ backgroundColor: '#FFFFFF', paddingVertical: 12 }}>
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="date"
+                      display="spinner"
+                      onChange={handleDateChange}
+                      minimumDate={new Date()}
+                      style={{ backgroundColor: '#FFFFFF', height: 200 }}
+                    />
+                  </View>
                 </View>
               </View>
             </Modal>
             <Modal visible={showTimePicker} transparent animationType="slide">
               <View className="flex-1 bg-black/50 justify-end">
-                <View className="bg-white rounded-t-3xl p-4">
-                  <View className="flex-row justify-between items-center mb-4">
+                <View className="bg-white rounded-t-3xl" style={{ backgroundColor: '#FFFFFF' }}>
+                  <View className="flex-row justify-between items-center px-4 pt-4 pb-3 border-b border-gray-200">
                     <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                      <Text className="text-blue-600 text-lg">Cancel</Text>
+                      <Text className="text-blue-600 text-lg font-semibold">Cancel</Text>
                     </TouchableOpacity>
-                    <Text className="text-lg font-semibold">Select Time</Text>
+                    <Text className="text-lg font-semibold text-gray-900">Select Time</Text>
                     <TouchableOpacity
                       onPress={() => {
                         handleTimeChange(null, selectedDate);
@@ -358,12 +318,15 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
                       <Text className="text-blue-600 text-lg font-semibold">Done</Text>
                     </TouchableOpacity>
                   </View>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="time"
-                    display="spinner"
-                    onChange={handleTimeChange}
-                  />
+                  <View style={{ backgroundColor: '#FFFFFF', paddingVertical: 12 }}>
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="time"
+                      display="spinner"
+                      onChange={handleTimeChange}
+                      style={{ backgroundColor: '#FFFFFF', height: 200 }}
+                    />
+                  </View>
                 </View>
               </View>
             </Modal>
