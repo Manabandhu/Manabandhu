@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Modal, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { jobsAPI, Job } from "@/lib/api/jobs";
-import { BriefcaseIcon, SearchIcon, MapPinIcon } from "@/components/ui/Icons";
+import { BriefcaseIcon, SearchIcon, MapPinIcon, FilterIcon, XIcon, PlusIcon, CalendarIcon } from "@/components/ui/Icons";
 import PostJobBottomSheet from "@/components/PostJobBottomSheet";
 
 const jobTypes = [
-  { key: 'ALL', label: 'All Jobs' },
-  { key: 'FULL_TIME', label: 'Full Time' },
-  { key: 'PART_TIME', label: 'Part Time' },
-  { key: 'CONTRACT', label: 'Contract' },
-  { key: 'REMOTE', label: 'Remote' },
+  { key: 'ALL', label: 'All Jobs', color: '#6366F1' },
+  { key: 'FULL_TIME', label: 'Full Time', color: '#10B981' },
+  { key: 'PART_TIME', label: 'Part Time', color: '#3B82F6' },
+  { key: 'CONTRACT', label: 'Contract', color: '#F59E0B' },
+  { key: 'REMOTE', label: 'Remote', color: '#8B5CF6' },
 ];
+
+type SortOption = 'recent' | 'salary_high' | 'salary_low' | 'company';
 
 export default function Jobs() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('ALL');
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [showPostJobSheet, setShowPostJobSheet] = useState(false);
+  const [showSortModal, setShowSortModal] = useState(false);
 
   const loadJobs = async () => {
     try {
@@ -54,10 +60,50 @@ export default function Jobs() {
     const timeoutId = setTimeout(() => {
       if (searchQuery !== '') {
         loadJobs();
+      } else {
+        loadJobs();
       }
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const total = jobs.length;
+    const fullTime = jobs.filter(j => j.type === 'FULL_TIME').length;
+    const remote = jobs.filter(j => j.type === 'REMOTE').length;
+    const avgSalary = jobs.length > 0 
+      ? jobs.reduce((sum, j) => sum + (j.salaryMin || 0) + (j.salaryMax || 0), 0) / (jobs.length * 2)
+      : 0;
+    
+    return { total, fullTime, remote, avgSalary };
+  }, [jobs]);
+
+  // Filter and sort jobs
+  const filteredAndSortedJobs = useMemo(() => {
+    let filtered = [...jobs];
+
+    // Sort
+    filtered = filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'salary_high':
+          const aMax = a.salaryMax || a.salaryMin || 0;
+          const bMax = b.salaryMax || b.salaryMin || 0;
+          return bMax - aMax;
+        case 'salary_low':
+          const aMin = a.salaryMin || a.salaryMax || 0;
+          const bMin = b.salaryMin || b.salaryMax || 0;
+          return aMin - bMin;
+        case 'company':
+          return (a.company || '').localeCompare(b.company || '');
+        case 'recent':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+    return filtered;
+  }, [jobs, sortBy]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return '';
@@ -77,142 +123,281 @@ export default function Jobs() {
     return `${days} days ago`;
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500">Loading jobs...</Text>
-      </View>
-    );
-  }
+  const getTypeColor = (type: string) => {
+    const typeConfig = jobTypes.find(t => t.key === type);
+    return typeConfig?.color || '#6B7280';
+  };
 
   return (
-    <ScrollView 
-      className="flex-1 bg-gray-50 px-4 py-6"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
+    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
       {/* Header */}
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-3xl font-bold text-gray-900">
-          Jobs
-        </Text>
-        <TouchableOpacity
-          className="bg-blue-600 px-4 py-2 rounded-full"
-          onPress={() => setShowPostJobSheet(true)}
-        >
-          <Text className="text-white font-semibold">+ Post</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <View className="flex-row items-center bg-white rounded-xl px-4 py-3 mb-4 shadow-sm">
-        <SearchIcon size={20} color="#6B7280" />
-        <TextInput
-          className="flex-1 ml-3 text-gray-900"
-          placeholder="Search jobs, companies, locations..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      {/* Job Type Filters */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
-        {jobTypes.map((type) => (
-          <TouchableOpacity
-            key={type.key}
-            className={`px-4 py-2 rounded-full mr-3 ${
-              selectedType === type.key ? 'bg-blue-600' : 'bg-white'
-            }`}
-            onPress={() => setSelectedType(type.key)}
-          >
-            <Text className={`font-medium ${
-              selectedType === type.key ? 'text-white' : 'text-gray-700'
-            }`}>
-              {type.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Jobs List */}
-      {jobs.length === 0 ? (
-        <View className="flex-1 justify-center items-center py-20">
-          <BriefcaseIcon size={48} color="#9CA3AF" />
-          <Text className="text-gray-500 text-lg mt-4">No jobs found</Text>
-          <Text className="text-gray-400 text-sm mt-2">Try adjusting your search or filters</Text>
-        </View>
-      ) : (
-        jobs.map((job) => (
-          <TouchableOpacity
-            key={job.id}
-            className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
-            onPress={() => router.push(`/jobs/detail?id=${job.id}`)}
-          >
-            <View className="flex-row justify-between items-start mb-2">
-              <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-900 mb-1">
-                  {job.title}
-                </Text>
-                <Text className="text-blue-600 font-medium mb-2">
-                  {job.company}
-                </Text>
-              </View>
-              <View className={`px-2 py-1 rounded-full ${
-                job.type === 'FULL_TIME' ? 'bg-green-100' :
-                job.type === 'REMOTE' ? 'bg-purple-100' :
-                'bg-gray-100'
-              }`}>
-                <Text className={`text-xs font-medium ${
-                  job.type === 'FULL_TIME' ? 'text-green-700' :
-                  job.type === 'REMOTE' ? 'text-purple-700' :
-                  'text-gray-700'
-                }`}>
-                  {job.type.replace('_', ' ')}
-                </Text>
-              </View>
+      <View className="bg-white border-b border-gray-200 shadow-sm">
+        <View className="px-6 pt-6 pb-4">
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-1">
+              <Text className="text-3xl font-bold text-gray-900">Jobs</Text>
+              <Text className="text-sm text-gray-500 mt-1">Find your next opportunity</Text>
             </View>
-            
-            <View className="flex-row items-center mb-3">
-              <MapPinIcon size={16} color="#6B7280" />
-              <Text className="text-gray-600 ml-1">{job.location}</Text>
-              {formatSalary(job.salaryMin, job.salaryMax) && (
-                <>
-                  <Text className="text-gray-400 mx-2">•</Text>
-                  <Text className="text-gray-600">
-                    {formatSalary(job.salaryMin, job.salaryMax)}
-                  </Text>
-                </>
+            <TouchableOpacity
+              onPress={() => setShowPostJobSheet(true)}
+              className="bg-blue-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"
+            >
+              <PlusIcon size={20} color="#FFFFFF" />
+              <Text className="text-white font-semibold ml-2">Post</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Statistics Cards */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+            <View className="flex-row gap-3">
+              <View className="bg-blue-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#3B82F6" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Total Jobs</Text>
+                <Text className="text-white text-3xl font-bold">{stats.total}</Text>
+              </View>
+              <View className="bg-green-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#10B981" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Full Time</Text>
+                <Text className="text-white text-3xl font-bold">{stats.fullTime}</Text>
+              </View>
+              <View className="bg-purple-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#8B5CF6" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Remote</Text>
+                <Text className="text-white text-3xl font-bold">{stats.remote}</Text>
+              </View>
+              {stats.avgSalary > 0 && (
+                <View className="bg-amber-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#F59E0B" }}>
+                  <Text className="text-white/90 text-xs font-medium mb-1">Avg Salary</Text>
+                  <Text className="text-white text-2xl font-bold">${Math.round(stats.avgSalary)}k</Text>
+                </View>
               )}
             </View>
-            
-            <Text className="text-gray-700 mb-3" numberOfLines={2}>
-              {job.description}
-            </Text>
-            
-            <Text className="text-gray-400 text-sm">
-              Posted {formatTime(job.createdAt)}
-            </Text>
-          </TouchableOpacity>
-        ))
-      )}
+          </ScrollView>
 
-      {/* Quick Actions */}
-      <View className="mt-6 mb-8">
-        <TouchableOpacity
-          className="bg-gray-100 rounded-xl p-4 mb-3"
-          onPress={() => router.push("/jobs/resume-tips")}
-        >
-          <Text className="text-gray-900 text-center font-medium">
-            📄 Resume Tips & AI Analysis
-          </Text>
-        </TouchableOpacity>
+          {/* Search Bar */}
+          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
+            <SearchIcon size={18} color="#6B7280" />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search jobs, companies, locations..."
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-3 text-gray-900"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <XIcon size={18} color="#6B7280" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Job Type Filters */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+            <View className="flex-row gap-2">
+              {jobTypes.map((type) => (
+                <TouchableOpacity
+                  key={type.key}
+                  onPress={() => setSelectedType(type.key)}
+                  className={`px-4 py-2.5 rounded-full ${
+                    selectedType === type.key 
+                      ? "bg-blue-600 shadow-md" 
+                      : "bg-gray-100"
+                  }`}
+                  style={selectedType === type.key ? { backgroundColor: type.color } : {}}
+                >
+                  <Text className={`font-semibold text-sm ${
+                    selectedType === type.key ? "text-white" : "text-gray-700"
+                  }`}>
+                    {type.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+
+          {/* Sort Button */}
+          <View className="flex-row items-center justify-between mt-3">
+            <Text className="text-sm text-gray-600">
+              {filteredAndSortedJobs.length} {filteredAndSortedJobs.length === 1 ? "job" : "jobs"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowSortModal(true)}
+              className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg"
+            >
+              <FilterIcon size={16} color="#6B7280" />
+              <Text className="text-sm text-gray-700 ml-2 font-medium">
+                Sort: {sortBy === 'recent' ? 'Recent' : 
+                       sortBy === 'salary_high' ? 'Salary (High)' : 
+                       sortBy === 'salary_low' ? 'Salary (Low)' : 
+                       'Company'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
+
+      {/* Jobs List */}
+      <ScrollView
+        className="flex-1 px-6 py-4"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        {loading && (
+          <View className="items-center py-20">
+            <Text className="text-gray-500 text-base">Loading jobs...</Text>
+          </View>
+        )}
+
+        {!loading && filteredAndSortedJobs.length === 0 && (
+          <View className="items-center py-20 px-4">
+            <View className="bg-blue-100 rounded-full p-6 mb-4">
+              <BriefcaseIcon size={48} color="#3B82F6" />
+            </View>
+            <Text className="text-gray-700 text-xl font-semibold mt-4">No jobs found</Text>
+            <Text className="text-gray-500 mt-2 text-center text-sm">
+              {searchQuery 
+                ? "Try adjusting your search or filters"
+                : "Be the first to post a job opportunity."}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowPostJobSheet(true)}
+              className="mt-6 bg-blue-600 px-6 py-3 rounded-xl shadow-md"
+            >
+              <Text className="text-white font-semibold">+ Post a Job</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!loading && filteredAndSortedJobs.map((job) => {
+          const typeColor = getTypeColor(job.type);
+          return (
+            <TouchableOpacity
+              key={job.id}
+              className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+              onPress={() => router.push(`/jobs/detail?id=${job.id}`)}
+              activeOpacity={0.7}
+            >
+              <View className="flex-row items-start justify-between mb-3">
+                <View className="flex-1 pr-2">
+                  <Text className="text-lg font-bold text-gray-900 mb-1" numberOfLines={2}>
+                    {job.title}
+                  </Text>
+                  <Text className="text-blue-600 font-semibold mb-2">
+                    {job.company}
+                  </Text>
+                </View>
+                <View 
+                  className="px-3 py-1.5 rounded-full"
+                  style={{ backgroundColor: `${typeColor}15` }}
+                >
+                  <Text 
+                    className="text-xs font-semibold"
+                    style={{ color: typeColor }}
+                  >
+                    {job.type.replace('_', ' ')}
+                  </Text>
+                </View>
+              </View>
+              
+              <View className="flex-row items-center mb-3">
+                <MapPinIcon size={16} color="#6B7280" />
+                <Text className="text-gray-600 text-sm ml-1">{job.location}</Text>
+                {formatSalary(job.salaryMin, job.salaryMax) && (
+                  <>
+                    <Text className="text-gray-400 mx-2">•</Text>
+                    <Text className="text-gray-600 text-sm font-medium">
+                      {formatSalary(job.salaryMin, job.salaryMax)}
+                    </Text>
+                  </>
+                )}
+              </View>
+              
+              <Text className="text-gray-700 text-sm mb-3 leading-5" numberOfLines={2}>
+                {job.description}
+              </Text>
+              
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
+                <View className="flex-row items-center">
+                  <CalendarIcon size={14} color="#6B7280" />
+                  <Text className="text-gray-500 text-xs ml-2">
+                    Posted {formatTime(job.createdAt)}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className="bg-blue-50 px-3 py-1.5 rounded-lg"
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push(`/jobs/detail?id=${job.id}`);
+                  }}
+                >
+                  <Text className="text-blue-600 text-xs font-semibold">View Details</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* Quick Actions */}
+        <View className="mt-6 mb-8">
+          <TouchableOpacity
+            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm mb-3"
+            onPress={() => router.push("/jobs/resume-tips")}
+          >
+            <View className="flex-row items-center">
+              <View className="bg-blue-100 rounded-lg p-2 mr-3">
+                <BriefcaseIcon size={20} color="#3B82F6" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-900 font-semibold">Resume Tips & AI Analysis</Text>
+                <Text className="text-gray-500 text-sm mt-1">Get expert advice on your resume</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Sort Modal */}
+      <Modal
+        visible={showSortModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowSortModal(false)}
+      >
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white rounded-t-3xl p-6">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-xl font-bold text-gray-900">Sort By</Text>
+              <TouchableOpacity onPress={() => setShowSortModal(false)}>
+                <XIcon size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            {(['recent', 'salary_high', 'salary_low', 'company'] as SortOption[]).map((option) => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setSortBy(option);
+                  setShowSortModal(false);
+                }}
+                className={`py-4 px-4 rounded-xl mb-2 ${
+                  sortBy === option ? "bg-blue-50" : "bg-gray-50"
+                }`}
+              >
+                <Text className={`font-semibold ${
+                  sortBy === option ? "text-blue-600" : "text-gray-700"
+                }`}>
+                  {option === 'recent' ? 'Most Recent' : 
+                   option === 'salary_high' ? 'Salary: High to Low' :
+                   option === 'salary_low' ? 'Salary: Low to High' :
+                   'Company: A to Z'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
 
       <PostJobBottomSheet 
         visible={showPostJobSheet}
         onClose={() => setShowPostJobSheet(false)}
         onJobPosted={loadJobs}
       />
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 

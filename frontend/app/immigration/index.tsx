@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,24 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
+  SafeAreaView,
+  TextInput,
 } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { immigrationNewsApi, NewsArticle, NewsFilters } from '@/lib/api/immigration';
 import { IMPACT_LEVEL_COLORS, SOURCE_TYPE_LABELS } from '@/types/immigration';
+import { SearchIcon, BookmarkIcon, XIcon, CalendarIcon, GlobeIcon } from '@/components/ui/Icons';
 
 export default function ImmigrationNewsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [filters, setFilters] = useState<NewsFilters>({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadNews();
@@ -55,6 +61,26 @@ export default function ImmigrationNewsScreen() {
         return {};
     }
   };
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const total = articles.length;
+    const breaking = articles.filter(a => a.isBreaking).length;
+    const verified = articles.filter(a => a.isVerified).length;
+    const bookmarked = articles.filter(a => a.isBookmarked).length;
+    
+    return { total, breaking, verified, bookmarked };
+  }, [articles]);
+
+  // Filter articles by search
+  const filteredArticles = useMemo(() => {
+    if (!searchQuery.trim()) return articles;
+    const query = searchQuery.toLowerCase();
+    return articles.filter(article =>
+      article.title?.toLowerCase().includes(query) ||
+      article.summary?.toLowerCase().includes(query)
+    );
+  }, [articles, searchQuery]);
 
   const getImpactColor = (level: string) => {
     return IMPACT_LEVEL_COLORS[level as keyof typeof IMPACT_LEVEL_COLORS] || '#6B7280';
@@ -95,140 +121,196 @@ export default function ImmigrationNewsScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white justify-center items-center">
-        <Text className="text-gray-600">Loading news...</Text>
-      </View>
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center" style={{ paddingTop: insets.top }}>
+        <Text className="text-gray-500 text-base">Loading news...</Text>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="bg-white px-4 py-6 border-b border-gray-200">
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-gray-900">Immigration News</Text>
-            <Text className="text-gray-600 mt-1">Verified updates & policy changes</Text>
+    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+      {/* Header */}
+      <View className="bg-white border-b border-gray-200 shadow-sm">
+        <View className="px-6 pt-6 pb-4">
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-1">
+              <Text className="text-3xl font-bold text-gray-900">Immigration News</Text>
+              <Text className="text-sm text-gray-500 mt-1">Verified updates & policy changes</Text>
+            </View>
+            <TouchableOpacity 
+              onPress={() => router.push('/immigration/bookmarks')}
+              className="bg-indigo-50 px-4 py-3 rounded-xl"
+            >
+              <BookmarkIcon size={20} color="#4F46E5" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => router.push('/immigration/bookmarks')}>
-            <Ionicons name="bookmark-outline" size={24} color="#374151" />
-          </TouchableOpacity>
+
+          {/* Statistics Cards */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+            <View className="flex-row gap-3">
+              <View className="bg-blue-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#3B82F6" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Total Articles</Text>
+                <Text className="text-white text-3xl font-bold">{stats.total}</Text>
+              </View>
+              <View className="bg-red-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#EF4444" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Breaking</Text>
+                <Text className="text-white text-3xl font-bold">{stats.breaking}</Text>
+              </View>
+              <View className="bg-green-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#10B981" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Verified</Text>
+                <Text className="text-white text-3xl font-bold">{stats.verified}</Text>
+              </View>
+              <View className="bg-purple-600 rounded-2xl px-5 py-4 min-w-[140px] shadow-md" style={{ backgroundColor: "#8B5CF6" }}>
+                <Text className="text-white/90 text-xs font-medium mb-1">Bookmarked</Text>
+                <Text className="text-white text-3xl font-bold">{stats.bookmarked}</Text>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Search Bar */}
+          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
+            <SearchIcon size={18} color="#6B7280" />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search articles..."
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 ml-3 text-gray-900"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <XIcon size={18} color="#6B7280" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+            <View className="flex-row gap-2">
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab.id}
+                  onPress={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2.5 rounded-full ${
+                    activeTab === tab.id ? 'bg-blue-600 shadow-md' : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`font-semibold text-sm ${
+                    activeTab === tab.id ? 'text-white' : 'text-gray-700'
+                  }`}>
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+
+          <Text className="text-sm text-gray-600 mt-3">
+            {filteredArticles.length} {filteredArticles.length === 1 ? "article" : "articles"}
+          </Text>
         </View>
       </View>
 
-      {/* Tabs */}
-      <View className="bg-white border-b border-gray-200">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 py-3">
-          <View className="flex-row space-x-4">
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-full ${
-                  activeTab === tab.id ? 'bg-blue-600' : 'bg-gray-100'
-                }`}
-              >
-                <Text className={`font-medium ${
-                  activeTab === tab.id ? 'text-white' : 'text-gray-700'
-                }`}>
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-
+      {/* Articles List */}
       <ScrollView
-        className="flex-1"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        className="flex-1 px-6 py-4"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {articles.length === 0 ? (
-          <View className="flex-1 justify-center items-center py-20">
-            <Ionicons name="newspaper-outline" size={64} color="#9CA3AF" />
-            <Text className="text-xl font-semibold text-gray-900 mt-4">No News Available</Text>
-            <Text className="text-gray-600 text-center mt-2 px-8">
-              Check back later for the latest immigration updates
+        {filteredArticles.length === 0 ? (
+          <View className="items-center py-20 px-4">
+            <View className="bg-blue-100 rounded-full p-6 mb-4">
+              <GlobeIcon size={48} color="#3B82F6" />
+            </View>
+            <Text className="text-gray-700 text-xl font-semibold mt-4">No News Available</Text>
+            <Text className="text-gray-500 mt-2 text-center text-sm">
+              {searchQuery 
+                ? "Try adjusting your search"
+                : "Check back later for the latest immigration updates"}
             </Text>
           </View>
         ) : (
-          <View className="p-4 space-y-4">
-            {articles.map((article) => (
+          filteredArticles.map((article) => {
+            const impactColor = getImpactColor(article.impactLevel);
+            return (
               <TouchableOpacity
                 key={article.id}
                 onPress={() => router.push(`/immigration/article/${article.id}`)}
-                className="bg-white rounded-lg p-4 border border-gray-200"
+                className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+                activeOpacity={0.7}
               >
                 <View className="flex-row justify-between items-start mb-3">
                   <View className="flex-1 mr-3">
-                    <View className="flex-row items-center mb-2">
+                    <View className="flex-row items-center flex-wrap gap-2 mb-2">
                       {article.isBreaking && (
-                        <View className="bg-red-100 px-2 py-1 rounded-full mr-2">
+                        <View className="bg-red-100 px-2 py-1 rounded-full">
                           <Text className="text-red-600 text-xs font-bold">BREAKING</Text>
                         </View>
                       )}
                       {article.isVerified && (
-                        <View className="bg-green-100 px-2 py-1 rounded-full mr-2">
-                          <Text className="text-green-600 text-xs font-medium">VERIFIED</Text>
+                        <View className="bg-green-100 px-2 py-1 rounded-full">
+                          <Text className="text-green-600 text-xs font-semibold">VERIFIED</Text>
                         </View>
                       )}
                       <View
                         className="px-2 py-1 rounded-full"
-                        style={{ backgroundColor: getImpactColor(article.impactLevel) + '20' }}
+                        style={{ backgroundColor: `${impactColor}20` }}
                       >
                         <Text
-                          className="text-xs font-medium"
-                          style={{ color: getImpactColor(article.impactLevel) }}
+                          className="text-xs font-semibold"
+                          style={{ color: impactColor }}
                         >
                           {article.impactLevel}
                         </Text>
                       </View>
                     </View>
                     
-                    <Text className="text-lg font-semibold text-gray-900 mb-2">
+                    <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={2}>
                       {article.title}
                     </Text>
                     
                     {article.summary && (
-                      <Text className="text-gray-600 text-sm mb-3 leading-5">
+                      <Text className="text-gray-600 text-sm mb-3 leading-5" numberOfLines={3}>
                         {article.summary}
                       </Text>
                     )}
                     
-                    <View className="flex-row justify-between items-center">
-                      <View>
-                        <Text className="text-xs text-gray-500">
-                          {SOURCE_TYPE_LABELS[article.sourceType]} • {article.sourceName}
-                        </Text>
-                        <Text className="text-xs text-gray-500 mt-1">
-                          {formatDate(article.publishedAt)}
-                        </Text>
-                      </View>
+                    <View className="flex-row items-center mb-2">
+                      <GlobeIcon size={14} color="#6B7280" />
+                      <Text className="text-xs text-gray-500 ml-2">
+                        {SOURCE_TYPE_LABELS[article.sourceType]} • {article.sourceName}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <CalendarIcon size={14} color="#6B7280" />
+                      <Text className="text-xs text-gray-500 ml-2">
+                        {formatDate(article.publishedAt)}
+                      </Text>
                     </View>
                   </View>
                   
                   <TouchableOpacity
-                    onPress={() => toggleBookmark(article)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark(article);
+                    }}
                     className="p-2"
                   >
-                    <Ionicons
-                      name={article.isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                      size={20}
-                      color={article.isBookmarked ? '#3B82F6' : '#6B7280'}
+                    <BookmarkIcon 
+                      size={20} 
+                      color={article.isBookmarked ? "#3B82F6" : "#6B7280"} 
                     />
                   </TouchableOpacity>
                 </View>
                 
                 {article.visaCategories.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2 mt-2">
+                  <View className="flex-row flex-wrap gap-2 pt-3 border-t border-gray-100">
                     {article.visaCategories.slice(0, 3).map((category, index) => (
-                      <View key={index} className="bg-blue-50 px-2 py-1 rounded">
+                      <View key={index} className="bg-blue-50 px-2 py-1 rounded-lg">
                         <Text className="text-blue-600 text-xs font-medium">{category}</Text>
                       </View>
                     ))}
                     {article.visaCategories.length > 3 && (
-                      <View className="bg-gray-50 px-2 py-1 rounded">
+                      <View className="bg-gray-50 px-2 py-1 rounded-lg">
                         <Text className="text-gray-600 text-xs">
                           +{article.visaCategories.length - 3} more
                         </Text>
@@ -237,10 +319,10 @@ export default function ImmigrationNewsScreen() {
                   </View>
                 )}
               </TouchableOpacity>
-            ))}
-          </View>
+            );
+          })
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

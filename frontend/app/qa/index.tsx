@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   TextInput,
   RefreshControl,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -16,7 +16,7 @@ import { QuestionCard } from '@/components/qa/QuestionCard';
 import { qaApi } from '@/lib/api/qa';
 import { toast } from '@/lib/toast';
 import { COLORS } from '@/constants/colors';
-import { SearchIcon, PlusIcon } from '@/components/ui/Icons';
+import { SearchIcon, PlusIcon, FilterIcon, XIcon } from '@/components/ui/Icons';
 
 export default function QaHomeScreen() {
   const router = useRouter();
@@ -130,51 +130,77 @@ export default function QaHomeScreen() {
   ];
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.searchContainer}>
-        <SearchIcon size={20} color={COLORS.gray[400]} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search questions..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-        />
-      </View>
-
-      <View style={styles.tabs}>
-        {tabs.map((tab) => (
+    <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="px-6 pt-6 pb-4">
+        <View className="flex-row items-center justify-between mb-4">
+          <View className="flex-1">
+            <Text className="text-3xl font-bold text-gray-900">Community Q&A</Text>
+            <Text className="text-sm text-gray-500 mt-1">Ask questions, share knowledge</Text>
+          </View>
           <TouchableOpacity
-            key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
-            onPress={() => handleTabChange(tab.key as any)}
+            onPress={handleAskQuestion}
+            className="bg-indigo-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"
           >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.activeTabText]}>
-              {tab.label}
+            <PlusIcon size={20} color="#FFFFFF" />
+            <Text className="text-white font-semibold ml-2">Ask</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
+          <SearchIcon size={18} color="#6B7280" />
+          <TextInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search questions..."
+            placeholderTextColor="#9CA3AF"
+            className="flex-1 ml-3 text-gray-900"
+            onSubmitEditing={handleSearch}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <XIcon size={18} color="#6B7280" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Tabs */}
+        <View className="flex-row gap-2 mb-4">
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => handleTabChange(tab.key as any)}
+              className={`px-4 py-2.5 rounded-full flex-1 ${
+                activeTab === tab.key 
+                  ? "bg-indigo-600 shadow-md" 
+                  : "bg-gray-100"
+              }`}
+            >
+              <Text className={`font-semibold text-sm text-center ${
+                activeTab === tab.key ? "text-white" : "text-gray-700"
+              }`}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Sort */}
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm text-gray-600">
+            {questions.length} {questions.length === 1 ? "question" : "questions"}
+          </Text>
+          <TouchableOpacity
+            onPress={() => setSortBy(sortBy === 'RECENT' ? 'VIEWS' : 'RECENT')}
+            className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg"
+          >
+            <FilterIcon size={16} color="#6B7280" />
+            <Text className="text-sm text-gray-700 ml-2 font-medium">
+              Sort: {sortBy === 'RECENT' ? 'Recent' : 'Most Viewed'}
             </Text>
           </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.sortContainer}>
-        <Text style={styles.sortLabel}>Sort by:</Text>
-        <TouchableOpacity
-          style={[styles.sortButton, sortBy === 'RECENT' && styles.activeSortButton]}
-          onPress={() => handleSortChange('RECENT')}
-        >
-          <Text style={[styles.sortButtonText, sortBy === 'RECENT' && styles.activeSortButtonText]}>
-            Recent
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.sortButton, sortBy === 'VIEWS' && styles.activeSortButton]}
-          onPress={() => handleSortChange('VIEWS')}
-        >
-          <Text style={[styles.sortButtonText, sortBy === 'VIEWS' && styles.activeSortButtonText]}>
-            Most Viewed
-          </Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -182,9 +208,9 @@ export default function QaHomeScreen() {
   const renderFooter = () => {
     if (!loadingMore) return null;
     return (
-      <View style={styles.loadingFooter}>
+      <View className="flex-row justify-center items-center py-4">
         <ActivityIndicator size="small" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading more questions...</Text>
+        <Text className="text-gray-500 text-sm ml-2">Loading more questions...</Text>
       </View>
     );
   };
@@ -192,32 +218,48 @@ export default function QaHomeScreen() {
   const renderEmptyState = () => {
     if (loading) {
       return (
-        <View style={styles.emptyContainer}>
+        <View className="flex-1 justify-center items-center py-20">
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.emptyText}>Loading questions...</Text>
+          <Text className="text-gray-500 text-base mt-4">Loading questions...</Text>
         </View>
       );
     }
 
     if (error) {
       return (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.errorText}>Failed to load questions</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+        <View className="flex-1 justify-center items-center py-20 px-4">
+          <View className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+            <Text className="text-red-600 text-base text-center mb-4">Failed to load questions</Text>
+            <TouchableOpacity 
+              className="bg-red-600 px-6 py-3 rounded-xl"
+              onPress={handleRefresh}
+            >
+              <Text className="text-white font-semibold text-center">Retry</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       );
     }
 
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>
-          {searchQuery ? 'No questions found matching your search' : 'No questions found'}
+      <View className="flex-1 justify-center items-center py-20 px-4">
+        <View className="bg-indigo-100 rounded-full p-6 mb-4">
+          <SearchIcon size={48} color="#4F46E5" />
+        </View>
+        <Text className="text-gray-700 text-xl font-semibold mt-4">
+          {searchQuery ? 'No questions found' : 'No questions yet'}
+        </Text>
+        <Text className="text-gray-500 mt-2 text-center text-sm">
+          {searchQuery 
+            ? 'Try adjusting your search'
+            : 'Be the first to ask a question!'}
         </Text>
         {!searchQuery && (
-          <TouchableOpacity style={styles.askFirstButton} onPress={handleAskQuestion}>
-            <Text style={styles.askFirstButtonText}>Ask the first question</Text>
+          <TouchableOpacity 
+            className="mt-6 bg-indigo-600 px-6 py-3 rounded-xl shadow-md"
+            onPress={handleAskQuestion}
+          >
+            <Text className="text-white font-semibold">Ask the first question</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -225,19 +267,15 @@ export default function QaHomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Community Q&A</Text>
-        <TouchableOpacity style={styles.askButton} onPress={handleAskQuestion}>
-          <PlusIcon size={20} color="#FFFFFF" />
-          <Text style={styles.askButtonText}>Ask</Text>
-        </TouchableOpacity>
-      </View>
-
+    <SafeAreaView className="flex-1 bg-gray-50">
       <FlatList
         data={questions}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <QuestionCard question={item} />}
+        renderItem={({ item }) => (
+          <View className="px-6">
+            <QuestionCard question={item} />
+          </View>
+        )}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmptyState}
@@ -245,172 +283,8 @@ export default function QaHomeScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.listContent, questions.length === 0 && styles.emptyListContent]}
+        contentContainerStyle={questions.length === 0 ? { flexGrow: 1 } : { paddingBottom: 20 }}
       />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  askButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  askButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  header: {
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    marginBottom: 8,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 16,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#111827',
-  },
-  tabs: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: COLORS.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6B7280',
-  },
-  activeTabText: {
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-  sortContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sortLabel: {
-    fontSize: 14,
-    color: '#374151',
-    marginRight: 12,
-  },
-  sortButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    marginRight: 8,
-  },
-  activeSortButton: {
-    backgroundColor: COLORS.primary,
-  },
-  sortButtonText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  activeSortButtonText: {
-    color: '#FFFFFF',
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 16,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  askFirstButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  askFirstButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loadingFooter: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  loadingText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#6B7280',
-  },
-});
