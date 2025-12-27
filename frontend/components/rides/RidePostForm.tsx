@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Switch } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Switch, Modal, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { PricingMode, RidePost, RidePostType, RideRequirements } from "@/types";
 import { validatePerMile } from "@/lib/rides/pricing";
+import { MapPinIcon, CalendarIcon, UsersIcon, DollarSignIcon, TypeIcon, NavigationIcon } from "@/components/ui/Icons";
 
 interface RidePostFormProps {
   type: RidePostType;
@@ -32,6 +34,22 @@ const haversineMiles = (lat1?: number, lng1?: number, lat2?: number, lng2?: numb
   return R * c;
 };
 
+const formatDateTime = (date: Date): string => {
+  return date.toISOString();
+};
+
+const formatDisplayDateTime = (isoString: string): string => {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const timeStr = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    return `${dateStr} at ${timeStr}`;
+  } catch {
+    return isoString;
+  }
+};
+
 export default function RidePostForm({ type, initial, onSubmit, submitLabel }: RidePostFormProps) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [pickupLabel, setPickupLabel] = useState(initial?.pickupLabel ?? "");
@@ -53,6 +71,18 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
   const [pricePerMile, setPricePerMile] = useState(initial?.pricePerMile?.toString() ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    if (initial?.departAt) {
+      try {
+        return new Date(initial.departAt);
+      } catch {
+        return new Date();
+      }
+    }
+    return new Date();
+  });
 
   const distancePreview = useMemo(
     () =>
@@ -64,6 +94,37 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
       ),
     [pickupLat, pickupLng, dropLat, dropLng]
   );
+
+  const handleDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+    if (date) {
+      setSelectedDate(date);
+      const updated = new Date(date);
+      if (departAt) {
+        try {
+          const existing = new Date(departAt);
+          updated.setHours(existing.getHours());
+          updated.setMinutes(existing.getMinutes());
+        } catch {}
+      }
+      setDepartAt(formatDateTime(updated));
+    }
+  };
+
+  const handleTimeChange = (event: any, date?: Date) => {
+    if (Platform.OS === "android") {
+      setShowTimePicker(false);
+    }
+    if (date) {
+      const updated = selectedDate;
+      updated.setHours(date.getHours());
+      updated.setMinutes(date.getMinutes());
+      setSelectedDate(new Date(updated));
+      setDepartAt(formatDateTime(updated));
+    }
+  };
 
   const submit = async () => {
     setError(null);
@@ -132,146 +193,289 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
 
   return (
     <View className="space-y-5">
-      <View>
-        <Text className="text-sm text-gray-600 mb-2">Title</Text>
+      {/* Title Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-3">
+          <TypeIcon size={18} color="#6B7280" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">Title (Optional)</Text>
+        </View>
         <TextInput
           value={title}
           onChangeText={setTitle}
-          placeholder="Morning commute"
-          className="border border-gray-200 rounded-xl px-3 py-2"
+          placeholder="e.g., Morning commute, Weekend trip"
+          placeholderTextColor="#9CA3AF"
+          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
         />
       </View>
 
-      <View>
-        <Text className="text-sm text-gray-600 mb-2">Pickup label</Text>
+      {/* Pickup Location Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-3">
+          <MapPinIcon size={18} color="#2563EB" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">Pickup Location *</Text>
+        </View>
         <TextInput
           value={pickupLabel}
           onChangeText={setPickupLabel}
-          placeholder="Downtown station"
-          className="border border-gray-200 rounded-xl px-3 py-2"
+          placeholder="e.g., Downtown station, Airport"
+          placeholderTextColor="#9CA3AF"
+          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50 mb-3"
         />
-      </View>
-      <View className="flex-row space-x-3">
-        <View className="flex-1">
-          <Text className="text-sm text-gray-600 mb-2">Pickup lat</Text>
-          <TextInput
-            value={pickupLat}
-            onChangeText={setPickupLat}
-            keyboardType="numeric"
-            placeholder="37.7749"
-            className="border border-gray-200 rounded-xl px-3 py-2"
-          />
-        </View>
-        <View className="flex-1">
-          <Text className="text-sm text-gray-600 mb-2">Pickup lng</Text>
-          <TextInput
-            value={pickupLng}
-            onChangeText={setPickupLng}
-            keyboardType="numeric"
-            placeholder="-122.4194"
-            className="border border-gray-200 rounded-xl px-3 py-2"
-          />
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Text className="text-sm text-gray-600 mb-2">Latitude *</Text>
+            <TextInput
+              value={pickupLat}
+              onChangeText={setPickupLat}
+              keyboardType="numeric"
+              placeholder="37.7749"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
+            />
+          </View>
+          <View className="flex-1">
+            <Text className="text-sm text-gray-600 mb-2">Longitude *</Text>
+            <TextInput
+              value={pickupLng}
+              onChangeText={setPickupLng}
+              keyboardType="numeric"
+              placeholder="-122.4194"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
+            />
+          </View>
         </View>
       </View>
 
-      <View>
-        <Text className="text-sm text-gray-600 mb-2">Drop label</Text>
+      {/* Drop Location Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-3">
+          <NavigationIcon size={18} color="#10B981" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">Drop-off Location *</Text>
+        </View>
         <TextInput
           value={dropLabel}
           onChangeText={setDropLabel}
-          placeholder="Airport terminal"
-          className="border border-gray-200 rounded-xl px-3 py-2"
+          placeholder="e.g., Airport terminal, City center"
+          placeholderTextColor="#9CA3AF"
+          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50 mb-3"
         />
-      </View>
-      <View className="flex-row space-x-3">
-        <View className="flex-1">
-          <Text className="text-sm text-gray-600 mb-2">Drop lat</Text>
-          <TextInput
-            value={dropLat}
-            onChangeText={setDropLat}
-            keyboardType="numeric"
-            placeholder="37.6152"
-            className="border border-gray-200 rounded-xl px-3 py-2"
-          />
-        </View>
-        <View className="flex-1">
-          <Text className="text-sm text-gray-600 mb-2">Drop lng</Text>
-          <TextInput
-            value={dropLng}
-            onChangeText={setDropLng}
-            keyboardType="numeric"
-            placeholder="-122.3899"
-            className="border border-gray-200 rounded-xl px-3 py-2"
-          />
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Text className="text-sm text-gray-600 mb-2">Latitude *</Text>
+            <TextInput
+              value={dropLat}
+              onChangeText={setDropLat}
+              keyboardType="numeric"
+              placeholder="37.6152"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
+            />
+          </View>
+          <View className="flex-1">
+            <Text className="text-sm text-gray-600 mb-2">Longitude *</Text>
+            <TextInput
+              value={dropLng}
+              onChangeText={setDropLng}
+              keyboardType="numeric"
+              placeholder="-122.3899"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-50"
+            />
+          </View>
         </View>
       </View>
 
-      <View>
-        <Text className="text-sm text-gray-600 mb-2">Depart at (ISO)</Text>
-        <TextInput
-          value={departAt}
-          onChangeText={setDepartAt}
-          placeholder="2024-06-01T18:00:00"
-          className="border border-gray-200 rounded-xl px-3 py-2"
-        />
+      {/* Departure Time Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-3">
+          <CalendarIcon size={18} color="#F59E0B" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">Departure Time *</Text>
+        </View>
+        <View className="flex-row gap-3">
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 bg-gray-50"
+          >
+            <Text className="text-xs text-gray-500 mb-1">Date</Text>
+            <Text className="text-base text-gray-900">
+              {departAt ? formatDisplayDateTime(departAt).split(" at ")[0] : "Select date"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setShowTimePicker(true)}
+            className="flex-1 border border-gray-200 rounded-xl px-4 py-3 bg-gray-50"
+          >
+            <Text className="text-xs text-gray-500 mb-1">Time</Text>
+            <Text className="text-base text-gray-900">
+              {departAt ? formatDisplayDateTime(departAt).split(" at ")[1] : "Select time"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {Platform.OS === "ios" && (
+          <>
+            <Modal visible={showDatePicker} transparent animationType="slide">
+              <View className="flex-1 bg-black/50 justify-end">
+                <View className="bg-white rounded-t-3xl p-4">
+                  <View className="flex-row justify-between items-center mb-4">
+                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                      <Text className="text-blue-600 text-lg">Cancel</Text>
+                    </TouchableOpacity>
+                    <Text className="text-lg font-semibold">Select Date</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleDateChange(null, selectedDate);
+                        setShowDatePicker(false);
+                      }}
+                    >
+                      <Text className="text-blue-600 text-lg font-semibold">Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="spinner"
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                </View>
+              </View>
+            </Modal>
+            <Modal visible={showTimePicker} transparent animationType="slide">
+              <View className="flex-1 bg-black/50 justify-end">
+                <View className="bg-white rounded-t-3xl p-4">
+                  <View className="flex-row justify-between items-center mb-4">
+                    <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                      <Text className="text-blue-600 text-lg">Cancel</Text>
+                    </TouchableOpacity>
+                    <Text className="text-lg font-semibold">Select Time</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleTimeChange(null, selectedDate);
+                        setShowTimePicker(false);
+                      }}
+                    >
+                      <Text className="text-blue-600 text-lg font-semibold">Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="time"
+                    display="spinner"
+                    onChange={handleTimeChange}
+                  />
+                </View>
+              </View>
+            </Modal>
+          </>
+        )}
+        {Platform.OS === "android" && (
+          <>
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+              />
+            )}
+            {showTimePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="time"
+                display="default"
+                onChange={handleTimeChange}
+              />
+            )}
+          </>
+        )}
       </View>
 
-      <View>
-        <Text className="text-sm text-gray-600 mb-2">Seats {type === "OFFER" ? "available" : "needed"}</Text>
+      {/* Seats Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-3">
+          <UsersIcon size={18} color="#8B5CF6" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">
+            Seats {type === "OFFER" ? "Available" : "Needed"} *
+          </Text>
+        </View>
         <TextInput
           value={seats}
           onChangeText={setSeats}
           keyboardType="numeric"
           placeholder="2"
-          className="border border-gray-200 rounded-xl px-3 py-2"
+          placeholderTextColor="#9CA3AF"
+          className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
         />
       </View>
 
-      <View className="bg-gray-50 rounded-2xl p-4">
-        <Text className="text-sm font-semibold text-gray-700 mb-3">Requirements</Text>
-        <View>
-          <Text className="text-sm text-gray-600 mb-2">People count</Text>
+      {/* Requirements Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <Text className="text-base font-semibold text-gray-900 mb-4">Requirements</Text>
+        <View className="mb-3">
+          <Text className="text-sm text-gray-600 mb-2">Number of People</Text>
           <TextInput
             value={peopleCount}
             onChangeText={setPeopleCount}
             keyboardType="numeric"
-            className="border border-gray-200 rounded-xl px-3 py-2 bg-white"
+            placeholder="1"
+            placeholderTextColor="#9CA3AF"
+            className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
           />
         </View>
-        <View className="flex-row justify-between items-center mt-3">
-          <Text className="text-sm text-gray-700">Luggage allowed</Text>
-          <Switch value={luggage} onValueChange={setLuggage} />
+        <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <Text className="text-base text-gray-900">Luggage Allowed</Text>
+          <Switch
+            value={luggage}
+            onValueChange={setLuggage}
+            trackColor={{ false: "#D1D5DB", true: "#2563EB" }}
+            thumbColor="#FFFFFF"
+          />
         </View>
-        <View className="flex-row justify-between items-center mt-3">
-          <Text className="text-sm text-gray-700">Pets allowed</Text>
-          <Switch value={pets} onValueChange={setPets} />
+        <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          <Text className="text-base text-gray-900">Pets Allowed</Text>
+          <Switch
+            value={pets}
+            onValueChange={setPets}
+            trackColor={{ false: "#D1D5DB", true: "#2563EB" }}
+            thumbColor="#FFFFFF"
+          />
         </View>
         <View className="mt-3">
-          <Text className="text-sm text-gray-600 mb-2">Notes</Text>
+          <Text className="text-sm text-gray-600 mb-2">Additional Notes</Text>
           <TextInput
             value={notes}
             onChangeText={setNotes}
-            placeholder="Any special requirements"
-            className="border border-gray-200 rounded-xl px-3 py-2 bg-white"
+            placeholder="Any special requirements or preferences"
+            placeholderTextColor="#9CA3AF"
+            multiline
+            numberOfLines={3}
+            className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
+            style={{ textAlignVertical: "top" }}
           />
         </View>
       </View>
 
-      <View className="bg-gray-50 rounded-2xl p-4">
-        <Text className="text-sm font-semibold text-gray-700 mb-3">Pricing</Text>
-        <View className="flex-row mb-4">
+      {/* Pricing Section */}
+      <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <View className="flex-row items-center mb-4">
+          <DollarSignIcon size={18} color="#059669" />
+          <Text className="text-base font-semibold text-gray-900 ml-2">Pricing *</Text>
+        </View>
+        <View className="flex-row gap-2 mb-4 bg-gray-100 rounded-xl p-1">
           <TouchableOpacity
-            className={`flex-1 py-2 rounded-full mr-2 ${pricingMode === "FIXED" ? "bg-blue-600" : "bg-white"}`}
+            className={`flex-1 py-2.5 rounded-lg ${pricingMode === "FIXED" ? "bg-blue-600 shadow-sm" : ""}`}
             onPress={() => setPricingMode("FIXED")}
           >
             <Text
               className={`text-center text-sm font-semibold ${pricingMode === "FIXED" ? "text-white" : "text-gray-600"}`}
             >
-              Fixed
+              Fixed Price
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`flex-1 py-2 rounded-full ${pricingMode === "PER_MILE" ? "bg-blue-600" : "bg-white"}`}
+            className={`flex-1 py-2.5 rounded-lg ${pricingMode === "PER_MILE" ? "bg-blue-600 shadow-sm" : ""}`}
             onPress={() => setPricingMode("PER_MILE")}
           >
             <Text
@@ -284,51 +488,65 @@ export default function RidePostForm({ type, initial, onSubmit, submitLabel }: R
 
         {pricingMode === "FIXED" ? (
           <View>
-            <Text className="text-sm text-gray-600 mb-2">Fixed price</Text>
+            <Text className="text-sm text-gray-600 mb-2">Fixed Price ($) *</Text>
             <TextInput
               value={priceFixed}
               onChangeText={setPriceFixed}
               keyboardType="numeric"
-              placeholder="$20"
-              className="border border-gray-200 rounded-xl px-3 py-2 bg-white"
+              placeholder="20.00"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
             />
           </View>
         ) : (
           <View>
-            <Text className="text-sm text-gray-600 mb-2">Price per mile</Text>
+            <Text className="text-sm text-gray-600 mb-2">Price Per Mile ($) *</Text>
             <TextInput
               value={pricePerMile}
               onChangeText={setPricePerMile}
               keyboardType="numeric"
-              placeholder="$1.25"
-              className="border border-gray-200 rounded-xl px-3 py-2 bg-white"
+              placeholder="1.25"
+              placeholderTextColor="#9CA3AF"
+              className="border border-gray-200 rounded-xl px-4 py-3 text-base bg-gray-50"
             />
           </View>
         )}
 
         {distancePreview ? (
-          <Text className="text-xs text-gray-500 mt-3">
-            Estimated distance: {distancePreview.toFixed(1)} miles. Final price will be confirmed by the backend.
-          </Text>
+          <View className="mt-3 bg-blue-50 rounded-xl p-3 border border-blue-100">
+            <Text className="text-xs text-blue-700">
+              Estimated distance: <Text className="font-semibold">{distancePreview.toFixed(1)} miles</Text>
+            </Text>
+            <Text className="text-xs text-blue-600 mt-1">
+              Final price will be confirmed by the backend.
+            </Text>
+          </View>
         ) : (
-          <Text className="text-xs text-gray-500 mt-3">
-            Enter coordinates to preview distance. Final price will be confirmed by the backend.
-          </Text>
+          <View className="mt-3 bg-gray-50 rounded-xl p-3">
+            <Text className="text-xs text-gray-600">
+              Enter coordinates to preview distance. Final price will be confirmed by the backend.
+            </Text>
+          </View>
         )}
       </View>
 
+      {/* Error Message */}
       {error ? (
-        <View className="bg-red-50 border border-red-100 rounded-xl p-3">
-          <Text className="text-red-600 text-sm">{error}</Text>
+        <View className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <Text className="text-red-600 text-sm font-medium">{error}</Text>
         </View>
       ) : null}
 
+      {/* Submit Button */}
       <TouchableOpacity
-        className={`rounded-xl py-3 ${saving ? "bg-gray-300" : "bg-blue-600"}`}
+        className={`rounded-xl py-4 shadow-lg ${saving ? "bg-gray-400" : type === "OFFER" ? "bg-blue-600" : "bg-indigo-600"}`}
         onPress={submit}
         disabled={saving}
+        activeOpacity={0.8}
       >
-        <Text className="text-white text-center font-semibold">{submitLabel}</Text>
+        <Text className="text-white text-center font-bold text-base">
+          {saving ? "Publishing..." : submitLabel}
+        </Text>
       </TouchableOpacity>
     </View>
   );
