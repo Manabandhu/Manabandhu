@@ -4,10 +4,14 @@ import com.manabandhu.dto.rides.RidePostRequest;
 import com.manabandhu.model.ride.RideConversationLink;
 import com.manabandhu.model.ride.RidePost;
 import com.manabandhu.model.ride.RidePostActivity;
+import com.manabandhu.model.ride.RideRequest;
 import com.manabandhu.repository.RideConversationLinkRepository;
 import com.manabandhu.repository.RidePostActivityRepository;
 import com.manabandhu.repository.RidePostRepository;
+import com.manabandhu.repository.RideRequestRepository;
 import com.manabandhu.service.ChatService;
+import com.manabandhu.service.NotificationEventService;
+import com.manabandhu.model.notification.NotificationEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,25 +35,31 @@ public class RidePostService {
     private final RidePostRepository ridePostRepository;
     private final RidePostActivityRepository activityRepository;
     private final RideConversationLinkRepository conversationLinkRepository;
+    private final RideRequestRepository rideRequestRepository;
     private final RidePricingService pricingService;
     private final RoutingProvider routingProvider;
     private final RideTrackingService trackingService;
     private final ChatService chatService;
+    private final NotificationEventService notificationEventService;
 
     public RidePostService(RidePostRepository ridePostRepository,
                            RidePostActivityRepository activityRepository,
                            RideConversationLinkRepository conversationLinkRepository,
+                           RideRequestRepository rideRequestRepository,
                            RidePricingService pricingService,
                            RoutingProvider routingProvider,
                            RideTrackingService trackingService,
-                           ChatService chatService) {
+                           ChatService chatService,
+                           NotificationEventService notificationEventService) {
         this.ridePostRepository = ridePostRepository;
         this.activityRepository = activityRepository;
         this.conversationLinkRepository = conversationLinkRepository;
+        this.rideRequestRepository = rideRequestRepository;
         this.pricingService = pricingService;
         this.routingProvider = routingProvider;
         this.trackingService = trackingService;
         this.chatService = chatService;
+        this.notificationEventService = notificationEventService;
     }
 
     public RidePostUpsertResult createOrUpdate(String ownerUserId, RidePostRequest request) {
@@ -153,22 +163,83 @@ public class RidePostService {
     public RidePost book(String userId, UUID id) {
         RidePost post = ridePostRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new NoSuchElementException("Ride post not found"));
-        if (post.getStatus() == RidePost.Status.BOOKED) {
-            throw new IllegalStateException("Ride already booked");
-        }
+        
         if (post.getStatus() != RidePost.Status.OPEN && post.getStatus() != RidePost.Status.IN_TALKS) {
-            throw new IllegalStateException("Ride cannot be booked in current status");
+            throw new IllegalStateException("Ride cannot be requested in current status");
         }
+        
         if (post.getOwnerUserId().equals(userId)) {
-            throw new IllegalArgumentException("Owner cannot book their own post");
+            throw new IllegalArgumentException("Owner cannot request their own post");
         }
-        post.setStatus(RidePost.Status.BOOKED);
-        post.setBookedByUserId(userId);
+        
+        // Check if user already has a request (any status)
+        Optional<RideRequest> existingRequest = rideRequestRepository.findByRidePostIdAndRequestedByUserId(id, userId);
+        if (existingRequest.isPresent()) {
+            RideRequest request = existingRequest.get();
+            if (request.getStatus() == RideRequest.RequestStatus.PENDING) {
+                throw new IllegalStateException("You already have a pending request for this ride");
+            }
+            if (request.getStatus() == RideRequest.RequestStatus.ACCEPTED) {
+                throw new IllegalStateException("You already have an accepted request for this ride");
+            }
+            // If request was rejected or cancelled, allow creating a new one by deleting the old one
+            if (request.getStatus() == RideRequest.RequestStatus.REJECTED || 
+                request.getStatus() == RideRequest.RequestStatus.CANCELLED) {
+                rideRequestRepository.delete(request);
+            }
+        }
+        
+        // Create a new ride request
+        // Use try-catch to handle potential race condition with unique constraint
+        try {
+            RideRequest rideRequest = new RideRequest();
+            rideRequest.setRidePostId(id);
+            rideRequest.setRequestedByUserId(userId);
+            rideRequest.setStatus(RideRequest.RequestStatus.PENDING);
+            rideRequestRepository.save(rideRequest);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Handle race condition: another request was created between check and save
+            // Re-check to provide accurate error message
+            Optional<RideRequest> duplicateRequest = rideRequestRepository.findByRidePostIdAndRequestedByUserId(id, userId);
+            if (duplicateRequest.isPresent()) {
+                RideRequest.RequestStatus status = duplicateRequest.get().getStatus();
+                if (status == RideRequest.RequestStatus.PENDING) {
+                    throw new IllegalStateException("You already have a pending request for this ride");
+                } else if (status == RideRequest.RequestStatus.ACCEPTED) {
+                    throw new IllegalStateException("You already have an accepted request for this ride");
+                } else {
+                    throw new IllegalStateException("A request for this ride already exists");
+                }
+            }
+            // If we can't find it, re-throw the original exception
+            throw new IllegalStateException("Unable to create request. A duplicate request may already exist.", e);
+        }
+        
+        // Update post activity
         post.setLastActivityAt(LocalDateTime.now());
         RidePost saved = ridePostRepository.save(post);
-        trackingService.startTracking(id, userId);
+        
         createActivity(saved, userId, RidePostActivity.ActivityType.BOOKED,
-                Map.of("bookedBy", userId));
+                Map.of("requestedBy", userId));
+        
+        // Send notification to ride owner
+        try {
+            notificationEventService.createEvent(
+                    post.getOwnerUserId(),
+                    NotificationEvent.NotificationType.RIDE_REQUESTED,
+                    Map.of(
+                            "ridePostId", id.toString(),
+                            "requestedBy", userId,
+                            "pickupLabel", post.getPickupLabel() != null ? post.getPickupLabel() : "",
+                            "dropLabel", post.getDropLabel() != null ? post.getDropLabel() : "",
+                            "departAt", post.getDepartAt() != null ? post.getDepartAt().toString() : ""
+                    )
+            );
+        } catch (Exception e) {
+            // Log error but don't fail the request
+            System.err.println("Failed to send ride request notification: " + e.getMessage());
+        }
+        
         return saved;
     }
 

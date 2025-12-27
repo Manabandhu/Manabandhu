@@ -3,6 +3,7 @@ package com.manabandhu.controller.ride;
 import com.manabandhu.dto.rides.*;
 import com.manabandhu.model.ride.RidePost;
 import com.manabandhu.model.ride.RideTrackingSession;
+import com.manabandhu.repository.RideRequestRepository;
 import com.manabandhu.service.ride.RidePostService;
 import com.manabandhu.service.ride.RideTrackingService;
 import jakarta.validation.Valid;
@@ -26,10 +27,14 @@ import java.util.UUID;
 public class RidePostController {
     private final RidePostService ridePostService;
     private final RideTrackingService rideTrackingService;
+    private final RideRequestRepository rideRequestRepository;
 
-    public RidePostController(RidePostService ridePostService, RideTrackingService rideTrackingService) {
+    public RidePostController(RidePostService ridePostService, 
+                             RideTrackingService rideTrackingService,
+                             RideRequestRepository rideRequestRepository) {
         this.ridePostService = ridePostService;
         this.rideTrackingService = rideTrackingService;
+        this.rideRequestRepository = rideRequestRepository;
     }
 
     @PostMapping("/posts")
@@ -149,7 +154,11 @@ public class RidePostController {
     public ResponseEntity<RidePostResponse> getPost(@PathVariable UUID id, Authentication authentication) {
         String userId = authentication.getName();
         RidePost post = ridePostService.getPost(id, userId);
-        return ResponseEntity.ok(new RidePostResponse(post));
+        long requestCount = rideRequestRepository.countByRidePostIdAndStatus(id, 
+            com.manabandhu.model.ride.RideRequest.RequestStatus.PENDING);
+        RidePostResponse response = new RidePostResponse(post);
+        response.setRequestCount(requestCount);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/posts/{id}/chat/start")
@@ -169,7 +178,11 @@ public class RidePostController {
     public ResponseEntity<RidePostResponse> bookPost(@PathVariable UUID id, Authentication authentication) {
         String userId = authentication.getName();
         RidePost post = ridePostService.book(userId, id);
-        return ResponseEntity.ok(new RidePostResponse(post));
+        long requestCount = rideRequestRepository.countByRidePostIdAndStatus(id, 
+            com.manabandhu.model.ride.RideRequest.RequestStatus.PENDING);
+        RidePostResponse response = new RidePostResponse(post);
+        response.setRequestCount(requestCount);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/posts/{id}/tracking/start")

@@ -35,6 +35,7 @@ public class RidePostResponse {
     private LocalDateTime lastActivityAt;
     private LocalDateTime expiresAt;
     private LocalDateTime archivedAt;
+    private Long requestCount;
 
     public RidePostResponse(RidePost post) {
         this.id = post.getId();
@@ -64,6 +65,12 @@ public class RidePostResponse {
         this.lastActivityAt = post.getLastActivityAt();
         this.expiresAt = post.getExpiresAt();
         this.archivedAt = post.getArchivedAt();
+        this.requestCount = null; // Will be set by controller/service
+    }
+    
+    public RidePostResponse(RidePost post, Long requestCount) {
+        this(post);
+        this.requestCount = requestCount;
     }
 
     private RideRequirements toRequirements(Map<String, Object> requirements) {
@@ -196,5 +203,13 @@ public class RidePostResponse {
 
     public LocalDateTime getArchivedAt() {
         return archivedAt;
+    }
+    
+    public Long getRequestCount() {
+        return requestCount;
+    }
+    
+    public void setRequestCount(Long requestCount) {
+        this.requestCount = requestCount;
     }
 }

@@ -31,7 +31,8 @@ public class NotificationEvent {
 
     public enum NotificationType {
         LISTING_HIDDEN_DUE_TO_INACTIVITY,
-        USCIS_STATUS_CHANGE
+        USCIS_STATUS_CHANGE,
+        RIDE_REQUESTED
     }
 
     public UUID getId() {

@@ -40,6 +40,7 @@ export interface RidePost extends RidePostBase {
   updatedAt: string;
   lastActivityAt: string;
   archivedAt?: string | null;
+  requestCount?: number | null;
 }
 
 export interface RidePostSummary extends RidePostBase {}

@@ -54,10 +54,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        // Check if this is a unique constraint violation (e.g., duplicate ride request)
+        String message = ex.getMessage();
+        String userMessage = "The operation conflicts with existing data";
+        
+        if (message != null) {
+            if (message.contains("ride_requests_unique") || message.contains("unique constraint")) {
+                userMessage = "You have already requested this ride. Please check your existing requests.";
+            } else if (message.contains("duplicate key") || message.contains("UNIQUE")) {
+                userMessage = "This action conflicts with existing data. The record may already exist.";
+            }
+        }
+        
         ErrorResponse error = new ErrorResponse(
             HttpStatus.CONFLICT.value(),
             "Data conflict",
-            "The operation conflicts with existing data",
+            userMessage,
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+    
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
+        ErrorResponse error = new ErrorResponse(
+            HttpStatus.CONFLICT.value(),
+            "Invalid operation",
+            ex.getMessage(),
             LocalDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);

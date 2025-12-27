@@ -14,6 +14,7 @@ export default function RideDetail() {
   const [ride, setRide] = useState<RidePost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const currentUserId = useAuthStore.getState().user?.uid;
 
@@ -52,18 +53,26 @@ export default function RideDetail() {
     }
   };
 
-  const bookRide = async () => {
+  const requestRide = async () => {
     if (!id) return;
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const updated = await ridesApi.bookPost(id);
       setRide(updated);
-    } catch {
-      setError("Unable to book this ride.");
+      setSuccess("Ride request sent! The driver will be notified.");
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (err) {
+      setError("Unable to request this ride. Please try again.");
     } finally {
       setActionLoading(false);
     }
   };
+
+  // Alias for backward compatibility
+  const bookRide = requestRide;
 
   const cancelRide = async () => {
     if (!id) return;
@@ -166,6 +175,14 @@ export default function RideDetail() {
                 ${ride.priceTotal.toFixed(2)}
               </Text>
             </View>
+            {ride.requestCount !== undefined && ride.requestCount !== null && ride.requestCount > 0 ? (
+              <View>
+                <Text className="text-sm text-gray-500">Requests</Text>
+                <Text className="text-base font-semibold text-gray-900">
+                  {ride.requestCount}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -190,15 +207,23 @@ export default function RideDetail() {
             <Text className="text-red-600 text-sm">{error}</Text>
           </View>
         ) : null}
+        
+        {success ? (
+          <View className="bg-green-50 border border-green-100 rounded-xl p-3">
+            <Text className="text-green-600 text-sm">{success}</Text>
+          </View>
+        ) : null}
 
         <View className="space-y-3">
           {!isOwner && !isBooked && canBook ? (
             <TouchableOpacity
               className="bg-blue-600 rounded-xl py-3"
-              onPress={bookRide}
+              onPress={requestRide}
               disabled={actionLoading}
             >
-              <Text className="text-white text-center font-semibold">Book Ride</Text>
+              <Text className="text-white text-center font-semibold">
+                {actionLoading ? "Requesting..." : "Request Ride"}
+              </Text>
             </TouchableOpacity>
           ) : null}
 
