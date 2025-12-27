@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import RideMapPreview from "@/components/rides/RideMapPreview";
+import RideMapView from "@/components/rides/RideMapView";
 import RideStatusBadge from "@/components/rides/RideStatusBadge";
 import { ridesApi } from "@/lib/api/rides";
 import { formatDepartTime, hoursUntil } from "@/lib/rides/format";
@@ -144,9 +144,10 @@ export default function RideDetail() {
           </View>
         </View>
 
-        <RideMapPreview
-          pickup={{ lat: ride.pickupLat, lng: ride.pickupLng, color: "#10B981" }}
-          drop={{ lat: ride.dropLat, lng: ride.dropLng, color: "#F97316" }}
+        <RideMapView
+          ride={ride}
+          height={300}
+          showRoute={true}
         />
 
         <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">

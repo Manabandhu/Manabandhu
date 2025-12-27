@@ -8,7 +8,7 @@ import { ridesApi } from "@/lib/api/rides";
 import { RideFilters, RidePostSummary, RidePostType } from "@/types";
 import RideCard from "@/components/rides/RideCard";
 import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
-import RideMapPreview from "@/components/rides/RideMapPreview";
+import RideMapCanvas from "@/components/rides/RideMapCanvas";
 import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from "@/components/ui/Icons";
 
 const TAB_CONFIG: { label: string; type: RidePostType }[] = [
@@ -206,26 +206,19 @@ export default function RidesHome() {
       </View>
 
       {viewMode === "map" ? (
-        <View className="flex-1">
-          {selectedRide ? (
-            <View className="p-4">
-              <RideMapPreview
-                pickup={{
-                  lat: selectedRide.pickupLat,
-                  lng: selectedRide.pickupLng,
-                  color: "#10B981",
-                }}
-                drop={{
-                  lat: selectedRide.dropLat,
-                  lng: selectedRide.dropLng,
-                  color: "#F97316",
-                }}
-              />
-            </View>
+        <View className="flex-1 px-4 py-4">
+          {filteredRides.length > 0 ? (
+            <RideMapCanvas
+              rides={filteredRides}
+              onSelect={(ride) => {
+                setSelectedRideId(ride.id);
+                navigateTo(`/rides/detail?id=${ride.id}`);
+              }}
+            />
           ) : (
             <View className="flex-1 items-center justify-center">
               <CarIcon size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-4">Select a ride to view on map</Text>
+              <Text className="text-gray-500 mt-4">No rides to display on map</Text>
             </View>
           )}
         </View>
