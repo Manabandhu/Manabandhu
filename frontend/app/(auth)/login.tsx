@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { GluestackInput } from "@/components/ui/gluestack-index";
 import { GluestackButton } from "@/components/ui/gluestack-index";
 import { GluestackCheckbox } from "@/components/ui/gluestack-index";
 import { Logo } from "@/components/ui/Logo";
-import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/components/ui/Icons";
+import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon, FingerprintIcon } from "@/components/ui/Icons";
 import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
@@ -29,6 +29,7 @@ import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { secureStorage } from "@/lib/storage";
+import { checkBiometricAvailability, authenticateWithBiometric, BiometricType } from "@/lib/biometric";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -36,6 +37,10 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState<BiometricType>({ available: false, type: "none", name: "" });
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [checkingBiometric, setCheckingBiometric] = useState(true);
+  const biometricPromptedRef = useRef(false);
   const { setUser } = useAuthStore();
 
   const form = useForm<LoginInput>({
@@ -44,6 +49,22 @@ export default function LoginScreen() {
   });
 
   useEffect(() => {
+    const initializeBiometric = async () => {
+      try {
+        // Check biometric availability
+        const biometric = await checkBiometricAvailability();
+        setBiometricAvailable(biometric);
+        
+        // Check if biometric is enabled
+        const biometricEnabled = await secureStorage.getItem('biometric_enabled');
+        setBiometricEnabled(biometricEnabled === 'true');
+      } catch (error) {
+        console.log('Error checking biometric:', error);
+      } finally {
+        setCheckingBiometric(false);
+      }
+    };
+
     const loadSavedCredentials = async () => {
       try {
         const savedEmail = await secureStorage.getItem('remembered_email');
@@ -62,8 +83,39 @@ export default function LoginScreen() {
       }
     };
     
+    initializeBiometric();
     loadSavedCredentials();
   }, []);
+
+  // Auto-prompt for biometric if enabled and credentials are saved
+  useEffect(() => {
+    const autoBiometricLogin = async () => {
+      if (checkingBiometric || loading || biometricPromptedRef.current) return;
+      
+      const savedEmail = await secureStorage.getItem('remembered_email');
+      const savedPassword = await secureStorage.getItem('remembered_password');
+      const wasRemembered = await secureStorage.getItem('remember_me');
+      const biometricEnabled = await secureStorage.getItem('biometric_enabled');
+      
+      if (
+        biometricAvailable.available &&
+        biometricEnabled === 'true' &&
+        wasRemembered === 'true' &&
+        savedEmail &&
+        savedPassword
+      ) {
+        biometricPromptedRef.current = true;
+        // Small delay to let the UI render first
+        setTimeout(async () => {
+          await handleBiometricLogin();
+        }, 500);
+      }
+    };
+
+    if (!checkingBiometric) {
+      autoBiometricLogin();
+    }
+  }, [checkingBiometric, biometricAvailable.available, loading]);
 
   const handleSubmit = async (data: LoginInput) => {
     try {
@@ -80,11 +132,21 @@ export default function LoginScreen() {
           await secureStorage.setItem('remembered_email', sanitizedEmail);
           await secureStorage.setItem('remembered_password', data.password);
           await secureStorage.setItem('remember_me', 'true');
+          
+          // Prompt to enable biometric if available and not already enabled
+          if (biometricAvailable.available && !biometricEnabled) {
+            // You could show a prompt here asking if user wants to enable biometric
+            // For now, we'll auto-enable it if they have remember me checked
+            await secureStorage.setItem('biometric_enabled', 'true');
+            setBiometricEnabled(true);
+          }
         } else {
           // Clear saved credentials if remember me is unchecked
           await secureStorage.removeItem('remembered_email');
           await secureStorage.removeItem('remembered_password');
           await secureStorage.removeItem('remember_me');
+          await secureStorage.removeItem('biometric_enabled');
+          setBiometricEnabled(false);
         }
         
         await navigateAfterAuth();
@@ -96,6 +158,51 @@ export default function LoginScreen() {
       form.setError("password", {
         message: appError.userMessage || getFirebaseErrorMessage(error),
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      setLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      // Authenticate with biometric
+      const result = await authenticateWithBiometric(
+        `Sign in with ${biometricAvailable.name}`
+      );
+
+      if (!result.success) {
+        if (result.error === "Authentication cancelled" || result.error === "user_fallback") {
+          // User cancelled or chose to use password - don't show error
+          setLoading(false);
+          return;
+        }
+        throw new Error(result.error || "Biometric authentication failed");
+      }
+
+      // Get saved credentials
+      const savedEmail = await secureStorage.getItem('remembered_email');
+      const savedPassword = await secureStorage.getItem('remembered_password');
+
+      if (!savedEmail || !savedPassword) {
+        throw new Error("No saved credentials found");
+      }
+
+      // Sign in with saved credentials
+      const sanitizedEmail = sanitizeEmail(savedEmail);
+      const signInResult = await signInWithEmail(sanitizedEmail, savedPassword);
+      const user = signInResult.user;
+
+      if (user) {
+        await navigateAfterAuth();
+      }
+    } catch (error: unknown) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      const appError = normalizeError(error);
+      logger.error("Biometric login failed", {}, error);
+      // Don't show error to user for biometric failures, just fall back to manual login
     } finally {
       setLoading(false);
     }
@@ -262,6 +369,20 @@ export default function LoginScreen() {
             >
               Sign in
             </GluestackButton>
+
+            {/* Biometric Login Button */}
+            {biometricAvailable.available && (
+              <TouchableOpacity
+                style={styles.biometricButton}
+                onPress={handleBiometricLogin}
+                disabled={loading || checkingBiometric}
+              >
+                <FingerprintIcon size={24} color="#4F46E5" />
+                <Text style={styles.biometricButtonText}>
+                  Sign in with {biometricAvailable.name}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {/* Divider */}
             <View style={styles.divider}>
@@ -478,5 +599,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4F46E5",
     fontWeight: "600",
+  },
+  biometricButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 48,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#4F46E5",
+    backgroundColor: "#FFFFFF",
+    marginTop: 12,
+    gap: 12,
+  },
+  biometricButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#4F46E5",
   },
 });
