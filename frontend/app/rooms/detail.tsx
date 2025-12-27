@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Alert, Dimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { openMapsDirections } from "@/lib/maps";
 import { roomsApi } from "@/lib/api/rooms";
@@ -15,6 +15,7 @@ export default function RoomDetail() {
   const [reviews, setReviews] = useState<RoomReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const loadListing = async () => {
     if (!id) return;
@@ -94,21 +95,56 @@ export default function RoomDetail() {
   }
 
   const locationLabel = listing.approxAreaLabel;
+  const screenWidth = Dimensions.get("window").width;
+  const images = listing.imageUrls || [];
+  const hasMultipleImages = images.length > 1;
+
+  const handleImageScroll = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = Math.round(event.nativeEvent.contentOffset.x / slideSize);
+    setCurrentImageIndex(index);
+  };
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} className="h-60">
-        {(listing.imageUrls || []).length ? (
-          (listing.imageUrls || []).map((uri) => (
-            <Image key={uri} source={{ uri }} className="h-60 w-full" />
-          ))
-        ) : (
-          <View className="h-60 w-full bg-gray-100 items-center justify-center">
-            <HomeIcon size={32} color="#9CA3AF" />
-            <Text className="text-gray-400 mt-2">No images yet</Text>
+      <View className="relative">
+        <ScrollView 
+          horizontal 
+          pagingEnabled 
+          showsHorizontalScrollIndicator={false} 
+          onScroll={handleImageScroll}
+          scrollEventThrottle={16}
+          style={{ height: 240 }}
+        >
+          {images.length > 0 ? (
+            images.map((uri, index) => (
+              <Image 
+                key={`${uri}-${index}`} 
+                source={{ uri }} 
+                style={{ width: screenWidth, height: 240 }}
+                resizeMode="cover"
+              />
+            ))
+          ) : (
+            <View style={{ width: screenWidth, height: 240 }} className="bg-gray-100 items-center justify-center">
+              <HomeIcon size={32} color="#9CA3AF" />
+              <Text className="text-gray-400 mt-2">No images yet</Text>
+            </View>
+          )}
+        </ScrollView>
+        {hasMultipleImages && (
+          <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-2">
+            {images.map((_, index) => (
+              <View
+                key={index}
+                className={`h-2 rounded-full ${
+                  index === currentImageIndex ? "bg-white w-6" : "bg-white/50 w-2"
+                }`}
+              />
+            ))}
           </View>
         )}
-      </ScrollView>
+      </View>
 
       <View className="px-6 py-5 gap-4">
         <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">

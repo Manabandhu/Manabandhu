@@ -21,6 +21,14 @@ export default function RoomFinderHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const sheetRef = useRef<BottomSheet>(null);
 
+  const navigateTo = (path: string) => {
+    try {
+      router.push(path as any);
+    } catch (err) {
+      console.error("Navigation error:", err);
+    }
+  };
+
   const loadListings = async (currentFilters = filters) => {
     setError(null);
     setLoading(true);
@@ -65,7 +73,7 @@ export default function RoomFinderHome() {
             </View>
             {Platform.OS === 'web' && (
               <TouchableOpacity
-                onPress={() => router.push("/rooms/create" as any)}
+                onPress={() => navigateTo("/rooms/create")}
                 className="bg-indigo-600 px-4 py-2.5 rounded-xl shadow-sm"
               >
                 <Text className="text-white font-semibold text-sm">+ Post Room</Text>
@@ -104,19 +112,19 @@ export default function RoomFinderHome() {
             <View className="flex-row bg-gray-100 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
               <TouchableOpacity
                 onPress={() => setViewMode("list")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white" : ""}`}
               >
                 <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("grid")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white" : ""}`}
               >
                 <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("map")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white shadow-sm" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white" : ""}`}
               >
                 <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : "#6B7280"} />
               </TouchableOpacity>
@@ -128,12 +136,12 @@ export default function RoomFinderHome() {
 
       {viewMode === "map" ? (
         <View className="flex-1">
-          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => router.push(`/rooms/detail?id=${listing.id}` as any)} />
+          <RoomMapCanvas listings={filteredListings} onSelect={(listing) => navigateTo(`/rooms/detail?id=${listing.id}`)} />
         </View>
       ) : (
         <ScrollView
           className="flex-1 bg-gray-50"
-          contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 16 }}
+          contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 8, paddingBottom: 20 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {loading && (
@@ -156,7 +164,7 @@ export default function RoomFinderHome() {
                   : "Be the first to post a room in your neighborhood."}
               </Text>
               <TouchableOpacity
-                onPress={() => router.push("/rooms/create" as any)}
+                onPress={() => navigateTo("/rooms/create")}
                 className="mt-6 bg-indigo-600 px-6 py-3 rounded-xl shadow-sm"
               >
                 <Text className="text-white font-semibold">Post a listing</Text>
@@ -164,13 +172,13 @@ export default function RoomFinderHome() {
             </View>
           )}
           {!loading && filteredListings.length > 0 && (
-            <View className={viewMode === "grid" ? "flex-row flex-wrap justify-between" : ""}>
+            <View className={viewMode === "grid" ? "flex-row flex-wrap justify-between" : "px-2"}>
               {filteredListings.map((listing) => (
             <RoomListingCard
               key={listing.id}
               listing={listing}
                   viewMode={viewMode}
-              onPress={() => router.push(`/rooms/detail?id=${listing.id}` as any)}
+              onPress={() => navigateTo(`/rooms/detail?id=${listing.id}`)}
             />
           ))}
             </View>
@@ -206,21 +214,22 @@ export default function RoomFinderHome() {
         />
       </BottomSheet>
 
-      {/* Floating Action Button - Mobile Only */}
+      {/* Floating Action Button - Mobile Only (Rooms specific styling) */}
       {Platform.OS !== 'web' && (
         <TouchableOpacity
-          onPress={() => router.push("/rooms/create" as any)}
-          className="absolute right-6 bg-indigo-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+          onPress={() => navigateTo("/rooms/create")}
+          className="absolute right-6 w-16 h-16 rounded-full items-center justify-center shadow-lg"
           style={{
             bottom: 24 + insets.bottom,
-            shadowColor: "#000",
+            backgroundColor: "#10B981", // Green color for rooms/housing
+            shadowColor: "#10B981",
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 8,
+            shadowOpacity: 0.4,
+            shadowRadius: 6,
+            elevation: 10,
           }}
         >
-          <PlusIcon size={24} color="#FFFFFF" />
+          <HomeIcon size={28} color="#FFFFFF" />
         </TouchableOpacity>
       )}
     </SafeAreaView>

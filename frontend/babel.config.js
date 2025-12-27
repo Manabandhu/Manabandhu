@@ -13,6 +13,7 @@ module.exports = function (api) {
       "nativewind/babel",
     ],
     plugins: [
+      "expo-router/babel",
       // Apply import.meta transform for web builds
       // This transforms import.meta to CommonJS-compatible code
       // Safe to apply conditionally - only transforms if import.meta is found
