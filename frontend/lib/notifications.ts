@@ -37,9 +37,20 @@ export async function registerForPushNotifications(): Promise<string | null> {
     }
 
     // Get the Expo push token
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'your-project-id',
-    });
+    // Only include projectId if it's a valid UUID format
+    const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID;
+    const isValidUUID = projectId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
+    
+    let tokenData;
+    if (isValidUUID) {
+      tokenData = await Notifications.getExpoPushTokenAsync({
+        projectId: projectId,
+      });
+    } else {
+      // In development/Expo Go, projectId is optional
+      // For production builds, you should set EXPO_PUBLIC_EAS_PROJECT_ID
+      tokenData = await Notifications.getExpoPushTokenAsync();
+    }
 
     const token = tokenData.data;
 
@@ -49,6 +60,10 @@ export async function registerForPushNotifications(): Promise<string | null> {
     return token;
   } catch (error) {
     console.error('Error registering for push notifications:', error);
+    // Don't throw - gracefully handle missing projectId in development
+    if (__DEV__) {
+      console.warn('Push notifications require a valid EAS project ID in production. Set EXPO_PUBLIC_EAS_PROJECT_ID environment variable.');
+    }
     return null;
   }
 }
@@ -85,9 +100,20 @@ export async function unregisterPushToken(token: string) {
  */
 export async function getPushToken(): Promise<string | null> {
   try {
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'your-project-id',
-    });
+    // Only include projectId if it's a valid UUID format
+    const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID;
+    const isValidUUID = projectId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
+    
+    let tokenData;
+    if (isValidUUID) {
+      tokenData = await Notifications.getExpoPushTokenAsync({
+        projectId: projectId,
+      });
+    } else {
+      // In development/Expo Go, projectId is optional
+      tokenData = await Notifications.getExpoPushTokenAsync();
+    }
+    
     return tokenData.data;
   } catch (error) {
     console.error('Error getting push token:', error);

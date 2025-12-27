@@ -65,7 +65,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       origin: false,
     },
     eas: {
-      projectId: "your-project-id",
+      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID || undefined,
     },
   },
   experiments: {

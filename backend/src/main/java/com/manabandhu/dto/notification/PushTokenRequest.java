@@ -1,5 +1,6 @@
 package com.manabandhu.dto.notification;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.manabandhu.model.notification.PushToken.Platform;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,5 +15,17 @@ public class PushTokenRequest {
     private Platform platform;
 
     private String deviceId;
-}
 
+    // Custom setter to handle case-insensitive platform conversion from frontend
+    @JsonSetter("platform")
+    public void setPlatformFromString(String platformStr) {
+        if (platformStr != null) {
+            try {
+                // Convert lowercase to uppercase enum value (ios -> IOS, android -> ANDROID, web -> WEB)
+                this.platform = Platform.valueOf(platformStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid platform: " + platformStr + ". Must be one of: ios, android, web");
+            }
+        }
+    }
+}

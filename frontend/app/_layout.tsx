@@ -47,9 +47,9 @@ export default function RootLayout() {
     };
   }, []);
 
-  // Set up push notifications when user is authenticated
+  // Set up push notifications when user is authenticated and app is ready
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !appIsReady) return;
 
     let cleanup: (() => void) | undefined;
 
@@ -65,27 +65,37 @@ export default function RootLayout() {
             console.log('Notification received:', notification);
           },
           (response) => {
-            // Handle notification tap
-            const data = response.notification.request.content.data;
-            if (data?.type) {
-              // Navigate based on notification type
-              switch (data.type) {
-                case 'RIDE_REQUESTED':
-                  if (data.ridePostId) {
-                    router.push(`/rides/detail?id=${data.ridePostId}`);
+            // Handle notification tap - use setTimeout to ensure navigation is ready
+            try {
+              const data = response.notification.request.content.data;
+              if (data?.type) {
+                // Use setTimeout to ensure navigation context is available
+                setTimeout(() => {
+                  try {
+                    switch (data.type) {
+                      case 'RIDE_REQUESTED':
+                        if (data.ridePostId) {
+                          router.push(`/rides/detail?id=${data.ridePostId}`);
+                        }
+                        break;
+                      case 'USCIS_STATUS_CHANGE':
+                        if (data.caseId) {
+                          router.push(`/uscis/case/${data.caseId}`);
+                        } else {
+                          router.push('/uscis');
+                        }
+                        break;
+                      default:
+                        // Navigate to home or notifications screen
+                        router.push('/(tabs)/home');
+                    }
+                  } catch (navError) {
+                    console.error('Navigation error:', navError);
                   }
-                  break;
-                case 'USCIS_STATUS_CHANGE':
-                  if (data.caseId) {
-                    router.push(`/uscis/case/${data.caseId}`);
-                  } else {
-                    router.push('/uscis');
-                  }
-                  break;
-                default:
-                  // Navigate to home or notifications screen
-                  router.push('/(tabs)/home');
+                }, 100);
               }
+            } catch (error) {
+              console.error('Error handling notification tap:', error);
             }
           }
         );
@@ -101,7 +111,7 @@ export default function RootLayout() {
         cleanup();
       }
     };
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, appIsReady, router]);
 
   const handleSplashComplete = () => {
     setShowCustomSplash(false);
