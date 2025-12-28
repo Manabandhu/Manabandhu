@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/auth.store';
+import { useThemeStore } from '@/store/theme.store';
 import Header from '@/components/ui/Header';
 import { communityAPI, CommunityPost } from '@/lib/api/community';
 import { jobsAPI, Job } from '@/lib/api/jobs';
@@ -11,6 +12,7 @@ import PostJobBottomSheet from '@/components/PostJobBottomSheet';
 export default function Profile() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
   const [loading, setLoading] = useState(false);
   const [userPosts, setUserPosts] = useState<CommunityPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
@@ -144,11 +146,11 @@ export default function Profile() {
   ];
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="Profile" showBack={false} />
       <ScrollView className="flex-1">
         {/* Header */}
-        <View className="bg-white px-6 py-8">
+        <View className="bg-white dark:bg-gray-800 px-6 py-8">
         <View className="items-center">
           {/* Profile Picture */}
           <View className="w-24 h-24 bg-gray-200 rounded-full items-center justify-center mb-4">
@@ -163,63 +165,63 @@ export default function Profile() {
           </View>
           
           {/* User Info */}
-          <Text className="text-2xl font-bold text-gray-900 mb-1">
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
             {user?.displayName || 'User'}
           </Text>
-          <Text className="text-gray-600 mb-1">
+          <Text className="text-gray-600 dark:text-gray-400 mb-1">
             {user?.email}
           </Text>
           {user?.city && (
-            <Text className="text-gray-500 text-sm">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
               📍 {user.city}, {user.country}
             </Text>
           )}
         </View>
 
         {/* Stats */}
-        <View className="flex-row justify-around mt-6 pt-6 border-t border-gray-100">
+        <View className="flex-row justify-around mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
           {profileStats.map((stat, index) => (
             <View key={index} className="items-center">
-              <Text className="text-2xl font-bold text-gray-900">{stat.value}</Text>
-              <Text className="text-gray-600 text-sm">{stat.label}</Text>
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-sm">{stat.label}</Text>
             </View>
           ))}
         </View>
       </View>
 
       {/* Menu Items */}
-      <View className="bg-white mt-4 mx-4 rounded-xl">
+      <View className="bg-white dark:bg-gray-800 mt-4 mx-4 rounded-xl">
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
             className={`flex-row items-center px-4 py-4 ${
-              index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
+              index !== menuItems.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
             }`}
             onPress={() => router.push(item.route as any)}
           >
-            <View className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center mr-3">
-              <item.icon size={20} color="#6B7280" />
+            <View className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full items-center justify-center mr-3">
+              <item.icon size={20} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
             </View>
-            <Text className="flex-1 text-gray-900 font-medium">{item.label}</Text>
-            <Text className="text-gray-400">›</Text>
+            <Text className="flex-1 text-gray-900 dark:text-white font-medium">{item.label}</Text>
+            <Text className="text-gray-400 dark:text-gray-500">›</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* My Jobs Section */}
-      <View className="bg-white mt-4 mx-4 rounded-xl">
+      <View className="bg-white dark:bg-gray-800 mt-4 mx-4 rounded-xl">
         <TouchableOpacity 
           className="flex-row justify-between items-center px-4 py-4"
           onPress={() => setExpandedSection(expandedSection === 'jobs' ? null : 'jobs')}
         >
-          <Text className="text-lg font-semibold text-gray-900">My Jobs ({userJobs.length})</Text>
-          <Text className="text-gray-400 text-xl">{expandedSection === 'jobs' ? '−' : '+'}</Text>
+          <Text className="text-lg font-semibold text-gray-900 dark:text-white">My Jobs ({userJobs.length})</Text>
+          <Text className="text-gray-400 dark:text-gray-500 text-xl">{expandedSection === 'jobs' ? '−' : '+'}</Text>
         </TouchableOpacity>
         
         {expandedSection === 'jobs' && (
-          <View className="border-t border-gray-100">
-            <View className="flex-row justify-between items-center px-4 py-3 bg-gray-50">
-              <Text className="text-sm text-gray-600">Manage your job postings</Text>
+          <View className="border-t border-gray-100 dark:border-gray-700">
+            <View className="flex-row justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-700">
+              <Text className="text-sm text-gray-600 dark:text-gray-400">Manage your job postings</Text>
               <TouchableOpacity onPress={() => setShowPostJobSheet(true)}>
                 <Text className="text-blue-600 font-medium text-sm">+ Post Job</Text>
               </TouchableOpacity>
@@ -239,13 +241,13 @@ export default function Profile() {
                   <View 
                     key={job.id} 
                     className={`px-4 py-4 ${
-                      index !== userJobs.length - 1 ? 'border-b border-gray-100' : ''
+                      index !== userJobs.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
                     }`}
                   >
                     <View className="flex-row justify-between items-start mb-2">
                       <View className="flex-1">
-                        <Text className="text-base font-semibold text-gray-900">{job.title}</Text>
-                        <Text className="text-sm text-gray-600">{job.company} • {job.location}</Text>
+                        <Text className="text-base font-semibold text-gray-900 dark:text-white">{job.title}</Text>
+                        <Text className="text-sm text-gray-600 dark:text-gray-400">{job.company} • {job.location}</Text>
                       </View>
                       <TouchableOpacity onPress={() => handleDeleteJob(job.id)}>
                         <TrashIcon size={16} color="#EF4444" />
@@ -271,19 +273,19 @@ export default function Profile() {
       </View>
 
       {/* My Posts Section */}
-      <View className="bg-white mt-4 mx-4 rounded-xl">
+      <View className="bg-white dark:bg-gray-800 mt-4 mx-4 rounded-xl">
         <TouchableOpacity 
           className="flex-row justify-between items-center px-4 py-4"
           onPress={() => setExpandedSection(expandedSection === 'posts' ? null : 'posts')}
         >
-          <Text className="text-lg font-semibold text-gray-900">My Posts ({userPosts.length})</Text>
-          <Text className="text-gray-400 text-xl">{expandedSection === 'posts' ? '−' : '+'}</Text>
+          <Text className="text-lg font-semibold text-gray-900 dark:text-white">My Posts ({userPosts.length})</Text>
+          <Text className="text-gray-400 dark:text-gray-500 text-xl">{expandedSection === 'posts' ? '−' : '+'}</Text>
         </TouchableOpacity>
         
         {expandedSection === 'posts' && (
-          <View className="border-t border-gray-100">
-            <View className="flex-row justify-between items-center px-4 py-3 bg-gray-50">
-              <Text className="text-sm text-gray-600">Manage your community posts</Text>
+          <View className="border-t border-gray-100 dark:border-gray-700">
+            <View className="flex-row justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-700">
+              <Text className="text-sm text-gray-600 dark:text-gray-400">Manage your community posts</Text>
               <TouchableOpacity onPress={() => router.push('/community/create-post')}>
                 <Text className="text-blue-600 font-medium text-sm">+ New Post</Text>
               </TouchableOpacity>
@@ -363,9 +365,9 @@ export default function Profile() {
       </View>
 
       {/* About Section */}
-      <View className="bg-white mt-4 mx-4 rounded-xl p-4">
-        <Text className="text-lg font-semibold text-gray-900 mb-3">About</Text>
-        <Text className="text-gray-600 leading-6">
+      <View className="bg-white dark:bg-gray-800 mt-4 mx-4 rounded-xl p-4">
+        <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">About</Text>
+        <Text className="text-gray-600 dark:text-gray-400 leading-6">
           Welcome to ManaBandhu! Connect with fellow immigrants, find housing, jobs, and build your community.
         </Text>
       </View>

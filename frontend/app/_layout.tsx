@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth.store";
 import * as SplashScreen from "expo-splash-screen";
 import CustomSplashScreen from "@/components/ui/SplashScreen";
 import { FontProvider } from "@/components/FontProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TIMING } from "@/constants/timing";
@@ -129,22 +130,24 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <FontProvider>
-          <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: "#ffffff" },
-            }}
-          >
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(onboarding)" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="rooms" />
-            <Stack.Screen name="expenses" />
-            <Stack.Screen name="index" />
-          </Stack>
-        </FontProvider>
+        <ThemeProvider>
+          <FontProvider>
+            <StatusBar style={Platform.OS === 'ios' ? 'auto' : 'dark'} />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: "#ffffff" },
+              }}
+            >
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(onboarding)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="rooms" />
+              <Stack.Screen name="expenses" />
+              <Stack.Screen name="index" />
+            </Stack>
+          </FontProvider>
+        </ThemeProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

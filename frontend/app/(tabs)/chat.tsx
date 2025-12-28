@@ -3,9 +3,11 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-
 import { useRouter } from "expo-router";
 import Header from "@/components/ui/Header";
 import { chatAPI, Chat } from "@/lib/api/chat";
+import { useThemeStore } from "@/store/theme.store";
 
 export default function ChatList() {
   const router = useRouter();
+  const { isDarkMode } = useThemeStore();
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,14 +41,14 @@ export default function ChatList() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500">Loading chats...</Text>
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
+        <Text className="text-gray-500 dark:text-gray-400">Loading chats...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="Chat" />
       <ScrollView 
         className="flex-1 px-4 py-6"
@@ -54,34 +56,34 @@ export default function ChatList() {
       >
       {chats.length === 0 ? (
         <View className="flex-1 justify-center items-center py-20">
-          <Text className="text-gray-500 text-lg">No chats yet</Text>
-          <Text className="text-gray-400 text-sm mt-2">Start a conversation!</Text>
+          <Text className="text-gray-500 dark:text-gray-400 text-lg">No chats yet</Text>
+          <Text className="text-gray-400 dark:text-gray-500 text-sm mt-2">Start a conversation!</Text>
         </View>
       ) : (
         chats.map((chat) => (
           <TouchableOpacity
             key={chat.id}
-            className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
+            className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 shadow-sm border border-gray-100 dark:border-gray-700"
             onPress={() => router.push(`/chat/conversation?chatId=${chat.id}&name=${encodeURIComponent(chat.name)}`)}
           >
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-900 mb-1">
+                <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                   {chat.name}
                 </Text>
                 {chat.lastMessage && (
-                  <Text className="text-gray-600 text-sm" numberOfLines={1}>
+                  <Text className="text-gray-600 dark:text-gray-400 text-sm" numberOfLines={1}>
                     {chat.lastMessage.content}
                   </Text>
                 )}
               </View>
               <View className="items-end">
-                <Text className="text-xs text-gray-400">
+                <Text className="text-xs text-gray-400 dark:text-gray-500">
                   {formatTime(chat.lastMessageAt)}
                 </Text>
                 {chat.type === 'GROUP' && (
-                  <View className="bg-blue-100 px-2 py-1 rounded-full mt-1">
-                    <Text className="text-xs text-blue-600">Group</Text>
+                  <View className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full mt-1">
+                    <Text className="text-xs text-blue-600 dark:text-blue-400">Group</Text>
                   </View>
                 )}
               </View>

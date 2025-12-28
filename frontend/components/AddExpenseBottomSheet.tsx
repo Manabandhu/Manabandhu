@@ -12,6 +12,7 @@ interface AddExpenseBottomSheetProps {
 
 export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded }: AddExpenseBottomSheetProps) {
   const router = useRouter();
+  const { isDarkMode } = useThemeStore();
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -76,15 +77,15 @@ export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded
         onPress={handleClose}
       >
         <Pressable 
-          className="bg-white rounded-t-3xl max-h-[70%]"
+          className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[70%]"
           onPress={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-200">
+          <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-200 dark:border-gray-700">
             <TouchableOpacity onPress={handleClose}>
-              <Text className="text-blue-600 text-lg">Cancel</Text>
+              <Text className="text-blue-600 dark:text-blue-400 text-lg">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-lg font-semibold">Add Expense</Text>
+            <Text className="text-lg font-semibold text-gray-900 dark:text-white">Add Expense</Text>
             <TouchableOpacity 
               onPress={handleSave}
               disabled={loading || !amount.trim() || !title.trim()}

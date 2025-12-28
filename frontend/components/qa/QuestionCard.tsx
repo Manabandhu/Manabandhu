@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Question } from '@/types/qa';
 import { COLORS, colors } from '@/constants/colors';
 import { useRouter } from 'expo-router';
+import { useThemeStore } from '@/store/theme.store';
 
 interface QuestionCardProps {
   question: Question;
@@ -10,6 +11,7 @@ interface QuestionCardProps {
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({ question }) => {
   const router = useRouter();
+  const { isDarkMode } = useThemeStore();
 
   const handlePress = () => {
     router.push(`/qa/question/${question.id}`);
@@ -22,6 +24,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ question }) => {
       default: return colors.primary[500];
     }
   };
+
+  const styles = getStyles(isDarkMode);
 
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress}>
@@ -64,9 +68,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ question }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
     padding: 16,
     marginVertical: 4,
     marginHorizontal: 16,
@@ -76,6 +80,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    borderWidth: isDarkMode ? 1 : 0,
+    borderColor: isDarkMode ? '#374151' : 'transparent',
   },
   header: {
     flexDirection: 'row',
@@ -87,7 +93,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: isDarkMode ? '#F9FAFB' : '#111827',
     marginRight: 8,
   },
   statusBadge: {
@@ -102,7 +108,7 @@ const styles = StyleSheet.create({
   },
   body: {
     fontSize: 14,
-    color: '#6B7280',
+    color: isDarkMode ? '#D1D5DB' : '#6B7280',
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -112,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   tag: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: isDarkMode ? '#374151' : '#F3F4F6',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -121,12 +127,12 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 12,
-    color: '#374151',
+    color: isDarkMode ? '#D1D5DB' : '#374151',
     fontWeight: '500',
   },
   moreText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: isDarkMode ? '#9CA3AF' : '#6B7280',
     alignSelf: 'center',
   },
   footer: {
@@ -137,7 +143,7 @@ const styles = StyleSheet.create({
   },
   author: {
     fontSize: 12,
-    color: '#374151',
+    color: isDarkMode ? '#D1D5DB' : '#374151',
     fontWeight: '500',
   },
   stats: {
@@ -145,11 +151,11 @@ const styles = StyleSheet.create({
   },
   stat: {
     fontSize: 12,
-    color: '#6B7280',
+    color: isDarkMode ? '#9CA3AF' : '#6B7280',
     marginLeft: 12,
   },
   timestamp: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: isDarkMode ? '#6B7280' : '#9CA3AF',
   },
 });

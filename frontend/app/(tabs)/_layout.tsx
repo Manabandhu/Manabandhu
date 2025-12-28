@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/Icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemeStore } from "@/store/theme.store";
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ export default function TabsLayout() {
   const [showExploreMenu, setShowExploreMenu] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
 
   const exploreOptions = [
     { icon: BriefcaseIcon, label: "Jobs", route: "/jobs", color: "#3B82F6" },
@@ -56,6 +58,8 @@ export default function TabsLayout() {
             height: 60,
             paddingBottom: 8,
             paddingTop: 8,
+            backgroundColor: isDarkMode ? "#111827" : "#FFFFFF",
+            borderTopColor: isDarkMode ? "#374151" : "#E5E7EB",
           },
         }}
       >
@@ -123,14 +127,18 @@ export default function TabsLayout() {
           style={styles.modalOverlay} 
           onPress={() => setShowExploreMenu(false)}
         >
-          <View style={[styles.exploreMenu, { paddingBottom: insets.bottom + 20 }]}>
+          <View style={[
+            styles.exploreMenu, 
+            isDarkMode && styles.exploreMenuDark,
+            { paddingBottom: insets.bottom + 20 }
+          ]}>
             <View style={styles.exploreHeader}>
-              <Text style={styles.exploreTitle}>Explore Services</Text>
+              <Text style={[styles.exploreTitle, isDarkMode && styles.exploreTitleDark]}>Explore Services</Text>
               <TouchableOpacity 
                 onPress={() => setShowExploreMenu(false)}
-                style={styles.closeButton}
+                style={[styles.closeButton, isDarkMode && styles.closeButtonDark]}
               >
-                <XIcon size={24} color={COLORS.gray[600]} />
+                <XIcon size={24} color={isDarkMode ? COLORS.gray[400] : COLORS.gray[600]} />
               </TouchableOpacity>
             </View>
             <View style={styles.exploreGrid}>
@@ -144,7 +152,7 @@ export default function TabsLayout() {
                   <View style={[styles.exploreIconContainer, { backgroundColor: option.color + '15' }]}>
                     <option.icon size={28} color={option.color} />
                   </View>
-                  <Text style={styles.exploreLabel}>{option.label}</Text>
+                  <Text style={[styles.exploreLabel, isDarkMode && styles.exploreLabelDark]}>{option.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -194,10 +202,19 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827",
   },
+  exploreTitleDark: {
+    color: "#F9FAFB",
+  },
+  exploreMenuDark: {
+    backgroundColor: "#111827",
+  },
   closeButton: {
     padding: 8,
     borderRadius: 20,
     backgroundColor: "#F3F4F6",
+  },
+  closeButtonDark: {
+    backgroundColor: "#374151",
   },
   exploreGrid: {
     flexDirection: "row",
@@ -223,5 +240,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#374151",
     textAlign: "center",
+  },
+  exploreLabelDark: {
+    color: "#D1D5DB",
   },
 });

@@ -19,6 +19,7 @@ import { SearchIcon, BookmarkIcon, XIcon, CalendarIcon, GlobeIcon } from '@/comp
 export default function ImmigrationNewsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -122,18 +123,18 @@ export default function ImmigrationNewsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center" style={{ paddingTop: insets.top }}>
-        <Text className="text-gray-500 text-base">Loading news...</Text>
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center" style={{ paddingTop: insets.top }}>
+        <Text className="text-gray-500 dark:text-gray-400 text-base">Loading news...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="Immigration" />
       
       {/* Header */}
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-6 pt-4 pb-4">
           <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity 
@@ -167,18 +168,18 @@ export default function ImmigrationNewsScreen() {
           </ScrollView>
 
           {/* Search Bar */}
-          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
-            <SearchIcon size={18} color="#6B7280" />
+          <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200 dark:border-gray-600">
+            <SearchIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search articles..."
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-gray-900"
+              className="flex-1 ml-3 text-gray-900 dark:text-white"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <XIcon size={18} color="#6B7280" />
+                <XIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               </TouchableOpacity>
             )}
           </View>
@@ -191,11 +192,11 @@ export default function ImmigrationNewsScreen() {
                   key={tab.id}
                   onPress={() => setActiveTab(tab.id)}
                   className={`px-4 py-2.5 rounded-full ${
-                    activeTab === tab.id ? 'bg-blue-600 shadow-md' : 'bg-gray-100'
+                    activeTab === tab.id ? 'bg-blue-600 shadow-md' : 'bg-gray-100 dark:bg-gray-700'
                   }`}
                 >
                   <Text className={`font-semibold text-sm ${
-                    activeTab === tab.id ? 'text-white' : 'text-gray-700'
+                    activeTab === tab.id ? 'text-white' : 'text-gray-700 dark:text-gray-300'
                   }`}>
                     {tab.label}
                   </Text>
@@ -204,7 +205,7 @@ export default function ImmigrationNewsScreen() {
             </View>
           </ScrollView>
 
-          <Text className="text-sm text-gray-600 mt-3">
+          <Text className="text-sm text-gray-600 dark:text-gray-400 mt-3">
             {filteredArticles.length} {filteredArticles.length === 1 ? "article" : "articles"}
           </Text>
         </View>
@@ -217,11 +218,11 @@ export default function ImmigrationNewsScreen() {
       >
         {filteredArticles.length === 0 ? (
           <View className="items-center py-20 px-4">
-            <View className="bg-blue-100 rounded-full p-6 mb-4">
+            <View className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-6 mb-4">
               <GlobeIcon size={48} color="#3B82F6" />
             </View>
-            <Text className="text-gray-700 text-xl font-semibold mt-4">No News Available</Text>
-            <Text className="text-gray-500 mt-2 text-center text-sm">
+            <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No News Available</Text>
+            <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
               {searchQuery 
                 ? "Try adjusting your search"
                 : "Check back later for the latest immigration updates"}
@@ -234,20 +235,20 @@ export default function ImmigrationNewsScreen() {
               <TouchableOpacity
                 key={article.id}
                 onPress={() => router.push(`/immigration/article/${article.id}`)}
-                className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-4 shadow-md border border-gray-100 dark:border-gray-700"
                 activeOpacity={0.7}
               >
                 <View className="flex-row justify-between items-start mb-3">
                   <View className="flex-1 mr-3">
                     <View className="flex-row items-center flex-wrap gap-2 mb-2">
                       {article.isBreaking && (
-                        <View className="bg-red-100 px-2 py-1 rounded-full">
-                          <Text className="text-red-600 text-xs font-bold">BREAKING</Text>
+                        <View className="bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-full">
+                          <Text className="text-red-600 dark:text-red-400 text-xs font-bold">BREAKING</Text>
                         </View>
                       )}
                       {article.isVerified && (
-                        <View className="bg-green-100 px-2 py-1 rounded-full">
-                          <Text className="text-green-600 text-xs font-semibold">VERIFIED</Text>
+                        <View className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                          <Text className="text-green-600 dark:text-green-400 text-xs font-semibold">VERIFIED</Text>
                         </View>
                       )}
                       <View
@@ -263,25 +264,25 @@ export default function ImmigrationNewsScreen() {
                       </View>
                     </View>
                     
-                    <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={2}>
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2" numberOfLines={2}>
                       {article.title}
                     </Text>
                     
                     {article.summary && (
-                      <Text className="text-gray-600 text-sm mb-3 leading-5" numberOfLines={3}>
+                      <Text className="text-gray-600 dark:text-gray-400 text-sm mb-3 leading-5" numberOfLines={3}>
                         {article.summary}
                       </Text>
                     )}
                     
                     <View className="flex-row items-center mb-2">
-                      <GlobeIcon size={14} color="#6B7280" />
-                      <Text className="text-xs text-gray-500 ml-2">
+                      <GlobeIcon size={14} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                      <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                         {SOURCE_TYPE_LABELS[article.sourceType]} • {article.sourceName}
                       </Text>
                     </View>
                     <View className="flex-row items-center">
-                      <CalendarIcon size={14} color="#6B7280" />
-                      <Text className="text-xs text-gray-500 ml-2">
+                      <CalendarIcon size={14} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                      <Text className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                         {formatDate(article.publishedAt)}
                       </Text>
                     </View>
@@ -296,21 +297,21 @@ export default function ImmigrationNewsScreen() {
                   >
                     <BookmarkIcon 
                       size={20} 
-                      color={article.isBookmarked ? "#3B82F6" : "#6B7280"} 
+                      color={article.isBookmarked ? "#3B82F6" : (isDarkMode ? "#9CA3AF" : "#6B7280")} 
                     />
                   </TouchableOpacity>
                 </View>
                 
                 {article.visaCategories.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2 pt-3 border-t border-gray-100">
+                  <View className="flex-row flex-wrap gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
                     {article.visaCategories.slice(0, 3).map((category, index) => (
-                      <View key={index} className="bg-blue-50 px-2 py-1 rounded-lg">
-                        <Text className="text-blue-600 text-xs font-medium">{category}</Text>
+                      <View key={index} className="bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">
+                        <Text className="text-blue-600 dark:text-blue-400 text-xs font-medium">{category}</Text>
                       </View>
                     ))}
                     {article.visaCategories.length > 3 && (
-                      <View className="bg-gray-50 px-2 py-1 rounded-lg">
-                        <Text className="text-gray-600 text-xs">
+                      <View className="bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-lg">
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs">
                           +{article.visaCategories.length - 3} more
                         </Text>
                       </View>

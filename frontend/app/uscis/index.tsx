@@ -15,6 +15,7 @@ import Header from '@/components/ui/Header';
 import { uscisApi, UscisCase } from '@/lib/api/uscis';
 import { FORM_TYPE_LABELS, STATUS_COLORS } from '@/types/uscis';
 import { FileIcon, PlusIcon, CalendarIcon, XIcon, FilterIcon, CheckCircleIcon } from '@/components/ui/Icons';
+import { useThemeStore } from '@/store/theme.store';
 
 type SortOption = 'recent' | 'status' | 'form_type';
 type StatusFilter = 'all' | 'pending' | 'approved' | 'rfe';
@@ -22,6 +23,7 @@ type StatusFilter = 'all' | 'pending' | 'approved' | 'rfe';
 export default function UscisTrackerScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
   const [cases, setCases] = useState<UscisCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -114,19 +116,19 @@ export default function UscisTrackerScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
         <Header title="USCIS" />
-        <Text className="text-gray-500 text-base">Loading cases...</Text>
+        <Text className="text-gray-500 dark:text-gray-400 text-base">Loading cases...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="USCIS" />
       
       {/* Header */}
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-6 pt-4 pb-4">
           <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
@@ -172,11 +174,11 @@ export default function UscisTrackerScreen() {
                   className={`px-4 py-2.5 rounded-full ${
                     statusFilter === filter 
                       ? "bg-blue-600 shadow-md" 
-                      : "bg-gray-100"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <Text className={`font-semibold text-sm ${
-                    statusFilter === filter ? "text-white" : "text-gray-700"
+                    statusFilter === filter ? "text-white" : "text-gray-700 dark:text-gray-300"
                   }`}>
                     {filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
                   </Text>
@@ -187,15 +189,15 @@ export default function UscisTrackerScreen() {
 
           {/* Sort Button */}
           <View className="flex-row items-center justify-between mt-3">
-            <Text className="text-sm text-gray-600">
+            <Text className="text-sm text-gray-600 dark:text-gray-400">
               {filteredAndSortedCases.length} {filteredAndSortedCases.length === 1 ? "case" : "cases"}
             </Text>
             <TouchableOpacity
               onPress={() => setShowSortModal(true)}
-              className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg"
+              className="flex-row items-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg"
             >
-              <FilterIcon size={16} color="#6B7280" />
-              <Text className="text-sm text-gray-700 ml-2 font-medium">
+              <FilterIcon size={16} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+              <Text className="text-sm text-gray-700 dark:text-gray-300 ml-2 font-medium">
                 Sort: {sortBy === 'recent' ? 'Recent' : 
                        sortBy === 'status' ? 'Status' : 
                        'Form Type'}
@@ -212,11 +214,11 @@ export default function UscisTrackerScreen() {
       >
         {filteredAndSortedCases.length === 0 ? (
           <View className="items-center py-20 px-4">
-            <View className="bg-blue-100 rounded-full p-6 mb-4">
+            <View className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-6 mb-4">
               <FileIcon size={48} color="#3B82F6" />
             </View>
-            <Text className="text-gray-700 text-xl font-semibold mt-4">No Cases Yet</Text>
-            <Text className="text-gray-500 mt-2 text-center text-sm">
+            <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No Cases Yet</Text>
+            <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
               {statusFilter !== 'all'
                 ? `No ${statusFilter} cases found.`
                 : "Add your first USCIS case to start tracking its status"}
@@ -235,12 +237,12 @@ export default function UscisTrackerScreen() {
               <TouchableOpacity
                 key={caseItem.id}
                 onPress={() => router.push(`/uscis/case/${caseItem.id}`)}
-                className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-4 shadow-md border border-gray-100 dark:border-gray-700"
                 activeOpacity={0.7}
               >
                 <View className="flex-row justify-between items-start mb-3">
                   <View className="flex-1 pr-2">
-                    <Text className="text-lg font-bold text-gray-900 mb-1">
+                    <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                       {caseItem.receiptNumber}
                     </Text>
                     <View 
@@ -261,32 +263,32 @@ export default function UscisTrackerScreen() {
                         className="w-3 h-3 rounded-full mr-2"
                         style={{ backgroundColor: statusColor }}
                       />
-                      <Text className="text-xs text-gray-500">Status</Text>
+                      <Text className="text-xs text-gray-500 dark:text-gray-400">Status</Text>
                     </View>
                   </View>
                 </View>
 
                 <View className="mb-3">
-                  <Text className="text-base font-semibold text-gray-900 mb-1">
+                  <Text className="text-base font-semibold text-gray-900 dark:text-white mb-1">
                     {caseItem.caseStatus}
                   </Text>
                   {caseItem.statusDescription && (
-                    <Text className="text-sm text-gray-600 leading-5" numberOfLines={2}>
+                    <Text className="text-sm text-gray-600 dark:text-gray-400 leading-5" numberOfLines={2}>
                       {caseItem.statusDescription}
                     </Text>
                   )}
                 </View>
 
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
+                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                   <View className="flex-row items-center">
-                    <CalendarIcon size={14} color="#6B7280" />
-                    <Text className="text-gray-500 text-xs ml-2">
+                    <CalendarIcon size={14} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                    <Text className="text-gray-500 dark:text-gray-400 text-xs ml-2">
                       Updated: {formatDate(caseItem.lastStatusDate)}
                     </Text>
                   </View>
                   {caseItem.daysPending && (
-                    <View className="bg-amber-50 px-3 py-1 rounded-lg">
-                      <Text className="text-amber-700 text-xs font-semibold">
+                    <View className="bg-amber-50 dark:bg-amber-900/30 px-3 py-1 rounded-lg">
+                      <Text className="text-amber-700 dark:text-amber-400 text-xs font-semibold">
                         {caseItem.daysPending} days
                       </Text>
                     </View>
@@ -306,11 +308,11 @@ export default function UscisTrackerScreen() {
         onRequestClose={() => setShowSortModal(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Sort By</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Sort By</Text>
               <TouchableOpacity onPress={() => setShowSortModal(false)}>
-                <XIcon size={24} color="#6B7280" />
+                <XIcon size={24} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               </TouchableOpacity>
             </View>
             {(['recent', 'status', 'form_type'] as SortOption[]).map((option) => (
@@ -321,11 +323,11 @@ export default function UscisTrackerScreen() {
                   setShowSortModal(false);
                 }}
                 className={`py-4 px-4 rounded-xl mb-2 ${
-                  sortBy === option ? "bg-blue-50" : "bg-gray-50"
+                  sortBy === option ? "bg-blue-50 dark:bg-blue-900/30" : "bg-gray-50 dark:bg-gray-700"
                 }`}
               >
                 <Text className={`font-semibold ${
-                  sortBy === option ? "text-blue-600" : "text-gray-700"
+                  sortBy === option ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"
                 }`}>
                   {option === 'recent' ? 'Most Recent' : 
                    option === 'status' ? 'Status: A to Z' :

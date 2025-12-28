@@ -24,6 +24,7 @@ import {
 import AddExpenseBottomSheet from "@/components/AddExpenseBottomSheet";
 import { useCurrency } from "@/lib/currency";
 import { expensesAPI, Expense, ExpenseCategory } from "@/lib/api/expenses";
+import { useThemeStore } from "@/store/theme.store";
 
 // Expense interface is imported from API
 
@@ -43,6 +44,7 @@ export default function ExpensesDashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { format, symbol } = useCurrency();
+  const { isDarkMode } = useThemeStore();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
@@ -218,10 +220,10 @@ export default function ExpensesDashboard() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="Expenses" />
       
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-6 pt-4 pb-4">
           <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
@@ -243,11 +245,11 @@ export default function ExpensesDashboard() {
                   className={`px-4 py-2.5 rounded-full ${
                     selectedPeriod === period 
                       ? "bg-indigo-600 shadow-md" 
-                      : "bg-gray-100"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <Text className={`font-semibold text-sm ${
-                    selectedPeriod === period ? "text-white" : "text-gray-700"
+                    selectedPeriod === period ? "text-white" : "text-gray-700 dark:text-gray-300"
                   }`}>
                     {period === 'all' ? 'All Time' : period.charAt(0).toUpperCase() + period.slice(1)}
                   </Text>
@@ -279,14 +281,14 @@ export default function ExpensesDashboard() {
           </ScrollView>
 
           {/* Search Bar */}
-          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
+          <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200 dark:border-gray-600">
             <SearchIcon size={18} color="#6B7280" />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search expenses..."
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-gray-900"
+              className="flex-1 ml-3 text-gray-900 dark:text-white"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
@@ -317,13 +319,13 @@ export default function ExpensesDashboard() {
                   <TouchableOpacity
                     key={category.id}
                     onPress={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2.5 rounded-full flex-row items-center ${
-                      isSelected ? 'bg-indigo-600' : 'bg-white border border-gray-200'
-                    }`}
+                className={`px-4 py-2.5 rounded-full flex-row items-center ${
+                  isSelected ? 'bg-indigo-600' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                }`}
                   >
                     <Icon size={16} color={isSelected ? "#FFFFFF" : category.color} />
                     <Text className={`font-semibold text-sm ml-2 ${
-                      isSelected ? 'text-white' : 'text-gray-700'
+                      isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'
                     }`}>
                       {category.label}
                     </Text>
@@ -335,15 +337,15 @@ export default function ExpensesDashboard() {
 
           {/* Sort Button */}
           <View className="flex-row items-center justify-between mt-3">
-            <Text className="text-sm text-gray-600">
+            <Text className="text-sm text-gray-600 dark:text-gray-400">
               {filteredAndSortedExpenses.length} {filteredAndSortedExpenses.length === 1 ? "expense" : "expenses"}
             </Text>
             <TouchableOpacity
               onPress={() => setShowSortModal(true)}
-              className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg"
+              className="flex-row items-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg"
             >
               <FilterIcon size={16} color="#6B7280" />
-              <Text className="text-sm text-gray-700 ml-2 font-medium">
+              <Text className="text-sm text-gray-700 dark:text-gray-300 ml-2 font-medium">
                 Sort: {sortBy === 'recent' ? 'Recent' : 
                        sortBy === 'amount_high' ? 'Amount (High)' : 
                        sortBy === 'amount_low' ? 'Amount (Low)' :
@@ -364,8 +366,8 @@ export default function ExpensesDashboard() {
             <View className="bg-indigo-100 rounded-full p-6 mb-4">
               <CreditCardIcon size={48} color="#4F46E5" />
             </View>
-            <Text className="text-gray-700 text-xl font-semibold mt-4">No expenses found</Text>
-            <Text className="text-gray-500 mt-2 text-center text-sm">
+            <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No expenses found</Text>
+            <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
               {searchQuery 
                 ? "Try adjusting your search or filters"
                 : "Add your first expense to get started."}
@@ -385,7 +387,7 @@ export default function ExpensesDashboard() {
             return (
               <View
                 key={expense.id}
-                className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-4 shadow-md border border-gray-100 dark:border-gray-700"
               >
                 <View className="flex-row items-start">
                   {/* Category Icon */}
@@ -401,7 +403,7 @@ export default function ExpensesDashboard() {
                     <View className="flex-row items-start justify-between mb-2">
                       <View className="flex-1 pr-2">
                         <View className="flex-row items-center mb-1">
-                          <Text className="text-lg font-bold text-gray-900 mr-2">
+                          <Text className="text-lg font-bold text-gray-900 dark:text-white mr-2">
                             {expense.title}
                           </Text>
                         </View>
@@ -421,10 +423,10 @@ export default function ExpensesDashboard() {
                       </Text>
                     </View>
 
-                    <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                       <View className="flex-row items-center">
-                        <CalendarIcon size={14} color="#6B7280" />
-                        <Text className="text-gray-500 text-sm ml-2">
+                        <CalendarIcon size={14} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                        <Text className="text-gray-500 dark:text-gray-400 text-sm ml-2">
                           {new Date(expense.expenseDate).toLocaleDateString('en-US', { 
                             month: 'short', 
                             day: 'numeric', 
@@ -489,9 +491,9 @@ export default function ExpensesDashboard() {
         onRequestClose={() => setShowSortModal(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Sort By</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Sort By</Text>
               <TouchableOpacity onPress={() => setShowSortModal(false)}>
                 <XIcon size={24} color="#6B7280" />
               </TouchableOpacity>
@@ -504,11 +506,11 @@ export default function ExpensesDashboard() {
                   setShowSortModal(false);
                 }}
                 className={`py-4 px-4 rounded-xl mb-2 ${
-                  sortBy === option ? "bg-indigo-50" : "bg-gray-50"
+                  sortBy === option ? "bg-indigo-50 dark:bg-indigo-900/30" : "bg-gray-50 dark:bg-gray-700"
                 }`}
               >
                 <Text className={`font-semibold ${
-                  sortBy === option ? "text-indigo-600" : "text-gray-700"
+                  sortBy === option ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
                 }`}>
                   {option === 'recent' ? 'Most Recent' : 
                    option === 'amount_high' ? 'Amount: High to Low' :

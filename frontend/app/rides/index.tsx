@@ -11,6 +11,7 @@ import RideCard from "@/components/rides/RideCard";
 import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
 import RideMapCanvas from "@/components/rides/RideMapCanvas";
 import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from "@/components/ui/Icons";
+import { useThemeStore } from "@/store/theme.store";
 
 const TAB_CONFIG: { label: string; type: RidePostType }[] = [
   { label: "Available Rides", type: "OFFER" },
@@ -19,6 +20,7 @@ const TAB_CONFIG: { label: string; type: RidePostType }[] = [
 
 export default function RidesHome() {
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
   const [activeTab, setActiveTab] = useState<RidePostType>("OFFER");
   const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
   const [rides, setRides] = useState<RidePostSummary[]>([]);
@@ -121,7 +123,7 @@ export default function RidesHome() {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
       <Header title="Rides" />
       {/* Initial Prompt Modal */}
       <Modal
@@ -135,16 +137,16 @@ export default function RidesHome() {
           onPress={() => {}}
         >
           <Pressable
-            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+            className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl"
             onPress={(e) => e.stopPropagation()}
           >
             <View className="px-6 py-6">
               {/* Header */}
               <View className="mb-6">
-                <Text className="text-2xl font-bold text-gray-900 text-center">
+                <Text className="text-2xl font-bold text-gray-900 dark:text-white text-center">
                   What are you looking for?
                 </Text>
-                <Text className="text-sm text-gray-600 mt-2 text-center">
+                <Text className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
                   Choose an option to get started
                 </Text>
               </View>
@@ -189,12 +191,12 @@ export default function RidesHome() {
       </Modal>
 
       {/* Header with Search */}
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-3 pt-2 pb-3">
           <View className="mb-3 flex-row items-center justify-between">
             <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-900">Find Your Ride</Text>
-              <Text className="text-xs text-gray-500 mt-0.5">Discover rides and carpool opportunities</Text>
+              <Text className="text-2xl font-bold text-gray-900 dark:text-white">Find Your Ride</Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Discover rides and carpool opportunities</Text>
             </View>
             {Platform.OS === 'web' && (
               <TouchableOpacity
@@ -208,14 +210,14 @@ export default function RidesHome() {
 
           {/* Search Bar with Filters and View Toggle */}
           <View className="flex-row items-center gap-1.5">
-            <View className="bg-gray-50 rounded-lg px-3 flex-row items-center border border-gray-200" style={{ flex: 2.5, height: 44 }}>
-              <SearchIcon size={18} color="#6B7280" />
+            <View className="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 flex-row items-center border border-gray-200 dark:border-gray-600" style={{ flex: 2.5, height: 44 }}>
+              <SearchIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder="Search pickup, drop-off, or notes..."
                 placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-2 text-gray-900 text-sm"
+                className="flex-1 ml-2 text-gray-900 dark:text-white text-sm"
                 returnKeyType="search"
               />
             </View>
@@ -228,30 +230,30 @@ export default function RidesHome() {
                   console.error("Error opening sheet:", error);
                 }
               }}
-              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5"
+              className="flex-row items-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2.5"
               style={{ height: 44 }}
             >
-              <FilterIcon size={16} color="#4B5563" />
+              <FilterIcon size={16} color={isDarkMode ? "#9CA3AF" : "#4B5563"} />
             </TouchableOpacity>
 
-            <View className="flex-row bg-gray-100 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
+            <View className="flex-row bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
               <TouchableOpacity
                 onPress={() => setViewMode("list")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
+                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("grid")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
+                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("map")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : "#6B7280"} />
+                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
             </View>
           </View>
@@ -262,13 +264,13 @@ export default function RidesHome() {
               <TouchableOpacity
                 key={tab.type}
                 className={`px-4 py-2 rounded-full mr-3 ${
-                  activeTab === tab.type ? "bg-blue-600" : "bg-gray-100"
+                  activeTab === tab.type ? "bg-blue-600" : "bg-gray-100 dark:bg-gray-700"
                 }`}
                 onPress={() => setActiveTab(tab.type)}
               >
                 <Text
                   className={`font-medium text-sm ${
-                    activeTab === tab.type ? "text-white" : "text-gray-700"
+                    activeTab === tab.type ? "text-white" : "text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {tab.label}
@@ -280,7 +282,7 @@ export default function RidesHome() {
       </View>
 
       {viewMode === "map" ? (
-        <View className="flex-1 px-4 py-4">
+        <View className="flex-1 px-4 py-4 bg-gray-50 dark:bg-gray-900">
           {filteredRides.length > 0 ? (
             <RideMapCanvas
               rides={filteredRides}
@@ -291,32 +293,32 @@ export default function RidesHome() {
             />
           ) : (
             <View className="flex-1 items-center justify-center">
-              <CarIcon size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-4">No rides to display on map</Text>
+              <CarIcon size={48} color={isDarkMode ? "#6B7280" : "#9CA3AF"} />
+              <Text className="text-gray-500 dark:text-gray-400 mt-4">No rides to display on map</Text>
             </View>
           )}
         </View>
       ) : (
         <ScrollView
-          className="flex-1 bg-gray-50"
+          className="flex-1 bg-gray-50 dark:bg-gray-900"
           contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 8, paddingBottom: 20 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {loading && (
             <View className="items-center py-20">
-              <Text className="text-gray-500 text-base">Loading rides...</Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-base">Loading rides...</Text>
             </View>
           )}
           {error && (
-            <View className="bg-red-50 border border-red-200 rounded-xl p-4 mx-4 mt-4">
-              <Text className="text-red-600 text-sm">{error}</Text>
+            <View className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 mx-4 mt-4">
+              <Text className="text-red-600 dark:text-red-400 text-sm">{error}</Text>
             </View>
           )}
           {!loading && filteredRides.length === 0 && (
             <View className="items-center py-20 px-4">
-              <CarIcon size={48} color="#9CA3AF" />
-              <Text className="text-gray-700 text-xl font-semibold mt-4">No rides found</Text>
-              <Text className="text-gray-500 mt-2 text-center text-sm">
+              <CarIcon size={48} color={isDarkMode ? "#6B7280" : "#9CA3AF"} />
+              <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No rides found</Text>
+              <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
                 {searchQuery 
                   ? "Try adjusting your search or filters"
                   : "Be the first to post a ride in your area."}
@@ -354,10 +356,10 @@ export default function RidesHome() {
         index={-1}
         snapPoints={["25%", "60%"]}
         enablePanDownToClose
-        backgroundStyle={{ backgroundColor: "#fff" }}
+        backgroundStyle={{ backgroundColor: isDarkMode ? "#1F2937" : "#fff" }}
       >
         <RideFiltersSheet
-          sheetRef={sheetRef}
+          sheetRef={sheetRef as React.RefObject<BottomSheet>}
           initialFilters={filters}
           onApply={(updated) => {
             setFilters(updated);
@@ -389,20 +391,20 @@ export default function RidesHome() {
           onPress={() => setShowActionModal(false)}
         >
           <Pressable
-            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+            className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm shadow-2xl"
             onPress={(e) => e.stopPropagation()}
           >
             <View className="px-6 py-5">
               {/* Header */}
               <View className="flex-row justify-between items-center mb-5">
-                <Text className="text-xl font-bold text-gray-900">
+                <Text className="text-xl font-bold text-gray-900 dark:text-white">
                   Create a Ride Post
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowActionModal(false)}
                   className="w-8 h-8 items-center justify-center"
                 >
-                  <XIcon size={20} color="#6B7280" />
+                  <XIcon size={20} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
                 </TouchableOpacity>
               </View>
 

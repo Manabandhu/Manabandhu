@@ -4,6 +4,7 @@ import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { RoomListingSummary } from "@/types";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 import { useCurrency } from "@/lib/currency";
+import { useThemeStore } from "@/store/theme.store";
 
 interface RoomListingCardProps {
   listing: RoomListingSummary;
@@ -18,6 +19,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
   const scrollViewRef = useRef<ScrollView>(null);
   const images = listing.imageUrls || [];
   const { format } = useCurrency();
+  const { isDarkMode } = useThemeStore();
   
   // Filter out failed images - keep both URI and original index
   const validImagesWithIndex = images
@@ -56,7 +58,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
     return (
       <TouchableOpacity
         onPress={onPress}
-        className="bg-white rounded-2xl border border-gray-200 shadow-md mb-3 overflow-hidden"
+        className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md mb-3 overflow-hidden"
         style={{ width: "48%" }}
         onLayout={handleCardLayout}
       >
@@ -106,19 +108,19 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
           )}
         </View>
         <View className="p-3">
-          <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={1}>
+          <Text className="text-base font-bold text-gray-900 dark:text-white mb-1" numberOfLines={1}>
             {listing.title}
           </Text>
           <View className="flex-row items-center mb-2">
             <MapPinIcon size={14} color="#6B7280" />
-            <Text className="text-xs text-gray-600 ml-1 flex-1" numberOfLines={1}>
+            <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1 flex-1" numberOfLines={1}>
               {listing.approxAreaLabel}
             </Text>
           </View>
           <View className="flex-row items-baseline justify-between mt-2">
             <View>
               <Text className="text-lg font-bold text-indigo-600">{format(listing.rentMonthly)}</Text>
-              <Text className="text-xs text-gray-500">per month</Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400">per month</Text>
             </View>
           </View>
           <View className="flex-row flex-wrap gap-1.5 mt-2">
@@ -142,7 +144,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white rounded-xl border border-gray-200 shadow-sm mb-3 overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-3 overflow-hidden"
       activeOpacity={0.7}
     >
       <View className="flex-row" style={{ minHeight: 140 }}>
@@ -182,7 +184,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
               )}
             </>
           ) : (
-            <View className="w-full h-full bg-gray-100 items-center justify-center">
+            <View className="w-full h-full bg-gray-100 dark:bg-gray-700 items-center justify-center">
               <HomeIcon size={32} color="#9CA3AF" />
             </View>
           )}
@@ -201,7 +203,7 @@ export default function RoomListingCard({ listing, onPress, viewMode = "list" }:
             </Text>
             <View className="flex-row items-center mb-2">
               <MapPinIcon size={14} color="#6B7280" />
-              <Text className="text-xs text-gray-600 ml-1 flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-600 dark:text-gray-400 ml-1 flex-1" numberOfLines={1}>
                 {listing.approxAreaLabel}
               </Text>
             </View>

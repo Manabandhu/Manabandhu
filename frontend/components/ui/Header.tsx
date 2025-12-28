@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeftIcon, BellIcon, UserIcon } from "./Icons";
 import * as Haptics from "expo-haptics";
 import { ROUTES } from "@/constants/routes";
+import { useThemeStore } from "@/store/theme.store";
 
 interface HeaderProps {
   title?: string;
@@ -16,6 +17,7 @@ export default function Header({ title, showBack = true, onBackPress }: HeaderPr
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
 
   // Get module name from pathname if title is not provided
   const getModuleName = () => {
@@ -65,7 +67,11 @@ export default function Header({ title, showBack = true, onBackPress }: HeaderPr
   };
 
   return (
-    <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
+    <View style={[
+      styles.header, 
+      isDarkMode && styles.headerDark,
+      { paddingTop: Math.max(insets.top, 6) }
+    ]}>
       <View style={styles.headerContent}>
         {/* Left: Back Button */}
         <View style={styles.leftSection}>
@@ -75,14 +81,14 @@ export default function Header({ title, showBack = true, onBackPress }: HeaderPr
               style={styles.iconButton}
               activeOpacity={0.7}
             >
-              <ArrowLeftIcon size={24} color="#111827" />
+              <ArrowLeftIcon size={24} color={isDarkMode ? "#F9FAFB" : "#111827"} />
             </TouchableOpacity>
           )}
         </View>
 
         {/* Center: Module Name */}
         <View style={styles.centerSection}>
-          <Text style={styles.moduleName} numberOfLines={1}>
+          <Text style={[styles.moduleName, { color: isDarkMode ? "#F9FAFB" : "#111827" }]} numberOfLines={1}>
             {moduleName}
           </Text>
         </View>
@@ -94,14 +100,14 @@ export default function Header({ title, showBack = true, onBackPress }: HeaderPr
             style={styles.iconButton}
             activeOpacity={0.7}
           >
-            <BellIcon size={22} color="#374151" />
+            <BellIcon size={22} color={isDarkMode ? "#D1D5DB" : "#374151"} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleProfilePress}
             style={styles.iconButton}
             activeOpacity={0.7}
           >
-            <UserIcon size={22} color="#374151" />
+            <UserIcon size={22} color={isDarkMode ? "#D1D5DB" : "#374151"} />
           </TouchableOpacity>
         </View>
       </View>
@@ -114,14 +120,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
-    paddingBottom: 12,
+    paddingBottom: 6,
     paddingHorizontal: 16,
+  },
+  headerDark: {
+    backgroundColor: "#111827",
+    borderBottomColor: "#374151",
   },
   headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: 44,
+    minHeight: 36,
   },
   leftSection: {
     width: 44,

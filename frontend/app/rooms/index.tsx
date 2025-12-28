@@ -10,9 +10,11 @@ import RoomMapCanvas from "@/components/rooms/RoomMapCanvas";
 import { roomsApi } from "@/lib/api/rooms";
 import { RoomFilters, RoomListingSummary } from "@/types";
 import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon, PlusIcon } from "@/components/ui/Icons";
+import { useThemeStore } from "@/store/theme.store";
 
 export default function RoomFinderHome() {
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
   const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
   const [filters, setFilters] = useState<RoomFilters>({});
   const [listings, setListings] = useState<RoomListingSummary[]>([]);
@@ -63,11 +65,11 @@ export default function RoomFinderHome() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
       <Header title="Rooms" />
       
       {/* Header with Search */}
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-3 pt-2 pb-3">
           <View className="mb-3 flex-row items-center justify-end">
             {Platform.OS === 'web' && (
@@ -82,14 +84,14 @@ export default function RoomFinderHome() {
 
           {/* Search Bar with Filters and View Toggle */}
           <View className="flex-row items-center gap-1.5">
-            <View className="bg-gray-50 rounded-lg px-3 flex-row items-center border border-gray-200" style={{ flex: 2.5, height: 44 }}>
-              <SearchIcon size={18} color="#6B7280" />
+            <View className="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 flex-row items-center border border-gray-200 dark:border-gray-600" style={{ flex: 2.5, height: 44 }}>
+              <SearchIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder="Search..."
                 placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-2 text-gray-900 text-sm"
+                className="flex-1 ml-2 text-gray-900 dark:text-white text-sm"
                 returnKeyType="search"
               />
             </View>
@@ -102,30 +104,30 @@ export default function RoomFinderHome() {
                   console.error("Error opening sheet:", error);
                 }
               }}
-              className="flex-row items-center bg-white border border-gray-300 rounded-lg px-2.5"
+              className="flex-row items-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2.5"
               style={{ height: 44 }}
             >
               <FilterIcon size={16} color="#4B5563" />
             </TouchableOpacity>
 
-            <View className="flex-row bg-gray-100 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
+            <View className="flex-row bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 items-center" style={{ height: 44, flex: 1.3 }}>
               <TouchableOpacity
                 onPress={() => setViewMode("list")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "list" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : "#6B7280"} />
+                <ListIcon size={16} color={viewMode === "list" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("grid")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "grid" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : "#6B7280"} />
+                <GridIcon size={16} color={viewMode === "grid" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setViewMode("map")}
-                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white" : ""}`}
+                className={`flex-1 h-full rounded-md items-center justify-center ${viewMode === "map" ? "bg-white dark:bg-gray-600" : ""}`}
               >
-                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : "#6B7280"} />
+                <MapPinIcon size={16} color={viewMode === "map" ? "#4F46E5" : (isDarkMode ? "#9CA3AF" : "#6B7280")} />
               </TouchableOpacity>
             </View>
           </View>
@@ -139,7 +141,7 @@ export default function RoomFinderHome() {
         </View>
       ) : (
         <ScrollView
-          className="flex-1 bg-gray-50"
+          className="flex-1 bg-gray-50 dark:bg-gray-900"
           contentContainerStyle={{ padding: viewMode === "grid" ? 12 : 8, paddingBottom: 20 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
@@ -156,8 +158,8 @@ export default function RoomFinderHome() {
           {!loading && filteredListings.length === 0 && (
             <View className="items-center py-20 px-4">
               <HomeIcon size={48} color="#9CA3AF" />
-              <Text className="text-gray-700 text-xl font-semibold mt-4">No listings found</Text>
-              <Text className="text-gray-500 mt-2 text-center text-sm">
+              <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No listings found</Text>
+              <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
                 {searchQuery 
                   ? "Try adjusting your search or filters"
                   : "Be the first to post a room in your neighborhood."}

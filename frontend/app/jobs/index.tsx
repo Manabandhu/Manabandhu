@@ -6,6 +6,7 @@ import Header from "@/components/ui/Header";
 import { jobsAPI, Job } from "@/lib/api/jobs";
 import { BriefcaseIcon, SearchIcon, MapPinIcon, FilterIcon, XIcon, PlusIcon, CalendarIcon } from "@/components/ui/Icons";
 import PostJobBottomSheet from "@/components/PostJobBottomSheet";
+import { useThemeStore } from "@/store/theme.store";
 
 const jobTypes = [
   { key: 'ALL', label: 'All Jobs', color: '#6366F1' },
@@ -20,6 +21,7 @@ type SortOption = 'recent' | 'salary_high' | 'salary_low' | 'company';
 export default function Jobs() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -130,10 +132,10 @@ export default function Jobs() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <Header title="Jobs" />
       
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-6 pt-4 pb-4">
           <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
@@ -170,18 +172,18 @@ export default function Jobs() {
           </ScrollView>
 
           {/* Search Bar */}
-          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
-            <SearchIcon size={18} color="#6B7280" />
+          <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200 dark:border-gray-600">
+            <SearchIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Search jobs, companies, locations..."
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-gray-900"
+              className="flex-1 ml-3 text-gray-900 dark:text-white"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <XIcon size={18} color="#6B7280" />
+                <XIcon size={18} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               </TouchableOpacity>
             )}
           </View>
@@ -196,12 +198,12 @@ export default function Jobs() {
                   className={`px-4 py-2.5 rounded-full ${
                     selectedType === type.key 
                       ? "bg-blue-600 shadow-md" 
-                      : "bg-gray-100"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                   style={selectedType === type.key ? { backgroundColor: type.color } : {}}
                 >
                   <Text className={`font-semibold text-sm ${
-                    selectedType === type.key ? "text-white" : "text-gray-700"
+                    selectedType === type.key ? "text-white" : "text-gray-700 dark:text-gray-300"
                   }`}>
                     {type.label}
                   </Text>
@@ -212,15 +214,15 @@ export default function Jobs() {
 
           {/* Sort Button */}
           <View className="flex-row items-center justify-between mt-3">
-            <Text className="text-sm text-gray-600">
+            <Text className="text-sm text-gray-600 dark:text-gray-400">
               {filteredAndSortedJobs.length} {filteredAndSortedJobs.length === 1 ? "job" : "jobs"}
             </Text>
             <TouchableOpacity
               onPress={() => setShowSortModal(true)}
-              className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg"
+              className="flex-row items-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg"
             >
-              <FilterIcon size={16} color="#6B7280" />
-              <Text className="text-sm text-gray-700 ml-2 font-medium">
+              <FilterIcon size={16} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+              <Text className="text-sm text-gray-700 dark:text-gray-300 ml-2 font-medium">
                 Sort: {sortBy === 'recent' ? 'Recent' : 
                        sortBy === 'salary_high' ? 'Salary (High)' : 
                        sortBy === 'salary_low' ? 'Salary (Low)' : 
@@ -238,17 +240,17 @@ export default function Jobs() {
       >
         {loading && (
           <View className="items-center py-20">
-            <Text className="text-gray-500 text-base">Loading jobs...</Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-base">Loading jobs...</Text>
           </View>
         )}
 
         {!loading && filteredAndSortedJobs.length === 0 && (
           <View className="items-center py-20 px-4">
-            <View className="bg-blue-100 rounded-full p-6 mb-4">
+            <View className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-6 mb-4">
               <BriefcaseIcon size={48} color="#3B82F6" />
             </View>
-            <Text className="text-gray-700 text-xl font-semibold mt-4">No jobs found</Text>
-            <Text className="text-gray-500 mt-2 text-center text-sm">
+            <Text className="text-gray-700 dark:text-gray-300 text-xl font-semibold mt-4">No jobs found</Text>
+            <Text className="text-gray-500 dark:text-gray-400 mt-2 text-center text-sm">
               {searchQuery 
                 ? "Try adjusting your search or filters"
                 : "Be the first to post a job opportunity."}
@@ -267,16 +269,16 @@ export default function Jobs() {
           return (
             <TouchableOpacity
               key={job.id}
-              className="bg-white rounded-2xl p-4 mb-4 shadow-md border border-gray-100"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-4 shadow-md border border-gray-100 dark:border-gray-700"
               onPress={() => router.push(`/jobs/detail?id=${job.id}`)}
               activeOpacity={0.7}
             >
               <View className="flex-row items-start justify-between mb-3">
                 <View className="flex-1 pr-2">
-                  <Text className="text-lg font-bold text-gray-900 mb-1" numberOfLines={2}>
+                  <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1" numberOfLines={2}>
                     {job.title}
                   </Text>
-                  <Text className="text-blue-600 font-semibold mb-2">
+                  <Text className="text-blue-600 dark:text-blue-400 font-semibold mb-2">
                     {job.company}
                   </Text>
                 </View>
@@ -294,37 +296,37 @@ export default function Jobs() {
               </View>
               
               <View className="flex-row items-center mb-3">
-                <MapPinIcon size={16} color="#6B7280" />
-                <Text className="text-gray-600 text-sm ml-1">{job.location}</Text>
+                <MapPinIcon size={16} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                <Text className="text-gray-600 dark:text-gray-400 text-sm ml-1">{job.location}</Text>
                 {formatSalary(job.salaryMin, job.salaryMax) && (
                   <>
-                    <Text className="text-gray-400 mx-2">•</Text>
-                    <Text className="text-gray-600 text-sm font-medium">
+                    <Text className="text-gray-400 dark:text-gray-500 mx-2">•</Text>
+                    <Text className="text-gray-600 dark:text-gray-400 text-sm font-medium">
                       {formatSalary(job.salaryMin, job.salaryMax)}
                     </Text>
                   </>
                 )}
               </View>
               
-              <Text className="text-gray-700 text-sm mb-3 leading-5" numberOfLines={2}>
+              <Text className="text-gray-700 dark:text-gray-300 text-sm mb-3 leading-5" numberOfLines={2}>
                 {job.description}
               </Text>
               
-              <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                 <View className="flex-row items-center">
-                  <CalendarIcon size={14} color="#6B7280" />
-                  <Text className="text-gray-500 text-xs ml-2">
+                  <CalendarIcon size={14} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs ml-2">
                     Posted {formatTime(job.createdAt)}
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="bg-blue-50 px-3 py-1.5 rounded-lg"
+                  className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg"
                   onPress={(e) => {
                     e.stopPropagation();
                     router.push(`/jobs/detail?id=${job.id}`);
                   }}
                 >
-                  <Text className="text-blue-600 text-xs font-semibold">View Details</Text>
+                  <Text className="text-blue-600 dark:text-blue-400 text-xs font-semibold">View Details</Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -334,16 +336,16 @@ export default function Jobs() {
         {/* Quick Actions */}
         <View className="mt-6 mb-8">
           <TouchableOpacity
-            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm mb-3"
+            className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm mb-3"
             onPress={() => router.push("/jobs/resume-tips")}
           >
             <View className="flex-row items-center">
-              <View className="bg-blue-100 rounded-lg p-2 mr-3">
+              <View className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-2 mr-3">
                 <BriefcaseIcon size={20} color="#3B82F6" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 font-semibold">Resume Tips & AI Analysis</Text>
-                <Text className="text-gray-500 text-sm mt-1">Get expert advice on your resume</Text>
+                <Text className="text-gray-900 dark:text-white font-semibold">Resume Tips & AI Analysis</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Get expert advice on your resume</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -358,11 +360,11 @@ export default function Jobs() {
         onRequestClose={() => setShowSortModal(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6">
+          <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Sort By</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Sort By</Text>
               <TouchableOpacity onPress={() => setShowSortModal(false)}>
-                <XIcon size={24} color="#6B7280" />
+                <XIcon size={24} color={isDarkMode ? "#9CA3AF" : "#6B7280"} />
               </TouchableOpacity>
             </View>
             {(['recent', 'salary_high', 'salary_low', 'company'] as SortOption[]).map((option) => (
@@ -373,11 +375,11 @@ export default function Jobs() {
                   setShowSortModal(false);
                 }}
                 className={`py-4 px-4 rounded-xl mb-2 ${
-                  sortBy === option ? "bg-blue-50" : "bg-gray-50"
+                  sortBy === option ? "bg-blue-50 dark:bg-blue-900/30" : "bg-gray-50 dark:bg-gray-700"
                 }`}
               >
                 <Text className={`font-semibold ${
-                  sortBy === option ? "text-blue-600" : "text-gray-700"
+                  sortBy === option ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"
                 }`}>
                   {option === 'recent' ? 'Most Recent' : 
                    option === 'salary_high' ? 'Salary: High to Low' :

@@ -6,10 +6,12 @@ import { roomsApi } from "@/lib/api/rooms";
 import { ridesApi } from "@/lib/api/rides";
 import { MessageIcon } from "@/components/ui/Icons";
 import { useAuthStore } from "@/store/auth.store";
+import { useThemeStore } from "@/store/theme.store";
 
 export default function Conversation() {
   const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();
   const router = useRouter();
+  const { isDarkMode } = useThemeStore();
   const scrollViewRef = useRef<ScrollView>(null);
   
   const [messages, setMessages] = useState<Message[]>([]);
@@ -70,23 +72,23 @@ export default function Conversation() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500">Loading messages...</Text>
+      <View className="flex-1 justify-center items-center bg-white dark:bg-gray-900">
+        <Text className="text-gray-500 dark:text-gray-400">Loading messages...</Text>
       </View>
     );
   }
 
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-white"
+      className="flex-1 bg-white dark:bg-gray-900"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Header */}
-      <View className="bg-white border-b border-gray-200 px-4 py-3 flex-row items-center">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex-row items-center">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <Text className="text-blue-600 text-lg">←</Text>
+          <Text className="text-blue-600 dark:text-blue-400 text-lg">←</Text>
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-gray-900 flex-1">
+        <Text className="text-lg font-semibold text-gray-900 dark:text-white flex-1">
           {decodeURIComponent(name || 'Chat')}
         </Text>
       </View>
@@ -98,15 +100,15 @@ export default function Conversation() {
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
         {errorMessage && (
-          <View className="bg-red-50 border border-red-100 rounded-lg p-3 mb-4">
-            <Text className="text-red-600 text-sm">{errorMessage}</Text>
+          <View className="bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-lg p-3 mb-4">
+            <Text className="text-red-600 dark:text-red-400 text-sm">{errorMessage}</Text>
           </View>
         )}
         {messages.length === 0 ? (
           <View className="flex-1 justify-center items-center py-20">
-            <MessageIcon size={48} color="#9CA3AF" />
-            <Text className="text-gray-500 text-lg mt-4">No messages yet</Text>
-            <Text className="text-gray-400 text-sm mt-2">Start the conversation!</Text>
+            <MessageIcon size={48} color={isDarkMode ? "#6B7280" : "#9CA3AF"} />
+            <Text className="text-gray-500 dark:text-gray-400 text-lg mt-4">No messages yet</Text>
+            <Text className="text-gray-400 dark:text-gray-500 text-sm mt-2">Start the conversation!</Text>
           </View>
         ) : (
           messages.map((message) => {
@@ -119,15 +121,15 @@ export default function Conversation() {
                 <View className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                   isOwn 
                     ? 'bg-blue-600' 
-                    : 'bg-gray-100'
+                    : 'bg-gray-100 dark:bg-gray-700'
                 }`}>
                   <Text className={`text-base ${
-                    isOwn ? 'text-white' : 'text-gray-900'
+                    isOwn ? 'text-white' : 'text-gray-900 dark:text-white'
                   }`}>
                     {message.content}
                   </Text>
                   <Text className={`text-xs mt-1 ${
-                    isOwn ? 'text-blue-100' : 'text-gray-500'
+                    isOwn ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
                   }`}>
                     {formatTime(message.createdAt)}
                   </Text>
@@ -139,11 +141,12 @@ export default function Conversation() {
       </ScrollView>
 
       {/* Message Input */}
-      <View className="bg-white border-t border-gray-200 px-4 py-3">
+      <View className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
         <View className="flex-row items-center space-x-3">
           <TextInput
-            className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-base"
+            className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-3 text-base text-gray-900 dark:text-white"
             placeholder="Type a message..."
+            placeholderTextColor={isDarkMode ? "#9CA3AF" : "#9CA3AF"}
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
@@ -151,7 +154,7 @@ export default function Conversation() {
           />
           <TouchableOpacity
             className={`w-12 h-12 rounded-full items-center justify-center ${
-              newMessage.trim() && !sending ? 'bg-blue-600' : 'bg-gray-300'
+              newMessage.trim() && !sending ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
             }`}
             onPress={sendMessage}
             disabled={!newMessage.trim() || sending}

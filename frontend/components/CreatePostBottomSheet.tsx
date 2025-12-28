@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { communityAPI } from '@/lib/api/community';
+import { useThemeStore } from '@/store/theme.store';
 
 interface CreatePostBottomSheetProps {
   visible: boolean;
@@ -9,6 +10,7 @@ interface CreatePostBottomSheetProps {
 }
 
 export default function CreatePostBottomSheet({ visible, onClose, onPostCreated }: CreatePostBottomSheetProps) {
+  const { isDarkMode } = useThemeStore();
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -58,15 +60,15 @@ export default function CreatePostBottomSheet({ visible, onClose, onPostCreated 
           onPress={handleClose}
         >
           <Pressable 
-            className="bg-white rounded-t-3xl max-h-[85%]"
+            className="bg-white dark:bg-gray-800 rounded-t-3xl max-h-[85%]"
             onPress={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-200">
+            <View className="flex-row justify-between items-center px-4 py-4 border-b border-gray-200 dark:border-gray-700">
               <TouchableOpacity onPress={handleClose}>
-                <Text className="text-blue-600 text-lg">Cancel</Text>
+                <Text className="text-blue-600 dark:text-blue-400 text-lg">Cancel</Text>
               </TouchableOpacity>
-              <Text className="text-lg font-semibold">Create Post</Text>
+              <Text className="text-lg font-semibold text-gray-900 dark:text-white">Create Post</Text>
               <TouchableOpacity 
                 onPress={handlePost}
                 disabled={loading || !content.trim()}
@@ -91,12 +93,12 @@ export default function CreatePostBottomSheet({ visible, onClose, onPostCreated 
                 placeholderTextColor="#9CA3AF"
                 multiline
                 textAlignVertical="top"
-                className="bg-gray-50 rounded-xl px-4 py-4 text-gray-900 text-base min-h-[150px]"
+                className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-4 text-gray-900 dark:text-white text-base min-h-[150px]"
                 maxLength={2000}
               />
               
               <View className="flex-row justify-between items-center mt-4">
-                <Text className="text-gray-500 text-sm">
+                <Text className="text-gray-500 dark:text-gray-400 text-sm">
                   {content.length}/2000 characters
                 </Text>
               </View>

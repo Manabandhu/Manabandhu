@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { GluestackButton } from "@/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
+import { useThemeStore } from "@/store/theme.store";
 import { GRADIENTS } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
 import * as Location from "expo-location";
@@ -29,6 +30,7 @@ import {
 export default function HomeScreen() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
   const [location, setLocation] = useState("San Francisco, CA");
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [search, setSearch] = useState("");
@@ -337,7 +339,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F9FAFB]">
+    <SafeAreaView className="flex-1 bg-[#F9FAFB] dark:bg-gray-900">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -373,14 +375,14 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="mt-4 bg-white rounded-2xl px-4 py-3 flex-row items-center shadow-sm">
+          <View className="mt-4 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 flex-row items-center shadow-sm">
             <SearchIcon size={16} color="#4F46E5" />
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Search rooms, rides, jobs..."
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-sm text-gray-900"
+              className="flex-1 ml-3 text-sm text-gray-900 dark:text-white"
               returnKeyType="search"
             />
           </View>
@@ -414,87 +416,87 @@ export default function HomeScreen() {
           onRequestClose={() => setShowLocationModal(false)}
         >
           <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-3xl p-6">
-              <Text className="text-xl font-bold text-gray-900 mb-4">Change Location</Text>
+            <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
+              <Text className="text-xl font-bold text-gray-900 dark:text-white mb-4">Change Location</Text>
               
               <TouchableOpacity
-                className="flex-row items-center bg-blue-50 rounded-2xl p-4 mb-4"
+                className="flex-row items-center bg-blue-50 dark:bg-blue-900/30 rounded-2xl p-4 mb-4"
                 onPress={getCurrentLocation}
               >
                 <MapPinIcon size={20} color="#4F46E5" />
                 <View className="ml-3 flex-1">
-                  <Text className="text-base font-semibold text-blue-600">Use Current Location</Text>
-                  <Text className="text-xs text-gray-500 mt-1">Update location using GPS</Text>
+                  <Text className="text-base font-semibold text-blue-600 dark:text-blue-400">Use Current Location</Text>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">Update location using GPS</Text>
                 </View>
               </TouchableOpacity>
 
-              <Text className="text-sm font-semibold text-gray-700 mb-3">Or Select a City</Text>
+              <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Or Select a City</Text>
               <ScrollView className="max-h-64">
                 {popularCities.map((city) => (
                   <TouchableOpacity
                     key={city}
-                    className="py-3 border-b border-gray-100"
+                    className="py-3 border-b border-gray-100 dark:border-gray-700"
                     onPress={() => {
                       setLocation(city);
                       setShowLocationModal(false);
                     }}
                   >
-                    <Text className="text-base text-gray-900">{city}</Text>
+                    <Text className="text-base text-gray-900 dark:text-white">{city}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
 
               <TouchableOpacity
-                className="mt-4 bg-gray-100 rounded-2xl py-3"
+                className="mt-4 bg-gray-100 dark:bg-gray-700 rounded-2xl py-3"
                 onPress={() => setShowLocationModal(false)}
               >
-                <Text className="text-center text-base font-semibold text-gray-600">Cancel</Text>
+                <Text className="text-center text-base font-semibold text-gray-600 dark:text-gray-300">Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
         <View className="px-4 mt-6 gap-5">
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">Live updates</Text>
-              <Text className="text-xs text-gray-500">Open source feeds</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Live updates</Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400">Open source feeds</Text>
             </View>
             {marketLoading ? (
-              <Text className="text-sm text-gray-500">Loading live data...</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">Loading live data...</Text>
             ) : marketError ? (
-              <Text className="text-sm text-red-500">{marketError}</Text>
+              <Text className="text-sm text-red-500 dark:text-red-400">{marketError}</Text>
             ) : (
               <View className="gap-4">
-                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                  <Text className="text-xs text-gray-500">Weather • San Francisco</Text>
-                  <Text className="text-base font-semibold text-gray-900 mt-1">
+                <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 border border-gray-100 dark:border-gray-600">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">Weather • San Francisco</Text>
+                  <Text className="text-base font-semibold text-gray-900 dark:text-white mt-1">
                     {weather?.temperature != null ? `${Math.round(weather.temperature)}°F` : "--"}
                     {"  "}
-                    <Text className="text-sm font-normal text-gray-600">
+                    <Text className="text-sm font-normal text-gray-600 dark:text-gray-400">
                       {weather?.description ?? "—"}
                     </Text>
                   </Text>
                 </View>
-                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                  <Text className="text-xs text-gray-500">Currency (USD)</Text>
+                <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 border border-gray-100 dark:border-gray-600">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">Currency (USD)</Text>
                   <View className="flex-row flex-wrap gap-3 mt-2">
                     {currencyRates ? (
                       Object.entries(currencyRates).map(([code, rate]) => (
-                        <View key={code} className="bg-white rounded-full px-3 py-1 border border-gray-200">
-                          <Text className="text-xs font-semibold text-gray-700">
+                        <View key={code} className="bg-white dark:bg-gray-600 rounded-full px-3 py-1 border border-gray-200 dark:border-gray-500">
+                          <Text className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                             {code} {rate.toFixed(2)}
                           </Text>
                         </View>
                       ))
                     ) : (
-                      <Text className="text-sm text-gray-500">--</Text>
+                      <Text className="text-sm text-gray-500 dark:text-gray-400">--</Text>
                     )}
                   </View>
                 </View>
-                <View className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
-                  <Text className="text-xs text-gray-500">Metals (USD/oz)</Text>
-                  <Text className="text-sm text-gray-700 mt-1">
+                <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 border border-gray-100 dark:border-gray-600">
+                  <Text className="text-xs text-gray-500 dark:text-gray-400">Metals (USD/oz)</Text>
+                  <Text className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                     Gold: {metals?.gold != null ? `$${metals.gold.toFixed(2)}` : "--"}
                     {"  "}•{"  "}
                     Silver: {metals?.silver != null ? `$${metals.silver.toFixed(2)}` : "--"}
@@ -504,10 +506,10 @@ export default function HomeScreen() {
             )}
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold text-gray-900">Explore ManaBandhu</Text>
-              <Text className="text-sm font-semibold text-indigo-600">Personalized</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Explore ManaBandhu</Text>
+              <Text className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">Personalized</Text>
             </View>
             <View className="flex-row flex-wrap justify-between gap-3">
               {featureCards.map((card) => {
@@ -520,13 +522,13 @@ export default function HomeScreen() {
                     activeOpacity={0.85}
                     onPress={() => router.push(card.route)}
                   >
-                    <View className="w-10 h-10 rounded-xl items-center justify-center mb-3" style={{ backgroundColor: "#FFFFFF" }}>
+                    <View className="w-10 h-10 rounded-xl items-center justify-center mb-3" style={{ backgroundColor: isDarkMode ? "#1F2937" : "#FFFFFF" }}>
                       <IconComponent size={22} color={card.accent} />
                     </View>
-                    <Text className="text-base font-semibold text-gray-900">
+                    <Text className="text-base font-semibold text-gray-900 dark:text-white">
                       {card.label}
                     </Text>
-                    <Text className="text-sm text-gray-600 mt-1 leading-5">
+                    <Text className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-5">
                       {card.description}
                     </Text>
                   </TouchableOpacity>
@@ -535,21 +537,21 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">Updates near you</Text>
-              <Text className="text-sm text-gray-500">Refreshed hourly</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Updates near you</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">Refreshed hourly</Text>
             </View>
             <View className="gap-3">
               {nearbyUpdates.map((item) => (
                 <View
                   key={item.title}
-                  className="bg-gray-50 rounded-xl px-3 py-3 border border-gray-100"
+                  className="bg-gray-50 dark:bg-gray-700 rounded-xl px-3 py-3 border border-gray-100 dark:border-gray-600"
                 >
-                  <Text className="text-sm font-semibold text-gray-900">{item.title}</Text>
+                  <Text className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</Text>
                   <View className="flex-row items-center justify-between mt-1">
-                    <Text className="text-xs text-gray-600">{item.meta}</Text>
-                    <Text className="text-xs font-semibold text-indigo-600">
+                    <Text className="text-xs text-gray-600 dark:text-gray-400">{item.meta}</Text>
+                    <Text className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                       {item.tag}
                     </Text>
                   </View>
@@ -558,26 +560,26 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">Community highlights</Text>
-              <UsersIcon size={18} color="#4B5563" />
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Community highlights</Text>
+              <UsersIcon size={18} color={isDarkMode ? "#9CA3AF" : "#4B5563"} />
             </View>
             <View className="gap-3">
               {communityHighlights.map((item) => (
                 <View key={item.title} className="flex-row justify-between items-center">
                   <View className="flex-1 pr-4">
-                    <Text className="text-sm font-semibold text-gray-900">
+                    <Text className="text-sm font-semibold text-gray-900 dark:text-white">
                       {item.title}
                     </Text>
-                    <Text className="text-xs text-gray-600 mt-1">{item.meta}</Text>
+                    <Text className="text-xs text-gray-600 dark:text-gray-400 mt-1">{item.meta}</Text>
                   </View>
                   <TouchableOpacity
-                    className="px-3 py-2 rounded-full bg-gray-100"
+                    className="px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700"
                     activeOpacity={0.8}
                     onPress={() => router.push(ROUTES.tabs.community)}
                   >
-                    <Text className="text-xs font-semibold text-indigo-600">
+                    <Text className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                       View
                     </Text>
                   </TouchableOpacity>
@@ -586,24 +588,24 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">Community calendar</Text>
-              <CalendarIcon size={18} color="#4B5563" />
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Community calendar</Text>
+              <CalendarIcon size={18} color={isDarkMode ? "#9CA3AF" : "#4B5563"} />
             </View>
             <View className="gap-3">
               {events.map((event) => (
                 <View
                   key={event.title}
-                  className="flex-row items-center justify-between bg-gray-50 rounded-xl px-3 py-3 border border-gray-100"
+                  className="flex-row items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl px-3 py-3 border border-gray-100 dark:border-gray-600"
                 >
                   <View className="flex-1 pr-3">
-                    <Text className="text-sm font-semibold text-gray-900">
+                    <Text className="text-sm font-semibold text-gray-900 dark:text-white">
                       {event.title}
                     </Text>
-                    <Text className="text-xs text-gray-600 mt-1">{event.meta}</Text>
+                    <Text className="text-xs text-gray-600 dark:text-gray-400 mt-1">{event.meta}</Text>
                   </View>
-                  <Text className="text-xs font-semibold text-indigo-600">
+                  <Text className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                     {event.tag}
                   </Text>
                 </View>
@@ -611,10 +613,10 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-sm">
+          <View className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-xl font-bold text-gray-900">Safety & support</Text>
-              <Text className="text-xs text-gray-500">Always visible</Text>
+              <Text className="text-xl font-bold text-gray-900 dark:text-white">Safety & support</Text>
+              <Text className="text-xs text-gray-500 dark:text-gray-400">Always visible</Text>
             </View>
             <View className="flex-row flex-wrap justify-between gap-3">
               {supportActions.map((action) => (
