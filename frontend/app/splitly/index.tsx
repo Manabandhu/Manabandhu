@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Header from '@/components/ui/Header';
 import { SplitIcon, UsersIcon, DollarSignIcon, PlusIcon, CalendarIcon, ArrowRightIcon } from '@/components/ui/Icons';
 import { useCurrency } from '@/lib/currency';
 import { splitlyAPI, SplitGroup } from '@/lib/api/splitly';
@@ -94,18 +95,13 @@ export default function Splitly() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <Header title="Splitly" />
+      
       {/* Header */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <View className="flex-row items-center mb-1">
-                <SplitIcon size={28} color="#10B981" />
-                <Text className="text-3xl font-bold text-gray-900 ml-2">Splitly</Text>
-              </View>
-              <Text className="text-sm text-gray-500 mt-1">Split expenses with friends</Text>
-            </View>
+        <View className="px-6 pt-4 pb-4">
+          <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
               className="bg-green-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"
               onPress={() => router.push('/splitly/create-group')}

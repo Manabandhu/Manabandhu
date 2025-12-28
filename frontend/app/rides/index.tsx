@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform, Modal, Pressable } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Header from "@/components/ui/Header";
 import * as Location from "expo-location";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ridesApi } from "@/lib/api/rides";
@@ -120,7 +121,8 @@ export default function RidesHome() {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-white">
+      <Header title="Rides" />
       {/* Initial Prompt Modal */}
       <Modal
         visible={showInitialPrompt}

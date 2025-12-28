@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Header from '@/components/ui/Header';
 import { uscisApi, UscisCase } from '@/lib/api/uscis';
 import { FORM_TYPE_LABELS, STATUS_COLORS } from '@/types/uscis';
 import { FileIcon, PlusIcon, CalendarIcon, XIcon, FilterIcon, CheckCircleIcon } from '@/components/ui/Icons';
@@ -113,28 +114,27 @@ export default function UscisTrackerScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center" style={{ paddingTop: insets.top }}>
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+        <Header title="USCIS" />
         <Text className="text-gray-500 text-base">Loading cases...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <Header title="USCIS" />
+      
       {/* Header */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900">USCIS Tracker</Text>
-              <Text className="text-sm text-gray-500 mt-1">Track your immigration cases</Text>
-            </View>
+        <View className="px-6 pt-4 pb-4">
+          <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
               onPress={() => router.push('/uscis/add-case')}
               className="bg-blue-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"
             >
               <PlusIcon size={20} color="#FFFFFF" />
-              <Text className="text-white font-semibold ml-2">Add</Text>
+              <Text className="text-white font-semibold ml-2">Add Case</Text>
             </TouchableOpacity>
           </View>
 

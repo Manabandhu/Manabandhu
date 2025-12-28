@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
+import Header from "@/components/ui/Header";
 import { chatAPI, Chat } from "@/lib/api/chat";
 
 export default function ChatList() {
@@ -45,14 +46,12 @@ export default function ChatList() {
   }
 
   return (
-    <ScrollView 
-      className="flex-1 bg-gray-50 px-4 py-6"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <Text className="text-3xl font-bold text-gray-900 mb-6">
-        Messages
-      </Text>
-      
+    <View className="flex-1 bg-gray-50">
+      <Header title="Chat" />
+      <ScrollView 
+        className="flex-1 px-4 py-6"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
       {chats.length === 0 ? (
         <View className="flex-1 justify-center items-center py-20">
           <Text className="text-gray-500 text-lg">No chats yet</Text>
@@ -90,7 +89,8 @@ export default function ChatList() {
           </TouchableOpacity>
         ))
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

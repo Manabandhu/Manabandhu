@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Header from "@/components/ui/Header";
 import BottomSheet from "@gorhom/bottom-sheet";
 import RoomFiltersBottomSheet from "@/components/rooms/RoomFiltersBottomSheet";
 import RoomListingCard from "@/components/rooms/RoomListingCard";
@@ -62,15 +63,13 @@ export default function RoomFinderHome() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-white">
+      <Header title="Rooms" />
+      
       {/* Header with Search */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
         <View className="px-3 pt-2 pb-3">
-          <View className="mb-3 flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-900">Find Your Room</Text>
-              <Text className="text-xs text-gray-500 mt-0.5">Discover rooms and homes near you</Text>
-            </View>
+          <View className="mb-3 flex-row items-center justify-end">
             {Platform.OS === 'web' && (
               <TouchableOpacity
                 onPress={() => navigateTo("/rooms/create")}

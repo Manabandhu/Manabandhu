@@ -17,6 +17,7 @@ import { qaApi } from '@/lib/api/qa';
 import { toast } from '@/lib/toast';
 import { COLORS } from '@/constants/colors';
 import { SearchIcon, PlusIcon, FilterIcon, XIcon } from '@/components/ui/Icons';
+import Header from '@/components/ui/Header';
 
 export default function QaHomeScreen() {
   const router = useRouter();
@@ -131,12 +132,9 @@ export default function QaHomeScreen() {
 
   const renderHeader = () => (
     <View className="bg-white border-b border-gray-200 shadow-sm">
-      <View className="px-6 pt-6 pb-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-1">
-            <Text className="text-3xl font-bold text-gray-900">Community Q&A</Text>
-            <Text className="text-sm text-gray-500 mt-1">Ask questions, share knowledge</Text>
-          </View>
+      <Header title="Q&A" />
+      <View className="px-6 pt-4 pb-4">
+        <View className="flex-row items-center justify-end mb-4">
           <TouchableOpacity
             onPress={handleAskQuestion}
             className="bg-indigo-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"

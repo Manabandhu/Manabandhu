@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Header from '@/components/ui/Header';
 import { immigrationNewsApi, NewsArticle, NewsFilters } from '@/lib/api/immigration';
 import { IMPACT_LEVEL_COLORS, SOURCE_TYPE_LABELS } from '@/types/immigration';
 import { SearchIcon, BookmarkIcon, XIcon, CalendarIcon, GlobeIcon } from '@/components/ui/Icons';
@@ -128,15 +129,13 @@ export default function ImmigrationNewsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <Header title="Immigration" />
+      
       {/* Header */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900">Immigration News</Text>
-              <Text className="text-sm text-gray-500 mt-1">Verified updates & policy changes</Text>
-            </View>
+        <View className="px-6 pt-4 pb-4">
+          <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity 
               onPress={() => router.push('/immigration/bookmarks')}
               className="bg-indigo-50 px-4 py-3 rounded-xl"

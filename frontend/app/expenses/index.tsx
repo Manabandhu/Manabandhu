@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Alert, Modal, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Header from "@/components/ui/Header";
 import { 
   CreditCardIcon, 
   UsersIcon, 
@@ -217,15 +218,12 @@ export default function ExpensesDashboard() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      {/* Header */}
+    <View className="flex-1 bg-gray-50">
+      <Header title="Expenses" />
+      
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900">Expenses</Text>
-              <Text className="text-sm text-gray-500 mt-1">Track and manage your spending</Text>
-            </View>
+        <View className="px-6 pt-4 pb-4">
+          <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
               onPress={() => setShowAddExpenseSheet(true)}
               className="bg-indigo-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"

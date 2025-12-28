@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Header from "@/components/ui/Header";
 import { communityAPI, CommunityPost } from "@/lib/api/community";
 import { useAuthStore } from "@/store/auth.store";
 import { MessageIcon, UserIcon, PlusIcon, SearchIcon, XIcon, HeartIcon } from "@/components/ui/Icons";
@@ -78,15 +79,13 @@ export default function CommunityFeed() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <Header title="Community" />
+      
       {/* Header */}
       <View className="bg-white border-b border-gray-200 shadow-sm">
-        <View className="px-6 pt-6 pb-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-gray-900">Community</Text>
-              <Text className="text-sm text-gray-500 mt-1">Connect and share with others</Text>
-            </View>
+        <View className="px-6 pt-4 pb-4">
+          <View className="flex-row items-center justify-end mb-4">
             <TouchableOpacity
               className="bg-blue-600 px-5 py-3 rounded-xl shadow-md flex-row items-center"
               onPress={() => setShowCreatePostSheet(true)}

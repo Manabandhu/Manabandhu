@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/auth.store';
+import Header from '@/components/ui/Header';
 import { communityAPI, CommunityPost } from '@/lib/api/community';
 import { jobsAPI, Job } from '@/lib/api/jobs';
 import { UserIcon, SettingsIcon, BriefcaseIcon, HomeIcon, MessageIcon, TrashIcon, EditIcon } from '@/components/ui/Icons';
@@ -143,9 +144,11 @@ export default function Profile() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-6 py-8">
+    <View className="flex-1 bg-gray-50">
+      <Header title="Profile" showBack={false} />
+      <ScrollView className="flex-1">
+        {/* Header */}
+        <View className="bg-white px-6 py-8">
         <View className="items-center">
           {/* Profile Picture */}
           <View className="w-24 h-24 bg-gray-200 rounded-full items-center justify-center mb-4">
@@ -385,6 +388,7 @@ export default function Profile() {
         onClose={() => setShowPostJobSheet(false)}
         onJobPosted={loadUserJobs}
       />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
