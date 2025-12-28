@@ -34,8 +34,21 @@ public class Chat {
     @Column
     private LocalDateTime lastMessageAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private ChatContext context;
+
     public enum ChatType {
         DIRECT, GROUP
+    }
+
+    public enum ChatContext {
+        ROOM,
+        RIDE,
+        COMMUNITY,
+        GROUP,
+        PERSONAL,
+        ONE_ON_ONE
     }
 
     // Constructors
@@ -45,6 +58,13 @@ public class Chat {
         this.name = name;
         this.type = type;
         this.participants = participants;
+    }
+
+    public Chat(String name, ChatType type, List<String> participants, ChatContext context) {
+        this.name = name;
+        this.type = type;
+        this.participants = participants;
+        this.context = context;
     }
 
     // Getters and Setters
@@ -65,4 +85,7 @@ public class Chat {
 
     public LocalDateTime getLastMessageAt() { return lastMessageAt; }
     public void setLastMessageAt(LocalDateTime lastMessageAt) { this.lastMessageAt = lastMessageAt; }
+
+    public ChatContext getContext() { return context; }
+    public void setContext(ChatContext context) { this.context = context; }
 }

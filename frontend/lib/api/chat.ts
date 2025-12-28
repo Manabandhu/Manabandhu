@@ -2,10 +2,13 @@ import { API_BASE_URL } from '@/constants/api';
 import { useAuthStore } from '@/store/auth.store';
 import { auth } from '@/lib/firebase';
 
+export type ChatContext = 'ROOM' | 'RIDE' | 'COMMUNITY' | 'GROUP' | 'PERSONAL' | 'ONE_ON_ONE';
+
 export interface Chat {
   id: number;
   name: string;
   type: 'DIRECT' | 'GROUP';
+  context?: ChatContext;
   participants: string[];
   createdAt: string;
   lastMessageAt?: string;

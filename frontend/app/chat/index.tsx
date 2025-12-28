@@ -1,29 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, SafeAreaView } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, SafeAreaView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { chatAPI, Chat } from "@/lib/api/chat";
-import { userApi } from "@/lib/api/users";
+import { userApi, User } from "@/lib/api/users";
 import { MessageIcon, SearchIcon, UserIcon, XIcon, PlusIcon } from "@/components/ui/Icons";
-
-interface User {
-  id: number;
-  firebaseUid: string;
-  name: string;
-  email?: string;
-  phoneNumber?: string;
-  country?: string;
-  city?: string;
-  role?: string;
-  photoUrl?: string;
-  isActive: boolean;
-}
+import { ChatContextTag } from "@/lib/utils/chatContext";
+import { useThemeStore } from "@/store/theme.store";
+import { useAuthStore } from "@/store/auth.store";
 
 export default function ChatIndex() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isDarkMode } = useThemeStore();
+  const currentUser = useAuthStore(state => state.user);
   const [chats, setChats] = useState<Chat[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [userMap, setUserMap] = useState<Map<string, User>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,12 +30,51 @@ export default function ChatIndex() {
       ]);
       setChats(chatsResponse);
       setUsers(usersResponse);
+      
+      // Create a map of firebaseUid -> User for quick lookup
+      const map = new Map<string, User>();
+      usersResponse.forEach(user => {
+        map.set(user.firebaseUid, user);
+      });
+      setUserMap(map);
     } catch (error) {
       console.error('Failed to load chat data:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  // Get the other participant's info for direct chats
+  const getChatParticipantInfo = (chat: Chat): User | null => {
+    if (chat.type === 'GROUP') return null;
+    const otherParticipantId = chat.participants.find(p => p !== currentUser?.uid);
+    if (!otherParticipantId) return null;
+    return userMap.get(otherParticipantId) || null;
+  };
+
+  // Get display name and image for chat
+  const getChatDisplayInfo = (chat: Chat) => {
+    if (chat.type === 'GROUP') {
+      return {
+        name: chat.name,
+        image: null,
+        initials: chat.name.charAt(0).toUpperCase()
+      };
+    }
+    const participant = getChatParticipantInfo(chat);
+    if (participant) {
+      return {
+        name: participant.name,
+        image: participant.photoUrl,
+        initials: participant.name.charAt(0).toUpperCase()
+      };
+    }
+    return {
+      name: chat.name,
+      image: null,
+      initials: chat.name.charAt(0).toUpperCase()
+    };
   };
 
   useEffect(() => {
@@ -67,14 +99,24 @@ export default function ChatIndex() {
     router.push(`/chat/conversation?chatId=${chat.id}&name=${encodeURIComponent(chat.name)}`);
   };
 
-  const filteredChats = chats.filter(chat => 
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) return chats;
+    const query = searchQuery.toLowerCase();
+    return chats.filter(chat => {
+      const displayInfo = getChatDisplayInfo(chat);
+      return displayInfo.name.toLowerCase().includes(query) ||
+        (chat.lastMessage?.content.toLowerCase().includes(query));
+    });
+  }, [chats, searchQuery, userMap, currentUser]);
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => 
+      user.name.toLowerCase().includes(query) ||
+      (user.email && user.email.toLowerCase().includes(query))
+    );
+  }, [users, searchQuery]);
 
   const formatTime = (dateString?: string) => {
     if (!dateString) return '';
@@ -98,9 +140,9 @@ export default function ChatIndex() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" style={{ paddingTop: insets.top }}>
       {/* Header */}
-      <View className="bg-white border-b border-gray-200 shadow-sm">
+      <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-6 pt-6 pb-4">
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-1">
@@ -110,10 +152,10 @@ export default function ChatIndex() {
           </View>
           
           {/* Search Bar */}
-          <View className="bg-gray-50 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200">
+          <View className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 flex-row items-center mb-4 border border-gray-200 dark:border-gray-600">
             <SearchIcon size={18} color="#6B7280" />
             <TextInput
-              className="flex-1 ml-3 text-gray-900"
+              className="flex-1 ml-3 text-gray-900 dark:text-white"
               placeholder="Search chats or users..."
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -127,20 +169,20 @@ export default function ChatIndex() {
           </View>
 
           {/* Tabs */}
-          <View className="flex-row bg-gray-100 rounded-xl p-1">
+          <View className="flex-row bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
             <TouchableOpacity
-              className={`flex-1 py-2.5 rounded-lg ${activeTab === 'chats' ? 'bg-white shadow-sm' : ''}`}
+              className={`flex-1 py-2.5 rounded-lg ${activeTab === 'chats' ? 'bg-white dark:bg-gray-800 shadow-sm' : ''}`}
               onPress={() => setActiveTab('chats')}
             >
-              <Text className={`text-center font-semibold ${activeTab === 'chats' ? 'text-blue-600' : 'text-gray-600'}`}>
+              <Text className={`text-center font-semibold ${activeTab === 'chats' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
                 Chats ({chats.length})
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={`flex-1 py-2.5 rounded-lg ${activeTab === 'users' ? 'bg-white shadow-sm' : ''}`}
+              className={`flex-1 py-2.5 rounded-lg ${activeTab === 'users' ? 'bg-white dark:bg-gray-800 shadow-sm' : ''}`}
               onPress={() => setActiveTab('users')}
             >
-              <Text className={`text-center font-semibold ${activeTab === 'users' ? 'text-blue-600' : 'text-gray-600'}`}>
+              <Text className={`text-center font-semibold ${activeTab === 'users' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
                 Users ({users.length})
               </Text>
             </TouchableOpacity>
@@ -171,33 +213,79 @@ export default function ChatIndex() {
                 </Text>
               </View>
             ) : (
-              filteredChats.map((chat) => (
-                <TouchableOpacity
-                  key={chat.id}
-                  className="bg-white rounded-2xl p-4 mb-3 shadow-md border border-gray-100 flex-row items-center"
-                  onPress={() => openChat(chat)}
-                  activeOpacity={0.7}
-                >
-                  <View className="w-14 h-14 bg-blue-100 rounded-full items-center justify-center mr-4">
-                    <Text className="text-blue-600 font-bold text-lg">
-                      {chat.name.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-900 font-bold text-base mb-1">{chat.name}</Text>
-                    {chat.lastMessage && (
-                      <Text className="text-gray-500 text-sm" numberOfLines={1}>
-                        {chat.lastMessage.content}
-                      </Text>
-                    )}
-                  </View>
-                  {chat.lastMessageAt && (
-                    <Text className="text-gray-400 text-xs ml-2">
-                      {formatTime(chat.lastMessageAt)}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              ))
+              filteredChats.map((chat) => {
+                const displayInfo = getChatDisplayInfo(chat);
+                return (
+                  <TouchableOpacity
+                    key={chat.id}
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-md border border-gray-100 dark:border-gray-700 flex-row items-center"
+                    onPress={() => openChat(chat)}
+                    activeOpacity={0.7}
+                  >
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        if (chat.type === 'DIRECT') {
+                          const otherParticipantId = chat.participants.find(p => p !== currentUser?.uid);
+                          if (otherParticipantId) {
+                            router.push(`/user/${otherParticipantId}`);
+                          }
+                        }
+                      }}
+                      className="mr-4"
+                    >
+                      <View className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center overflow-hidden">
+                        {displayInfo.image ? (
+                          <Image 
+                            source={{ uri: displayInfo.image }} 
+                            className="w-14 h-14 rounded-full"
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text className="text-blue-600 dark:text-blue-400 font-bold text-lg">
+                            {displayInfo.initials}
+                          </Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                    <View className="flex-1">
+                      <View className="flex-row items-center mb-1 flex-wrap">
+                        <TouchableOpacity
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            if (chat.type === 'DIRECT') {
+                              const otherParticipantId = chat.participants.find(p => p !== currentUser?.uid);
+                              if (otherParticipantId) {
+                                router.push(`/user/${otherParticipantId}`);
+                              }
+                            }
+                          }}
+                        >
+                          <Text className="text-gray-900 dark:text-white font-bold text-base mr-2">{displayInfo.name}</Text>
+                        </TouchableOpacity>
+                        <ChatContextTag context={chat.context} size="small" isDarkMode={isDarkMode} />
+                      </View>
+                      {chat.lastMessage && (
+                        <Text className="text-gray-500 dark:text-gray-400 text-sm" numberOfLines={1}>
+                          {chat.lastMessage.content}
+                        </Text>
+                      )}
+                    </View>
+                    <View className="items-end">
+                      {chat.lastMessageAt && (
+                        <Text className="text-gray-400 dark:text-gray-500 text-xs mb-1">
+                          {formatTime(chat.lastMessageAt)}
+                        </Text>
+                      )}
+                      {chat.type === 'GROUP' && (
+                        <View className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full mt-1">
+                          <Text className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Group</Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
             )}
           </>
         ) : (
@@ -221,22 +309,36 @@ export default function ChatIndex() {
               filteredUsers.map((user) => (
                 <TouchableOpacity
                   key={user.id}
-                  className="bg-white rounded-2xl p-4 mb-3 shadow-md border border-gray-100 flex-row items-center"
-                  onPress={() => startDirectChat(user)}
+                  className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-md border border-gray-100 dark:border-gray-700 flex-row items-center"
+                  onPress={() => router.push(`/user/${user.firebaseUid}`)}
                   activeOpacity={0.7}
                 >
-                  <View className="w-14 h-14 bg-green-100 rounded-full items-center justify-center mr-4">
-                    <Text className="text-green-600 font-bold text-lg">
-                      {user.name.charAt(0).toUpperCase()}
-                    </Text>
+                  <View className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full items-center justify-center mr-4 overflow-hidden">
+                    {user.photoUrl ? (
+                      <Image 
+                        source={{ uri: user.photoUrl }} 
+                        className="w-14 h-14 rounded-full"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
+                        {user.name.charAt(0).toUpperCase()}
+                      </Text>
+                    )}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-900 font-bold text-base mb-1">{user.name}</Text>
-                    <Text className="text-gray-500 text-sm">{user.email || 'No email'}</Text>
+                    <Text className="text-gray-900 dark:text-white font-bold text-base mb-1">{user.name}</Text>
+                    <Text className="text-gray-500 dark:text-gray-400 text-sm">{user.email || 'No email'}</Text>
                   </View>
-                  <View className="w-10 h-10 bg-blue-600 rounded-full items-center justify-center">
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      startDirectChat(user);
+                    }}
+                    className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-full items-center justify-center"
+                  >
                     <MessageIcon size={18} color="white" />
-                  </View>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))
             )}

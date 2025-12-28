@@ -250,7 +250,11 @@ public class RoomListingService {
                 throw new ValidationException("Cannot start chat with yourself");
             }
             
-            String chatThreadId = chatService.getOrCreateDirectChat(listing.getOwnerUserId(), currentUserId).getId().toString();
+            String chatThreadId = chatService.getOrCreateDirectChat(
+                listing.getOwnerUserId(), 
+                currentUserId, 
+                com.manabandhu.model.chat.Chat.ChatContext.ROOM
+            ).getId().toString();
             ConversationLink link = conversationLinkRepository
                     .findByListingIdAndOwnerUserIdAndOtherUserId(listingId, listing.getOwnerUserId(), currentUserId)
                     .orElseGet(ConversationLink::new);

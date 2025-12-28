@@ -279,8 +279,11 @@ public class RidePostService {
         if (post.getOwnerUserId().equals(currentUserId)) {
             throw new IllegalArgumentException("Owner cannot start chat with themselves");
         }
-        String chatThreadId = chatService.getOrCreateDirectChat(post.getOwnerUserId(), currentUserId)
-                .getId().toString();
+        String chatThreadId = chatService.getOrCreateDirectChat(
+            post.getOwnerUserId(), 
+            currentUserId,
+            com.manabandhu.model.chat.Chat.ChatContext.RIDE
+        ).getId().toString();
         RideConversationLink link = conversationLinkRepository
                 .findByRidePostIdAndOwnerUserIdAndOtherUserId(postId, post.getOwnerUserId(), currentUserId)
                 .orElseGet(RideConversationLink::new);

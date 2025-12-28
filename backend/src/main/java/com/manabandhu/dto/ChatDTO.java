@@ -8,6 +8,7 @@ public class ChatDTO {
     private Long id;
     private String name;
     private Chat.ChatType type;
+    private Chat.ChatContext context;
     private List<String> participants;
     private LocalDateTime createdAt;
     private LocalDateTime lastMessageAt;
@@ -19,6 +20,7 @@ public class ChatDTO {
         this.id = chat.getId();
         this.name = chat.getName();
         this.type = chat.getType();
+        this.context = chat.getContext();
         this.participants = chat.getParticipants();
         this.createdAt = chat.getCreatedAt();
         this.lastMessageAt = chat.getLastMessageAt();
@@ -45,6 +47,9 @@ public class ChatDTO {
 
     public MessageDTO getLastMessage() { return lastMessage; }
     public void setLastMessage(MessageDTO lastMessage) { this.lastMessage = lastMessage; }
+
+    public Chat.ChatContext getContext() { return context; }
+    public void setContext(Chat.ChatContext context) { this.context = context; }
 }
 
 class CreateChatRequest {

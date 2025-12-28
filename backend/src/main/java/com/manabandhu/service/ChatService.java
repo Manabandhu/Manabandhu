@@ -38,6 +38,12 @@ public class ChatService {
         return new ChatDTO(chat);
     }
 
+    public ChatDTO createChat(String name, Chat.ChatType type, List<String> participants, Chat.ChatContext context) {
+        Chat chat = new Chat(name, type, participants, context);
+        chat = chatRepository.save(chat);
+        return new ChatDTO(chat);
+    }
+
     public ChatDTO getOrCreateDirectChat(String user1, String user2) {
         Chat existingChat = chatRepository.findDirectChatBetweenUsers(user1, user2);
         if (existingChat != null) {
@@ -46,7 +52,27 @@ public class ChatService {
         
         List<String> participants = List.of(user1, user2);
         String chatName = "Direct Chat";
-        return createChat(chatName, Chat.ChatType.DIRECT, participants);
+        Chat chat = new Chat(chatName, Chat.ChatType.DIRECT, participants, Chat.ChatContext.ONE_ON_ONE);
+        chat = chatRepository.save(chat);
+        return new ChatDTO(chat);
+    }
+
+    public ChatDTO getOrCreateDirectChat(String user1, String user2, Chat.ChatContext context) {
+        Chat existingChat = chatRepository.findDirectChatBetweenUsers(user1, user2);
+        if (existingChat != null) {
+            // Update context if it's not set
+            if (existingChat.getContext() == null && context != null) {
+                existingChat.setContext(context);
+                existingChat = chatRepository.save(existingChat);
+            }
+            return new ChatDTO(existingChat);
+        }
+        
+        List<String> participants = List.of(user1, user2);
+        String chatName = "Direct Chat";
+        Chat chat = new Chat(chatName, Chat.ChatType.DIRECT, participants, context != null ? context : Chat.ChatContext.ONE_ON_ONE);
+        chat = chatRepository.save(chat);
+        return new ChatDTO(chat);
     }
 
     public MessageDTO sendMessage(Long chatId, String senderId, String content, Message.MessageType type) {
