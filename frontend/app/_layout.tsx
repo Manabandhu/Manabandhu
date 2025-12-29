@@ -12,6 +12,8 @@ import { TIMING } from "@/constants/timing";
 import { Platform } from "react-native";
 import { registerForPushNotifications, setupNotificationListeners } from "@/lib/notifications";
 import { useRouter } from "expo-router";
+import { firebaseChatService } from "@/lib/chat/firebaseChat";
+import { auth } from "@/lib/firebase";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -56,6 +58,12 @@ export default function RootLayout() {
 
     const setupNotifications = async () => {
       try {
+        // Initialize Firebase Chat Service
+        const user = auth?.currentUser;
+        if (user?.uid) {
+          firebaseChatService.initialize(user.uid);
+        }
+
         // Register for push notifications
         await registerForPushNotifications();
 
@@ -86,6 +94,13 @@ export default function RootLayout() {
                           router.push('/uscis');
                         }
                         break;
+                      case 'CHAT_MESSAGE':
+                        if (data.chatId) {
+                          router.push(`/chat/conversation?chatId=${data.chatId}`);
+                        } else {
+                          router.push('/(tabs)/chat');
+                        }
+                        break;
                       default:
                         // Navigate to home or notifications screen
                         router.push('/(tabs)/home');
@@ -111,6 +126,8 @@ export default function RootLayout() {
       if (cleanup) {
         cleanup();
       }
+      // Cleanup Firebase chat service on unmount
+      firebaseChatService.cleanup();
     };
   }, [isAuthenticated, appIsReady, router]);
 

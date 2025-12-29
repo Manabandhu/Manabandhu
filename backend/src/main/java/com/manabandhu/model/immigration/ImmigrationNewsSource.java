@@ -22,6 +22,9 @@ public class ImmigrationNewsSource {
     @Column(name = "base_url", nullable = false)
     private String baseUrl;
     
+    @Column(name = "rss_feed_url")
+    private String rssFeedUrl;
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ImmigrationNewsArticle.SourceType type;

@@ -21,6 +21,7 @@ import {
 import { getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore, Firestore } from "firebase/firestore";
+import { getDatabase, Database } from "firebase/database";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 import { firebaseConfig } from "./config/firebase";
 import { ENV } from "@/constants/env";
@@ -28,6 +29,7 @@ import { ENV } from "@/constants/env";
 let app: FirebaseApp;
 let auth: Auth | null = null;
 let db: Firestore;
+let realtimeDb: Database;
 let storage: FirebaseStorage;
 
 if (!getApps().length) {
@@ -51,6 +53,7 @@ if (!getApps().length) {
     auth = getAuth(app);
   }
   db = getFirestore(app);
+  realtimeDb = getDatabase(app);
   storage = getStorage(app);
 } else {
   app = getApps()[0];
@@ -73,6 +76,7 @@ if (!getApps().length) {
     auth = getAuth(app);
   }
   db = getFirestore(app);
+  realtimeDb = getDatabase(app);
   storage = getStorage(app);
 }
 
@@ -143,4 +147,4 @@ export const getCurrentUser = (): FirebaseUser | null => {
   return auth?.currentUser || null;
 };
 
-export { auth, db, storage };
+export { auth, db, realtimeDb, storage };

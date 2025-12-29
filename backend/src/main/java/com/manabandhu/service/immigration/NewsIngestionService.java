@@ -4,13 +4,21 @@ import com.manabandhu.model.immigration.ImmigrationNewsArticle;
 import com.manabandhu.model.immigration.ImmigrationNewsSource;
 import com.manabandhu.repository.ImmigrationNewsArticleRepository;
 import com.manabandhu.repository.ImmigrationNewsSourceRepository;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,7 +30,6 @@ public class NewsIngestionService {
     private final ImmigrationNewsSourceRepository sourceRepository;
     private final ImmigrationNewsArticleRepository articleRepository;
     private final ImmigrationNewsService newsService;
-    private final RestTemplate restTemplate;
     
     private static final Pattern VISA_PATTERN = Pattern.compile("\\b(H-?1B|F-?1|OPT|STEM|H-?4|L-?1|B-?1|B-?2|Green Card|GC|I-?140|I-?485)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("\\b(India|China|Mexico|Philippines|Vietnam|South Korea|Canada|UK|Germany|France)\\b", Pattern.CASE_INSENSITIVE);
@@ -43,8 +50,6 @@ public class NewsIngestionService {
     private void ingestFromSource(ImmigrationNewsSource source) {
         log.info("Ingesting news from source: {}", source.getName());
         
-        // This is a simplified implementation
-        // In production, this would handle RSS feeds, APIs, etc.
         List<RawNewsItem> rawItems = fetchRawNewsItems(source);
         
         for (RawNewsItem rawItem : rawItems) {
@@ -61,16 +66,73 @@ public class NewsIngestionService {
     }
     
     private List<RawNewsItem> fetchRawNewsItems(ImmigrationNewsSource source) {
-        // Simplified mock implementation
-        // In production, this would fetch from RSS feeds, APIs, etc.
-        return List.of(
-            new RawNewsItem(
-                "USCIS Updates Processing Times for I-485 Applications",
-                "USCIS has updated processing times for Form I-485, Application to Adjust Status to Permanent Resident.",
-                source.getBaseUrl() + "/news/processing-times-update",
-                LocalDateTime.now().minusHours(2)
-            )
-        );
+        List<RawNewsItem> items = new ArrayList<>();
+        
+        // If RSS feed URL is provided, fetch from RSS feed
+        if (source.getRssFeedUrl() != null && !source.getRssFeedUrl().trim().isEmpty()) {
+            try {
+                log.info("Fetching RSS feed from: {}", source.getRssFeedUrl());
+                items.addAll(fetchFromRssFeed(source.getRssFeedUrl()));
+            } catch (Exception e) {
+                log.error("Failed to fetch RSS feed from {}: {}", source.getRssFeedUrl(), e.getMessage(), e);
+            }
+        } else {
+            log.warn("No RSS feed URL configured for source: {}", source.getName());
+        }
+        
+        return items;
+    }
+    
+    private List<RawNewsItem> fetchFromRssFeed(String rssFeedUrl) throws Exception {
+        List<RawNewsItem> items = new ArrayList<>();
+        
+        try (InputStream inputStream = new URI(rssFeedUrl).toURL().openStream()) {
+            SyndFeedInput input = new SyndFeedInput();
+            SyndFeed feed = input.build(new XmlReader(inputStream));
+            
+            log.info("Parsed RSS feed: {} with {} entries", feed.getTitle(), feed.getEntries().size());
+            
+            for (SyndEntry entry : feed.getEntries()) {
+                try {
+                    String title = entry.getTitle() != null ? entry.getTitle() : "Untitled";
+                    String description = "";
+                    
+                    if (entry.getDescription() != null) {
+                        description = entry.getDescription().getValue();
+                        // Strip HTML tags from description
+                        description = Jsoup.parse(description).text();
+                    }
+                    
+                    // If no description, try to get content
+                    if (description.isEmpty() && entry.getContents() != null && !entry.getContents().isEmpty()) {
+                        description = entry.getContents().get(0).getValue();
+                        description = Jsoup.parse(description).text();
+                    }
+                    
+                    String link = entry.getLink();
+                    if (link == null && entry.getUri() != null) {
+                        link = entry.getUri();
+                    }
+                    
+                    LocalDateTime publishedAt = LocalDateTime.now();
+                    if (entry.getPublishedDate() != null) {
+                        publishedAt = entry.getPublishedDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    } else if (entry.getUpdatedDate() != null) {
+                        publishedAt = entry.getUpdatedDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    }
+                    
+                    items.add(new RawNewsItem(title, description, link, publishedAt));
+                } catch (Exception e) {
+                    log.warn("Failed to process RSS entry: {}", e.getMessage());
+                }
+            }
+        }
+        
+        return items;
     }
     
     private ImmigrationNewsArticle processRawItem(RawNewsItem rawItem, ImmigrationNewsSource source) {

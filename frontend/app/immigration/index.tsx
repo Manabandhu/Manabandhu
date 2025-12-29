@@ -14,6 +14,7 @@ import Header from '@/components/ui/Header';
 import { immigrationNewsApi, NewsArticle, NewsFilters } from '@/lib/api/immigration';
 import { IMPACT_LEVEL_COLORS, SOURCE_TYPE_LABELS } from '@/types/immigration';
 import { SearchIcon, BookmarkIcon, XIcon, CalendarIcon, GlobeIcon } from '@/components/ui/Icons';
+import { useThemeStore } from '@/store/theme.store';
 
 export default function ImmigrationNewsScreen() {
   const router = useRouter();

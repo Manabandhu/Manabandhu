@@ -7,6 +7,10 @@ if (!ENV.firebase.apiKey || !ENV.firebase.authDomain || !ENV.firebase.projectId)
   );
 }
 
+// Get database URL from env or construct it from projectId
+const databaseURL = process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL 
+  || `https://${ENV.firebase.projectId}-default-rtdb.firebaseio.com`;
+
 export const firebaseConfig = {
   apiKey: ENV.firebase.apiKey,
   authDomain: ENV.firebase.authDomain,
@@ -14,4 +18,5 @@ export const firebaseConfig = {
   storageBucket: ENV.firebase.storageBucket,
   messagingSenderId: ENV.firebase.messagingSenderId,
   appId: ENV.firebase.appId,
+  databaseURL: databaseURL,
 };

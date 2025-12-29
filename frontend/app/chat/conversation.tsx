@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
 import { ChatContextTag } from "@/lib/utils/chatContext";
 import { userApi, User } from "@/lib/api/users";
-import { websocketClient, connectWebSocket, ChatMessageEvent } from "@/lib/websocket";
+import { firebaseChatService, FirebaseMessage, ChatPresence } from "@/lib/chat/firebaseChat";
 
 export default function Conversation() {
   const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();
@@ -24,6 +24,7 @@ export default function Conversation() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [onlineStatus, setOnlineStatus] = useState<Map<string, ChatPresence>>(new Map());
   
   const currentUser = useAuthStore(state => state.user);
   const currentUserId = currentUser?.uid || 'unknown';
@@ -94,11 +95,13 @@ export default function Conversation() {
     if (!chatId) return;
     setErrorMessage(null);
     try {
-      const response = await chatAPI.getChatMessages(parseInt(chatId));
-      setMessages(response.content.reverse());
+      // Load initial messages from backend and sync to Firebase
+      const initialMessages = await firebaseChatService.loadInitialMessages(parseInt(chatId));
+      setMessages(initialMessages.reverse());
+      setLoading(false);
     } catch (error) {
+      console.error('Error loading messages:', error);
       setErrorMessage('Unable to load messages right now.');
-    } finally {
       setLoading(false);
     }
   };
@@ -109,11 +112,8 @@ export default function Conversation() {
     setSending(true);
     setErrorMessage(null);
     try {
-      const message = await chatAPI.sendMessage(parseInt(chatId), {
-        content: newMessage.trim(),
-        type: 'TEXT'
-      });
-      setMessages(prev => [...prev, message]);
+      // Send via Firebase Realtime Database (real-time delivery)
+      await firebaseChatService.sendMessage(parseInt(chatId), newMessage.trim(), 'TEXT');
       setNewMessage('');
       scrollViewRef.current?.scrollToEnd({ animated: true });
       if (listingId) {
@@ -123,6 +123,7 @@ export default function Conversation() {
         await ridesApi.heartbeat(chatId);
       }
     } catch (error) {
+      console.error('Error sending message:', error);
       setErrorMessage('Unable to send message right now.');
     } finally {
       setSending(false);
@@ -130,65 +131,78 @@ export default function Conversation() {
   };
 
   useEffect(() => {
+    if (!chatId || !currentUserId) return;
+
+    // Initialize Firebase chat service
+    firebaseChatService.initialize(currentUserId);
+
     loadChatInfo();
     loadMessages();
-    
-    // Connect WebSocket if not already connected
-    const initWebSocket = async () => {
-      if (!websocketClient.connected) {
-        try {
-          await connectWebSocket();
-        } catch (error) {
-          console.error('Failed to connect WebSocket:', error);
-        }
-      }
-    };
-    initWebSocket();
 
-    // Subscribe to WebSocket messages for real-time updates
-    const unsubscribe = websocketClient.subscribe<ChatMessageEvent>(
-      'CHAT_MESSAGE',
-      (event) => {
-        // Only add message if it's for the current chat
-        if (event.chatId === parseInt(chatId || '0')) {
-          const newMessage: Message = {
-            id: event.message.id,
-            chatId: event.message.chatId,
-            senderId: event.message.senderId,
-            content: event.message.content,
-            type: event.message.type,
-            createdAt: event.message.createdAt,
-          };
-          
-          // Check if message already exists (avoid duplicates)
-          setMessages(prev => {
-            const exists = prev.some(m => m.id === newMessage.id);
-            if (exists) {
-              return prev;
-            }
-            return [...prev, newMessage];
-          });
-          
-          // Scroll to bottom when new message arrives
-          setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-          }, 100);
-        }
+    // Subscribe to Firebase Realtime Database messages
+    const unsubscribeMessages = firebaseChatService.subscribeToMessages(
+      parseInt(chatId),
+      (firebaseMessage: FirebaseMessage) => {
+        // Convert Firebase message to Message format
+        const message: Message = {
+          id: parseInt(firebaseMessage.id || '0') || Date.now(),
+          chatId: firebaseMessage.chatId,
+          senderId: firebaseMessage.senderId,
+          content: firebaseMessage.content,
+          type: firebaseMessage.type,
+          createdAt: new Date(firebaseMessage.createdAt).toISOString(),
+        };
+
+        // Check if message already exists (avoid duplicates)
+        setMessages(prev => {
+          const exists = prev.some(m => 
+            m.id === message.id || 
+            (m.senderId === message.senderId && 
+             m.content === message.content && 
+             Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) < 1000)
+          );
+          if (exists) {
+            return prev;
+          }
+          return [...prev, message];
+        });
+
+        // Scroll to bottom when new message arrives
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      },
+      (error) => {
+        console.error('Error in Firebase message listener:', error);
+        setErrorMessage('Connection error. Messages may not update in real-time.');
       }
     );
 
-    // Set up polling as fallback (longer interval since WebSocket handles real-time)
-    const interval = setInterval(() => {
-      if (!loading && chatId) {
-        loadMessages();
-      }
-    }, 30000); // Poll every 30 seconds as fallback
+    // Subscribe to online status for all participants
+    const presenceUnsubscribes: (() => void)[] = [];
+    if (chatInfo) {
+      chatInfo.participants.forEach((participantId) => {
+        if (participantId !== currentUserId) {
+          const unsubscribe = firebaseChatService.subscribeToUserPresence(
+            participantId,
+            (presence) => {
+              setOnlineStatus(prev => {
+                const newMap = new Map(prev);
+                newMap.set(participantId, presence);
+                return newMap;
+              });
+            }
+          );
+          presenceUnsubscribes.push(unsubscribe);
+        }
+      });
+    }
 
     return () => {
-      clearInterval(interval);
-      unsubscribe();
+      unsubscribeMessages();
+      presenceUnsubscribes.forEach(unsub => unsub());
     };
-  }, [chatId]);
+  }, [chatId, currentUserId, chatInfo]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -258,6 +272,20 @@ export default function Conversation() {
                           <Text className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
                             {displayName}
                           </Text>
+                          {otherParticipantId && (() => {
+                            const presence = onlineStatus.get(otherParticipantId);
+                            const isOnline = presence?.online === true;
+                            return (
+                              <View className="flex-row items-center mr-2">
+                                <View className={`w-2 h-2 rounded-full mr-1 ${
+                                  isOnline ? 'bg-green-500' : 'bg-gray-400'
+                                }`} />
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                                  {isOnline ? 'Online' : 'Offline'}
+                                </Text>
+                              </View>
+                            );
+                          })()}
                           <ChatContextTag context={getChatContext()} size="small" isDarkMode={isDarkMode} />
                         </View>
                       </View>
