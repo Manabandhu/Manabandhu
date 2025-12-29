@@ -6,11 +6,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  SafeAreaView,
   TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '@/components/ui/Header';
 import { immigrationNewsApi, NewsArticle, NewsFilters } from '@/lib/api/immigration';
 import { IMPACT_LEVEL_COLORS, SOURCE_TYPE_LABELS } from '@/types/immigration';

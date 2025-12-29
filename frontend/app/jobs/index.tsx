@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Modal, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Modal } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "@/components/ui/Header";
 import { jobsAPI, Job } from "@/lib/api/jobs";
 import { BriefcaseIcon, SearchIcon, MapPinIcon, FilterIcon, XIcon, PlusIcon, CalendarIcon } from "@/components/ui/Icons";

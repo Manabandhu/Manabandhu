@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "@/components/ui/Header";
 import { communityAPI, CommunityPost } from "@/lib/api/community";
 import { useAuthStore } from "@/store/auth.store";

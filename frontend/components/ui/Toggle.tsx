@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet, Animated } from "react-native";
+import { TouchableOpacity, View, StyleSheet, Animated, Platform } from "react-native";
 
 interface ToggleProps {
   value: boolean;
@@ -72,11 +72,15 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 9,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 2px rgba(0, 0, 0, 0.2)',
+    } : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 2,
+    }),
   },
 });
 

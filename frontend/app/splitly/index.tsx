@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '@/components/ui/Header';
 import { SplitIcon, UsersIcon, DollarSignIcon, PlusIcon, CalendarIcon, ArrowRightIcon } from '@/components/ui/Icons';
 import { useCurrency } from '@/lib/currency';

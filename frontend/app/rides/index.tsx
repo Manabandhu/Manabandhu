@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform, Modal, Pressable } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, Platform, Modal, Pressable } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "@/components/ui/Header";
 import * as Location from "expo-location";
 import BottomSheet from "@gorhom/bottom-sheet";
@@ -470,11 +470,15 @@ export default function RidesHome() {
             className="w-16 h-16 rounded-full items-center justify-center shadow-lg"
             style={{
               backgroundColor: "#2563EB", // Blue color for rides
-              shadowColor: "#2563EB",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.4,
-              shadowRadius: 6,
-              elevation: 10,
+              ...(Platform.OS === 'web' ? {
+                boxShadow: '0 4px 6px rgba(37, 99, 235, 0.4)',
+              } : {
+                shadowColor: "#2563EB",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 6,
+                elevation: 10,
+              }),
             }}
           >
             <CarIcon size={28} color="#FFFFFF" />

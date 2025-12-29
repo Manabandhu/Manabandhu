@@ -121,11 +121,15 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
             onPress={handleOpenDirections}
             className="absolute bottom-4 right-4 bg-blue-600 rounded-full px-4 py-3 flex-row items-center shadow-lg z-10"
             style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
+              ...(Platform.OS === 'web' ? {
+                boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
+              } : {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5,
+              }),
             }}
             activeOpacity={0.8}
           >
@@ -217,11 +221,15 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
                 borderRadius: 12,
                 borderWidth: 3,
                 borderColor: 'white',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-                elevation: 5,
+                ...(Platform.OS === 'web' ? {
+                  boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
+                } : {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                }),
               }}
             />
           </View>
@@ -242,11 +250,15 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
                 borderRadius: 12,
                 borderWidth: 3,
                 borderColor: 'white',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-                elevation: 5,
+                ...(Platform.OS === 'web' ? {
+                  boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
+                } : {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                }),
               }}
             />
           </View>
@@ -258,11 +270,15 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
         onPress={handleOpenDirections}
         className="absolute bottom-4 right-4 bg-blue-600 rounded-full px-4 py-3 flex-row items-center shadow-lg"
         style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          elevation: 5,
+          ...(Platform.OS === 'web' ? {
+            boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
+          } : {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+          }),
         }}
         activeOpacity={0.8}
       >

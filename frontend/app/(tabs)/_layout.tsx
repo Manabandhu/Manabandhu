@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Pressable, View, Modal, StyleSheet, Text, TouchableOpacity, Dimensions } from "react-native";
+import { Pressable, View, Modal, StyleSheet, Text, TouchableOpacity, Dimensions, Platform } from "react-native";
 import { useState } from "react";
 import { COLORS } from "@/constants/colors";
 import { 
@@ -172,11 +172,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 4px 4px rgba(0, 0, 0, 0.3)',
+    } : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 8,
+    }),
   },
   modalOverlay: {
     flex: 1,

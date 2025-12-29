@@ -6,11 +6,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  SafeAreaView,
   Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '@/components/ui/Header';
 import { uscisApi, UscisCase } from '@/lib/api/uscis';
 import { FORM_TYPE_LABELS, STATUS_COLORS } from '@/types/uscis';

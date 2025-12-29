@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { SettingsIcon, UserIcon, FileIcon, ShieldIcon, AlertTriangleIcon, BanIcon } from "@/components/ui/Icons";
 
 interface AdminItem {

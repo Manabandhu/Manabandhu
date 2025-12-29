@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, SafeAreaView, Image } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { chatAPI, Chat } from "@/lib/api/chat";
 import { userApi, User } from "@/lib/api/users";
 import { MessageIcon, SearchIcon, UserIcon, XIcon, PlusIcon } from "@/components/ui/Icons";

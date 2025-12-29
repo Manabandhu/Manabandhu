@@ -462,11 +462,15 @@ const styles = StyleSheet.create({
     padding: 48,
     alignItems: "center",
     maxWidth: 300,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 30,
-    elevation: 10,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+    } : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.2,
+      shadowRadius: 30,
+      elevation: 10,
+    }),
   },
   successIcon: {
     marginBottom: 24,

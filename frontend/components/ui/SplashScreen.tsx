@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Animated, Dimensions, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
 
@@ -359,11 +359,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+    } : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
+      elevation: 10,
+    }),
   },
   logoInner: {
     width: "100%",
@@ -372,10 +376,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logoSvg: {
-    shadowColor: "#FFFFFF",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 0 15px rgba(255, 255, 255, 0.5)',
+    } : {
+      shadowColor: "#FFFFFF",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 15,
+    }),
   },
   textContainer: {
     alignItems: "center",

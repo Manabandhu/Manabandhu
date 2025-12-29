@@ -1,7 +1,7 @@
 import React from "react";
-import { ScrollView, Text, View, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import RidePostForm from "@/components/rides/RidePostForm";
 import { ridesApi } from "@/lib/api/rides";
 import { RidePost } from "@/types";

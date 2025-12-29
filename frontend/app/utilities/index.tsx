@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert, SafeAreaView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { DollarSignIcon, GlobeIcon, CalendarIcon, FileIcon, BellIcon, ShoppingBagIcon, SettingsIcon } from "@/components/ui/Icons";
 
 interface UtilityItem {

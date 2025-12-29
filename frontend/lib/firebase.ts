@@ -2,6 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { Platform } from "react-native";
 import {
   getAuth,
+  initializeAuth,
   Auth,
   GoogleAuthProvider,
   OAuthProvider,
@@ -16,6 +17,9 @@ import {
   User as FirebaseUser,
   ApplicationVerifier,
 } from "firebase/auth";
+// @ts-ignore - getReactNativePersistence exists but may not be in TypeScript definitions for v11
+import { getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 import { firebaseConfig } from "./config/firebase";
@@ -28,12 +32,46 @@ let storage: FirebaseStorage;
 
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
+  // Use initializeAuth with AsyncStorage persistence for React Native
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    try {
+      auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage)
+      });
+    } catch (error: any) {
+      // If auth is already initialized, get the existing instance
+      if (error.code === 'auth/already-initialized') {
+        auth = getAuth(app);
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    // Web platform uses getAuth
+    auth = getAuth(app);
+  }
   db = getFirestore(app);
   storage = getStorage(app);
 } else {
   app = getApps()[0];
-  auth = getAuth(app);
+  // Use initializeAuth with AsyncStorage persistence for React Native
+  if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    try {
+      auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage)
+      });
+    } catch (error: any) {
+      // If auth is already initialized, get the existing instance
+      if (error.code === 'auth/already-initialized') {
+        auth = getAuth(app);
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    // Web platform uses getAuth
+    auth = getAuth(app);
+  }
   db = getFirestore(app);
   storage = getStorage(app);
 }

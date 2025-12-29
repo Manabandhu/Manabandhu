@@ -1,15 +1,22 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { notificationsAPI } from './api/notifications';
 
+// Check if running in Expo Go
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
+
 // Configure how notifications are handled when app is in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Only set handler if not in Expo Go to avoid warnings
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 export interface PushTokenRegistration {
   token: string;
@@ -21,6 +28,14 @@ export interface PushTokenRegistration {
  * Request notification permissions and register push token
  */
 export async function registerForPushNotifications(): Promise<string | null> {
+  // Skip notification registration in Expo Go to avoid warnings
+  if (isExpoGo) {
+    if (__DEV__) {
+      console.log('Push notifications are not fully supported in Expo Go. Use a development build for full functionality.');
+    }
+    return null;
+  }
+
   try {
     // Request permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -99,6 +114,11 @@ export async function unregisterPushToken(token: string) {
  * Get the current push token
  */
 export async function getPushToken(): Promise<string | null> {
+  // Skip in Expo Go to avoid warnings
+  if (isExpoGo) {
+    return null;
+  }
+
   try {
     // Only include projectId if it's a valid UUID format
     const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID;
@@ -128,6 +148,12 @@ export function setupNotificationListeners(
   onNotificationReceived?: (notification: Notifications.Notification) => void,
   onNotificationTapped?: (response: Notifications.NotificationResponse) => void
 ) {
+  // Skip setting up listeners in Expo Go to avoid warnings
+  if (isExpoGo) {
+    // Return a no-op cleanup function
+    return () => {};
+  }
+
   // Listener for notifications received while app is foregrounded
   const receivedSubscription = Notifications.addNotificationReceivedListener((notification) => {
     console.log('Notification received:', notification);

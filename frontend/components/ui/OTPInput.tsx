@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { View, TextInput, Text, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } from "react-native";
+import { View, TextInput, Text, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData, Platform } from "react-native";
 
 interface OTPInputProps {
   length?: number;
@@ -164,11 +164,15 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: "#6366F1",
-    shadowColor: "#6366F1",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 0 3px rgba(99, 102, 241, 0.1)',
+    } : {
+      shadowColor: "#6366F1",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 3,
+    }),
   },
   inputError: {
     borderColor: "#EF4444",

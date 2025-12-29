@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, SafeAreaView, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, Platform } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "@/components/ui/Header";
 import BottomSheet from "@gorhom/bottom-sheet";
 import RoomFiltersBottomSheet from "@/components/rooms/RoomFiltersBottomSheet";
@@ -223,11 +223,15 @@ export default function RoomFinderHome() {
           style={{
             bottom: 24 + insets.bottom,
             backgroundColor: "#10B981", // Green color for rooms/housing
-            shadowColor: "#10B981",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 6,
-            elevation: 10,
+            ...(Platform.OS === 'web' ? {
+              boxShadow: '0 4px 6px rgba(16, 185, 129, 0.4)',
+            } : {
+              shadowColor: "#10B981",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 6,
+              elevation: 10,
+            }),
           }}
         >
           <HomeIcon size={28} color="#FFFFFF" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Question } from '@/types/qa';
 import { COLORS, colors } from '@/constants/colors';
 import { useRouter } from 'expo-router';
@@ -75,11 +75,15 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginVertical: 4,
     marginHorizontal: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+    } : {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    }),
     borderWidth: isDarkMode ? 1 : 0,
     borderColor: isDarkMode ? '#374151' : 'transparent',
   },
