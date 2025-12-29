@@ -60,12 +60,20 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                     // Set the user in the accessor
                     accessor.setUser(authentication);
                     log.info("WebSocket connection authenticated for user: {}", uid);
+                } catch (com.google.firebase.auth.FirebaseAuthException e) {
+                    log.error("Failed to authenticate WebSocket connection - Firebase auth error: {}", e.getMessage());
+                    log.error("Error code: {}", e.getErrorCode());
+                    // Throw exception to reject the connection
+                    throw new RuntimeException("WebSocket authentication failed: " + e.getMessage(), e);
                 } catch (Exception e) {
-                    log.error("Failed to authenticate WebSocket connection: {}", e.getMessage());
-                    // Connection will be rejected if authentication fails
+                    log.error("Failed to authenticate WebSocket connection - Unexpected error: {}", e.getMessage(), e);
+                    // Throw exception to reject the connection
+                    throw new RuntimeException("WebSocket authentication failed: " + e.getMessage(), e);
                 }
             } else {
                 log.warn("WebSocket connection attempt without authorization token");
+                // Reject connection if no token provided
+                throw new RuntimeException("WebSocket connection rejected: No authorization token provided");
             }
         }
         

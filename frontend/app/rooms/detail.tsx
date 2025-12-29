@@ -7,6 +7,7 @@ import { ListingStatus, RoomListing, RoomReview } from "@/types";
 import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 import { useCurrency } from "@/lib/currency";
+import { normalizeImageUrls } from "@/lib/utils/firebaseStorage";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 
@@ -19,6 +20,7 @@ export default function RoomDetail() {
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  const [normalizedImageUrls, setNormalizedImageUrls] = useState<string[]>([]);
   const { format } = useCurrency();
 
   const loadListing = async () => {
@@ -31,6 +33,14 @@ export default function RoomDetail() {
       ]);
       setListing(listingResponse);
       setReviews(reviewsResponse || []);
+      
+      // Normalize image URLs (convert metadata URLs to download URLs)
+      if (listingResponse.imageUrls && listingResponse.imageUrls.length > 0) {
+        const normalized = await normalizeImageUrls(listingResponse.imageUrls);
+        setNormalizedImageUrls(normalized);
+      } else {
+        setNormalizedImageUrls([]);
+      }
     } catch (err) {
       setError("Unable to load listing details.");
     } finally {
@@ -100,7 +110,8 @@ export default function RoomDetail() {
 
   const locationLabel = listing.approxAreaLabel;
   const screenWidth = Dimensions.get("window").width;
-  const images = listing.imageUrls || [];
+  // Use normalized URLs if available, otherwise fall back to original URLs
+  const images = normalizedImageUrls.length > 0 ? normalizedImageUrls : (listing.imageUrls || []);
   
   // Filter out failed images - keep both URI and original index
   const validImagesWithIndex = images

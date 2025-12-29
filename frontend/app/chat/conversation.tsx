@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
 import { ChatContextTag } from "@/lib/utils/chatContext";
 import { userApi, User } from "@/lib/api/users";
+import { websocketClient, connectWebSocket, ChatMessageEvent } from "@/lib/websocket";
 
 export default function Conversation() {
   const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();
@@ -132,14 +133,61 @@ export default function Conversation() {
     loadChatInfo();
     loadMessages();
     
-    // Set up polling for new messages every 5 seconds
+    // Connect WebSocket if not already connected
+    const initWebSocket = async () => {
+      if (!websocketClient.connected) {
+        try {
+          await connectWebSocket();
+        } catch (error) {
+          console.error('Failed to connect WebSocket:', error);
+        }
+      }
+    };
+    initWebSocket();
+
+    // Subscribe to WebSocket messages for real-time updates
+    const unsubscribe = websocketClient.subscribe<ChatMessageEvent>(
+      'CHAT_MESSAGE',
+      (event) => {
+        // Only add message if it's for the current chat
+        if (event.chatId === parseInt(chatId || '0')) {
+          const newMessage: Message = {
+            id: event.message.id,
+            chatId: event.message.chatId,
+            senderId: event.message.senderId,
+            content: event.message.content,
+            type: event.message.type,
+            createdAt: event.message.createdAt,
+          };
+          
+          // Check if message already exists (avoid duplicates)
+          setMessages(prev => {
+            const exists = prev.some(m => m.id === newMessage.id);
+            if (exists) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+          
+          // Scroll to bottom when new message arrives
+          setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }, 100);
+        }
+      }
+    );
+
+    // Set up polling as fallback (longer interval since WebSocket handles real-time)
     const interval = setInterval(() => {
       if (!loading && chatId) {
         loadMessages();
       }
-    }, 5000);
+    }, 30000); // Poll every 30 seconds as fallback
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
   }, [chatId]);
 
   const formatTime = (dateString: string) => {
