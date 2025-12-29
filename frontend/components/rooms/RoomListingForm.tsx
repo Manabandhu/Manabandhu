@@ -73,6 +73,7 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
   const { symbol } = useCurrency();
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const initialImages = useMemo(() => {
     if (!initialValues?.imageUrls?.length) return [];
@@ -286,6 +287,16 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
         ))}
       </View>
 
+      {/* Error Summary */}
+      {Object.keys(errors).length > 0 && (
+        <View className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <Text className="text-red-800 font-semibold mb-2">Please fix the following errors:</Text>
+          {Object.entries(errors).map(([field, message]) => (
+            <Text key={field} className="text-red-600 text-sm">• {message}</Text>
+          ))}
+        </View>
+      )}
+
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
@@ -300,12 +311,22 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <Text className="text-base font-semibold text-gray-900 mb-2">Title *</Text>
               <TextInput
                 value={form.title}
-                onChangeText={(value) => updateField("title", value)}
+                onChangeText={(value) => {
+                  updateField("title", value);
+                  if (errors.title) {
+                    setErrors(prev => ({ ...prev, title: "" }));
+                  }
+                }}
                 onFocus={handleInputFocus}
                 placeholder="e.g., Spacious 2BHK with balcony"
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                  errors.title ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholderTextColor="#9CA3AF"
               />
+              {errors.title && (
+                <Text className="text-red-500 text-sm mt-1">{errors.title}</Text>
+              )}
             </View>
             <View>
               <Text className="text-base font-semibold text-gray-900 mb-2">Listing For *</Text>
@@ -363,13 +384,23 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
                 <Text className="text-base font-semibold text-gray-900 mb-2">Rent / month *</Text>
                 <TextInput
                   value={form.rentMonthly}
-                  onChangeText={(value) => updateField("rentMonthly", value)}
+                  onChangeText={(value) => {
+                    updateField("rentMonthly", value);
+                    if (errors.rentMonthly) {
+                      setErrors(prev => ({ ...prev, rentMonthly: "" }));
+                    }
+                  }}
                   onFocus={handleInputFocus}
                   keyboardType="numeric"
-                  className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                  className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                    errors.rentMonthly ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholder={symbol}
                   placeholderTextColor="#9CA3AF"
                 />
+                {errors.rentMonthly && (
+                  <Text className="text-red-500 text-sm mt-1">{errors.rentMonthly}</Text>
+                )}
               </View>
             </View>
             <View className="flex-row gap-3">
@@ -619,35 +650,65 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
               <Text className="text-base font-semibold text-gray-900 mb-2">Area / Location *</Text>
               <TextInput
                 value={form.approxAreaLabel}
-                onChangeText={(value) => updateField("approxAreaLabel", value)}
+                onChangeText={(value) => {
+                  updateField("approxAreaLabel", value);
+                  if (errors.approxAreaLabel) {
+                    setErrors(prev => ({ ...prev, approxAreaLabel: "" }));
+                  }
+                }}
                 onFocus={handleInputFocus}
                 placeholder="e.g., Indiranagar, Bengaluru"
-                className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                  errors.approxAreaLabel ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholderTextColor="#9CA3AF"
               />
+              {errors.approxAreaLabel && (
+                <Text className="text-red-500 text-sm mt-1">{errors.approxAreaLabel}</Text>
+              )}
             </View>
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <Text className="text-base font-semibold text-gray-900 mb-2">Latitude *</Text>
                 <TextInput
                   value={form.latApprox}
-                  onChangeText={(value) => updateField("latApprox", value)}
+                  onChangeText={(value) => {
+                    updateField("latApprox", value);
+                    if (errors.latApprox) {
+                      setErrors(prev => ({ ...prev, latApprox: "" }));
+                    }
+                  }}
                   onFocus={handleInputFocus}
                   keyboardType="numeric"
-                  className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                  className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                    errors.latApprox ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholderTextColor="#9CA3AF"
                 />
+                {errors.latApprox && (
+                  <Text className="text-red-500 text-sm mt-1">{errors.latApprox}</Text>
+                )}
               </View>
               <View className="flex-1">
                 <Text className="text-base font-semibold text-gray-900 mb-2">Longitude *</Text>
                 <TextInput
                   value={form.lngApprox}
-                  onChangeText={(value) => updateField("lngApprox", value)}
+                  onChangeText={(value) => {
+                    updateField("lngApprox", value);
+                    if (errors.lngApprox) {
+                      setErrors(prev => ({ ...prev, lngApprox: "" }));
+                    }
+                  }}
                   onFocus={handleInputFocus}
                   keyboardType="numeric"
-                  className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                  className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                    errors.lngApprox ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholderTextColor="#9CA3AF"
                 />
+                {errors.lngApprox && (
+                  <Text className="text-red-500 text-sm mt-1">{errors.lngApprox}</Text>
+                )}
               </View>
             </View>
             <View className="flex-row items-center justify-between bg-gray-50 p-4 rounded-xl">
@@ -665,26 +726,46 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
             {form.locationExactEnabled && (
               <View className="flex-row gap-3">
                 <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900 mb-2">Exact Latitude</Text>
+                  <Text className="text-base font-semibold text-gray-900 mb-2">Exact Latitude *</Text>
                   <TextInput
                     value={form.latExact}
-                    onChangeText={(value) => updateField("latExact", value)}
+                    onChangeText={(value) => {
+                      updateField("latExact", value);
+                      if (errors.latExact) {
+                        setErrors(prev => ({ ...prev, latExact: "" }));
+                      }
+                    }}
                     onFocus={handleInputFocus}
                     keyboardType="numeric"
-                    className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                    className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                      errors.latExact ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholderTextColor="#9CA3AF"
                   />
+                  {errors.latExact && (
+                    <Text className="text-red-500 text-sm mt-1">{errors.latExact}</Text>
+                  )}
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900 mb-2">Exact Longitude</Text>
+                  <Text className="text-base font-semibold text-gray-900 mb-2">Exact Longitude *</Text>
                   <TextInput
                     value={form.lngExact}
-                    onChangeText={(value) => updateField("lngExact", value)}
+                    onChangeText={(value) => {
+                      updateField("lngExact", value);
+                      if (errors.lngExact) {
+                        setErrors(prev => ({ ...prev, lngExact: "" }));
+                      }
+                    }}
                     onFocus={handleInputFocus}
                     keyboardType="numeric"
-                    className="border border-gray-300 rounded-xl px-4 py-3 text-base bg-white"
+                    className={`border rounded-xl px-4 py-3 text-base bg-white ${
+                      errors.lngExact ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholderTextColor="#9CA3AF"
                   />
+                  {errors.lngExact && (
+                    <Text className="text-red-500 text-sm mt-1">{errors.lngExact}</Text>
+                  )}
                 </View>
               </View>
             )}
@@ -921,6 +1002,45 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
         ) : (
           <TouchableOpacity
             onPress={() => {
+              // Validate form before submitting
+              const validationErrors: Record<string, string> = {};
+              
+              if (!form.title.trim()) {
+                validationErrors.title = "Title is required";
+              }
+              if (!form.rentMonthly.trim() || isNaN(Number(form.rentMonthly)) || Number(form.rentMonthly) <= 0) {
+                validationErrors.rentMonthly = "Valid rent amount is required";
+              }
+              if (!form.latApprox.trim() || isNaN(Number(form.latApprox))) {
+                validationErrors.latApprox = "Approximate location is required";
+              }
+              if (!form.lngApprox.trim() || isNaN(Number(form.lngApprox))) {
+                validationErrors.lngApprox = "Approximate location is required";
+              }
+              if (!form.approxAreaLabel.trim()) {
+                validationErrors.approxAreaLabel = "Area label is required";
+              }
+              if (form.locationExactEnabled) {
+                if (!form.latExact.trim() || isNaN(Number(form.latExact))) {
+                  validationErrors.latExact = "Exact latitude is required";
+                }
+                if (!form.lngExact.trim() || isNaN(Number(form.lngExact))) {
+                  validationErrors.lngExact = "Exact longitude is required";
+                }
+              }
+              
+              setErrors(validationErrors);
+              
+              // If there are errors, scroll to first error or show alert
+              if (Object.keys(validationErrors).length > 0) {
+                const firstErrorField = Object.keys(validationErrors)[0];
+                const errorMessages = Object.values(validationErrors).join("\n");
+                
+                // Scroll to top to show errors
+                // You could also implement field-level scrolling here
+                return;
+              }
+              
               // Combine selected icons with manual entries before submitting
               const combinedForm = {
                 ...form,
@@ -942,4 +1062,5 @@ export default function RoomListingForm({ initialValues, onSubmit, submitLabel, 
     </KeyboardAvoidingView>
   );
 }
+
 

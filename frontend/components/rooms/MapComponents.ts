@@ -12,3 +12,4 @@ export const MapView: MapViewType = null;
 export const Marker: MarkerType = null;
 export const PROVIDER_GOOGLE: ProviderType = null;
 
+

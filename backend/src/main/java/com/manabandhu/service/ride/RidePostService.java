@@ -11,6 +11,9 @@ import com.manabandhu.repository.RidePostRepository;
 import com.manabandhu.repository.RideRequestRepository;
 import com.manabandhu.service.ChatService;
 import com.manabandhu.service.NotificationEventService;
+import com.manabandhu.service.WebSocketService;
+import com.manabandhu.dto.rides.RidePostResponse;
+import com.manabandhu.dto.websocket.RideUpdateEvent;
 import com.manabandhu.model.notification.NotificationEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,7 @@ public class RidePostService {
     private final RideTrackingService trackingService;
     private final ChatService chatService;
     private final NotificationEventService notificationEventService;
+    private final WebSocketService webSocketService;
 
     public RidePostService(RidePostRepository ridePostRepository,
                            RidePostActivityRepository activityRepository,
@@ -50,7 +54,8 @@ public class RidePostService {
                            RoutingProvider routingProvider,
                            RideTrackingService trackingService,
                            ChatService chatService,
-                           NotificationEventService notificationEventService) {
+                           NotificationEventService notificationEventService,
+                           WebSocketService webSocketService) {
         this.ridePostRepository = ridePostRepository;
         this.activityRepository = activityRepository;
         this.conversationLinkRepository = conversationLinkRepository;
@@ -60,6 +65,7 @@ public class RidePostService {
         this.trackingService = trackingService;
         this.chatService = chatService;
         this.notificationEventService = notificationEventService;
+        this.webSocketService = webSocketService;
     }
 
     public RidePostUpsertResult createOrUpdate(String ownerUserId, RidePostRequest request) {
@@ -72,6 +78,10 @@ public class RidePostService {
                 updated.setLastActivityAt(LocalDateTime.now());
                 ridePostRepository.save(updated);
                 createActivity(updated, ownerUserId, RidePostActivity.ActivityType.UPDATED, Map.of("upsert", "updated"));
+                
+                // Publish WebSocket event
+                publishRideUpdate("UPDATED", updated);
+                
                 return new RidePostUpsertResult(updated, RidePostUpsertResult.Action.UPDATED_EXISTING);
             }
             if (existing.getStatus() == RidePost.Status.BOOKED) {
@@ -82,6 +92,10 @@ public class RidePostService {
                 ridePostRepository.save(rebooked);
                 createActivity(rebooked, ownerUserId, RidePostActivity.ActivityType.REBOOKED,
                         Map.of("previousPostId", existing.getId().toString()));
+                
+                // Publish WebSocket event
+                publishRideUpdate("REBOOKED", rebooked);
+                
                 return new RidePostUpsertResult(rebooked, RidePostUpsertResult.Action.REBOOKED_FROM_BOOKED);
             }
         }
@@ -90,6 +104,10 @@ public class RidePostService {
         created.setStatus(RidePost.Status.OPEN);
         ridePostRepository.save(created);
         createActivity(created, ownerUserId, RidePostActivity.ActivityType.CREATED, Map.of("title", created.getTitle()));
+        
+        // Publish WebSocket event
+        publishRideUpdate("CREATED", created);
+        
         return new RidePostUpsertResult(created, RidePostUpsertResult.Action.CREATED);
     }
 
@@ -100,6 +118,10 @@ public class RidePostService {
         updated.setLastActivityAt(LocalDateTime.now());
         updated = ridePostRepository.save(updated);
         createActivity(updated, ownerUserId, RidePostActivity.ActivityType.UPDATED, Map.of("title", updated.getTitle()));
+        
+        // Publish WebSocket event
+        publishRideUpdate("UPDATED", updated);
+        
         return updated;
     }
 
@@ -113,6 +135,9 @@ public class RidePostService {
         ridePostRepository.save(post);
         trackingService.cancelTracking(id);
         createActivity(post, ownerUserId, RidePostActivity.ActivityType.CANCELLED, Map.of("title", post.getTitle()));
+        
+        // Publish WebSocket event
+        publishRideUpdate("CANCELLED", post);
     }
 
     public RidePost repostPost(String ownerUserId, UUID id) {
@@ -129,6 +154,10 @@ public class RidePostService {
         RidePost saved = ridePostRepository.save(post);
         createActivity(saved, ownerUserId, RidePostActivity.ActivityType.STATUS_CHANGED,
                 Map.of("from", previous.name(), "to", saved.getStatus().name()));
+        
+        // Publish WebSocket event
+        publishRideUpdate("STATUS_CHANGED", saved);
+        
         return saved;
     }
 
@@ -140,6 +169,10 @@ public class RidePostService {
         ridePostRepository.save(newPost);
         createActivity(newPost, ownerUserId, RidePostActivity.ActivityType.REBOOKED,
                 Map.of("previousPostId", post.getId().toString()));
+        
+        // Publish WebSocket event
+        publishRideUpdate("REBOOKED", newPost);
+        
         return newPost;
     }
 
@@ -221,6 +254,9 @@ public class RidePostService {
         
         createActivity(saved, userId, RidePostActivity.ActivityType.BOOKED,
                 Map.of("requestedBy", userId));
+        
+        // Publish WebSocket event
+        publishRideUpdate("REQUESTED", saved);
         
         // Send notification to ride owner
         try {
@@ -587,6 +623,17 @@ public class RidePostService {
             }
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
+    }
+
+    private void publishRideUpdate(String action, RidePost post) {
+        try {
+            RidePostResponse response = new RidePostResponse(post);
+            RideUpdateEvent event = new RideUpdateEvent(action, response);
+            webSocketService.broadcastRideUpdate(event);
+        } catch (Exception e) {
+            // Log but don't fail the operation if WebSocket publishing fails
+            // This ensures the main operation (saving ride) still succeeds
+        }
     }
 
     public record RidePostUpsertResult(RidePost post, Action action) {

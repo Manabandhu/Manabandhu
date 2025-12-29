@@ -19,6 +19,7 @@ import java.util.Map;
 public class NotificationEventService {
     private final NotificationEventRepository notificationEventRepository;
     private final PushNotificationService pushNotificationService;
+    private final WebSocketService webSocketService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public NotificationEvent createEvent(String userId, NotificationEvent.NotificationType type, Map<String, Object> payload) {
@@ -28,21 +29,38 @@ public class NotificationEventService {
         event.setPayload(serializePayload(payload));
         event = notificationEventRepository.save(event);
 
+        // Prepare notification data
+        String title = getNotificationTitle(type);
+        String body = getNotificationBody(type, payload);
+        Map<String, Object> notificationData = new HashMap<>();
+        notificationData.put("type", type.toString());
+        notificationData.put("eventId", event.getId().toString());
+        if (payload != null) {
+            notificationData.putAll(payload);
+        }
+
         // Send push notification
         try {
-            String title = getNotificationTitle(type);
-            String body = getNotificationBody(type, payload);
-            Map<String, Object> notificationData = new HashMap<>();
-            notificationData.put("type", type.toString());
-            notificationData.put("eventId", event.getId().toString());
-            if (payload != null) {
-                notificationData.putAll(payload);
-            }
-
             pushNotificationService.sendPushNotificationToUser(userId, title, body, notificationData);
         } catch (Exception e) {
             log.error("Failed to send push notification for event: {}", event.getId(), e);
             // Don't fail the event creation if push notification fails
+        }
+
+        // Send WebSocket notification
+        try {
+            com.manabandhu.dto.websocket.NotificationEvent wsEvent = 
+                new com.manabandhu.dto.websocket.NotificationEvent(
+                    type.toString(), 
+                    title, 
+                    body, 
+                    notificationData, 
+                    userId
+                );
+            webSocketService.sendNotification(userId, wsEvent);
+        } catch (Exception e) {
+            log.error("Failed to send WebSocket notification for event: {}", event.getId(), e);
+            // Don't fail the event creation if WebSocket notification fails
         }
 
         return event;

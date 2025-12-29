@@ -24,3 +24,4 @@ public interface RideRequestRepository extends JpaRepository<RideRequest, UUID> 
     List<RideRequest> findByRequestedByUserId(String userId);
 }
 
+

@@ -24,8 +24,48 @@ export default function CreateRoomListing() {
   };
 
   const handleSubmit = async (values: RoomListingFormValues) => {
-    if (!values.title.trim() || !values.rentMonthly.trim() || !values.latApprox.trim() || !values.lngApprox.trim()) {
-      Alert.alert("Missing required fields", "Please complete all required fields.");
+    // Comprehensive validation
+    const errors: string[] = [];
+    
+    if (!values.title.trim()) {
+      errors.push("Title is required");
+    }
+    if (!values.rentMonthly.trim() || isNaN(Number(values.rentMonthly)) || Number(values.rentMonthly) <= 0) {
+      errors.push("Valid rent amount is required");
+    }
+    if (!values.latApprox.trim() || isNaN(Number(values.latApprox))) {
+      errors.push("Approximate location (latitude) is required");
+    }
+    if (!values.lngApprox.trim() || isNaN(Number(values.lngApprox))) {
+      errors.push("Approximate location (longitude) is required");
+    }
+    if (!values.approxAreaLabel.trim()) {
+      errors.push("Area label is required");
+    }
+    if (!values.listingFor) {
+      errors.push("Listing type is required");
+    }
+    if (!values.roomType) {
+      errors.push("Room type is required");
+    }
+    if (!values.visitType) {
+      errors.push("Visit type is required");
+    }
+    if (values.locationExactEnabled) {
+      if (!values.latExact.trim() || isNaN(Number(values.latExact))) {
+        errors.push("Exact location (latitude) is required when exact location is enabled");
+      }
+      if (!values.lngExact.trim() || isNaN(Number(values.lngExact))) {
+        errors.push("Exact location (longitude) is required when exact location is enabled");
+      }
+    }
+
+    if (errors.length > 0) {
+      Alert.alert(
+        "Validation Error",
+        errors.join("\n"),
+        [{ text: "OK" }]
+      );
       return;
     }
 
@@ -113,7 +153,16 @@ export default function CreateRoomListing() {
         router.replace("/rooms");
       }, 2500);
     } catch (err) {
-      Alert.alert("Unable to create listing", "Please try again.");
+      console.error("Error creating listing:", err);
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "An unexpected error occurred. Please try again.";
+      
+      Alert.alert(
+        "Failed to Create Listing",
+        errorMessage,
+        [{ text: "OK" }]
+      );
     } finally {
       setLoading(false);
     }

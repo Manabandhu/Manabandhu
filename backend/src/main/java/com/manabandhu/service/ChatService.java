@@ -2,6 +2,7 @@ package com.manabandhu.service;
 
 import com.manabandhu.dto.ChatDTO;
 import com.manabandhu.dto.MessageDTO;
+import com.manabandhu.dto.websocket.ChatMessageEvent;
 import com.manabandhu.model.chat.Chat;
 import com.manabandhu.model.chat.Message;
 import com.manabandhu.repository.ChatRepository;
@@ -26,6 +27,9 @@ public class ChatService {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private WebSocketService webSocketService;
 
     public List<ChatDTO> getUserChats(String userId) {
         List<Chat> chats = chatRepository.findByParticipantsContaining(userId);
@@ -84,7 +88,13 @@ public class ChatService {
         chat.setLastMessageAt(LocalDateTime.now());
         chatRepository.save(chat);
         
-        return new MessageDTO(message);
+        MessageDTO messageDTO = new MessageDTO(message);
+        
+        // Publish WebSocket event to all chat participants
+        ChatMessageEvent event = new ChatMessageEvent(messageDTO, chatId);
+        webSocketService.sendChatMessage(chat.getParticipants(), chatId, event);
+        
+        return messageDTO;
     }
 
     public Page<MessageDTO> getChatMessages(Long chatId, int page, int size) {

@@ -93,11 +93,27 @@ export const roomsApi = {
 
   async createListing(payload: Partial<RoomListing>) {
     try {
+      // Validate required fields
       if (!payload.title?.trim()) {
         throw new Error('Title is required');
       }
-      if (!payload.rent || payload.rent <= 0) {
+      if (!payload.rentMonthly || payload.rentMonthly <= 0) {
         throw new Error('Valid rent amount is required');
+      }
+      if (!payload.latApprox || !payload.lngApprox) {
+        throw new Error('Location is required');
+      }
+      if (!payload.approxAreaLabel?.trim()) {
+        throw new Error('Area label is required');
+      }
+      if (!payload.listingFor) {
+        throw new Error('Listing type is required');
+      }
+      if (!payload.roomType) {
+        throw new Error('Room type is required');
+      }
+      if (!payload.visitType) {
+        throw new Error('Visit type is required');
       }
       
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings`, {
@@ -105,9 +121,22 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
       });
-      return await handleResponse(response, 'Room listing created successfully!') as RoomListing;
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || errorData.error || `Failed to create listing (${response.status})`;
+        throw new Error(errorMessage);
+      }
+      
+      const result = await response.json();
+      toast.showSuccess('Room listing created successfully!');
+      return result as RoomListing;
     } catch (error) {
-      throw error;
+      // Re-throw with better error message
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while creating the listing');
     }
   },
 

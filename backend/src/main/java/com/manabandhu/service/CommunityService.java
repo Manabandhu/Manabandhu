@@ -3,6 +3,8 @@ package com.manabandhu.service;
 import com.manabandhu.dto.CommentDTO;
 import com.manabandhu.dto.CommunityPostDTO;
 import com.manabandhu.dto.CreateCommentRequest;
+import com.manabandhu.dto.websocket.CommunityCommentEvent;
+import com.manabandhu.dto.websocket.CommunityPostEvent;
 import com.manabandhu.model.community.Comment;
 import com.manabandhu.model.community.CommunityPost;
 import com.manabandhu.repository.CommentRepository;
@@ -30,6 +32,9 @@ public class CommunityService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private WebSocketService webSocketService;
+
     public Page<CommunityPostDTO> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<CommunityPost> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
@@ -45,7 +50,13 @@ public class CommunityService {
     public CommunityPostDTO createPost(String authorId, String content, List<String> images) {
         CommunityPost post = new CommunityPost(authorId, content, images);
         post = postRepository.save(post);
-        return new CommunityPostDTO(post);
+        CommunityPostDTO postDTO = new CommunityPostDTO(post);
+        
+        // Publish WebSocket event
+        CommunityPostEvent event = new CommunityPostEvent("CREATED", postDTO);
+        webSocketService.broadcastCommunityUpdate(event);
+        
+        return postDTO;
     }
 
     public CommunityPostDTO likePost(Long postId) {
@@ -53,7 +64,13 @@ public class CommunityService {
             .orElseThrow(() -> new RuntimeException("Post not found"));
         post.setLikes(post.getLikes() + 1);
         post = postRepository.save(post);
-        return new CommunityPostDTO(post);
+        CommunityPostDTO postDTO = new CommunityPostDTO(post);
+        
+        // Publish WebSocket event
+        CommunityPostEvent event = new CommunityPostEvent("LIKED", postDTO);
+        webSocketService.broadcastCommunityUpdate(event);
+        
+        return postDTO;
     }
 
     public void deletePost(Long postId, String userId) {
@@ -64,7 +81,12 @@ public class CommunityService {
             throw new RuntimeException("Not authorized to delete this post");
         }
         
+        CommunityPostDTO postDTO = new CommunityPostDTO(post);
         postRepository.delete(post);
+        
+        // Publish WebSocket event
+        CommunityPostEvent event = new CommunityPostEvent("DELETED", postDTO);
+        webSocketService.broadcastCommunityUpdate(event);
     }
 
     public CommentDTO addComment(Long postId, String authorId, CreateCommentRequest request) {
@@ -86,7 +108,13 @@ public class CommunityService {
             .map(user -> user.getName())
             .orElse("Anonymous");
         
-        return new CommentDTO(comment, authorName);
+        CommentDTO commentDTO = new CommentDTO(comment, authorName);
+        
+        // Publish WebSocket event
+        CommunityCommentEvent event = new CommunityCommentEvent("CREATED", commentDTO, postId);
+        webSocketService.broadcastCommunityUpdate(event);
+        
+        return commentDTO;
     }
 
     public Page<CommentDTO> getPostComments(Long postId, Pageable pageable) {
@@ -113,6 +141,16 @@ public class CommunityService {
         post.setComments(Math.max(0, post.getComments() - 1));
         postRepository.save(post);
         
+        Long postId = comment.getPostId();
+        CommentDTO commentDTO = new CommentDTO(comment, 
+            userRepository.findByFirebaseUid(comment.getAuthorId())
+                .map(user -> user.getName())
+                .orElse("Anonymous"));
+        
         commentRepository.delete(comment);
+        
+        // Publish WebSocket event
+        CommunityCommentEvent event = new CommunityCommentEvent("DELETED", commentDTO, postId);
+        webSocketService.broadcastCommunityUpdate(event);
     }
 }

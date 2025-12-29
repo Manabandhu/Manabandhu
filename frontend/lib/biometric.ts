@@ -124,3 +124,4 @@ export const getBiometricName = (type: BiometricType): string => {
   return type.name;
 };
 
+

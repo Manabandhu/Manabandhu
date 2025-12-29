@@ -359,3 +359,4 @@ export default function RideMapCanvas({ rides, onSelect }: RideMapCanvasProps) {
   );
 }
 
+
