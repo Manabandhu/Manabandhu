@@ -44,7 +44,29 @@ public class ChatService {
 
     public List<ChatDTO> getUserChats(String userId) {
         List<Chat> chats = chatRepository.findByParticipantsContaining(userId);
-        return chats.stream().map(ChatDTO::new).collect(Collectors.toList());
+        
+        // Efficiently load last message for each chat to avoid N+1 queries
+        List<Long> chatIds = chats.stream().map(Chat::getId).collect(Collectors.toList());
+        Map<Long, Message> lastMessagesMap = new HashMap<>();
+        
+        if (!chatIds.isEmpty()) {
+            // Fetch the most recent message for each chat in a single query
+            List<Message> lastMessages = messageRepository.findLastMessageByChatIds(chatIds);
+            lastMessagesMap = lastMessages.stream()
+                    .collect(Collectors.toMap(Message::getChatId, m -> m, (m1, m2) -> 
+                        m1.getCreatedAt().isAfter(m2.getCreatedAt()) ? m1 : m2));
+        }
+        
+        // Build ChatDTOs with last messages
+        final Map<Long, Message> finalLastMessagesMap = lastMessagesMap;
+        return chats.stream().map(chat -> {
+            ChatDTO dto = new ChatDTO(chat);
+            Message lastMessage = finalLastMessagesMap.get(chat.getId());
+            if (lastMessage != null) {
+                dto.setLastMessage(new MessageDTO(lastMessage));
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public ChatDTO createChat(String name, Chat.ChatType type, List<String> participants) {
@@ -91,11 +113,13 @@ public class ChatService {
     }
 
     public MessageDTO sendMessage(Long chatId, String senderId, String content, Message.MessageType type) {
+        // Optimize: Fetch chat first, then save message and update chat in single transaction
+        Chat chat = chatRepository.findById(chatId).orElseThrow();
+        
         Message message = new Message(chatId, senderId, content, type);
         message = messageRepository.save(message);
         
-        // Update chat's last message time
-        Chat chat = chatRepository.findById(chatId).orElseThrow();
+        // Update chat's last message time (already have chat object, no need for second query)
         chat.setLastMessageAt(LocalDateTime.now());
         chatRepository.save(chat);
         

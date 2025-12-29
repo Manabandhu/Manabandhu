@@ -25,6 +25,9 @@ export default function Conversation() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [onlineStatus, setOnlineStatus] = useState<Map<string, ChatPresence>>(new Map());
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
   
   const currentUser = useAuthStore(state => state.user);
   const currentUserId = currentUser?.uid || 'unknown';
@@ -91,18 +94,43 @@ export default function Conversation() {
     };
   };
 
-  const loadMessages = async () => {
+  const loadMessages = async (page = 0, append = false) => {
     if (!chatId) return;
     setErrorMessage(null);
     try {
-      // Load initial messages from backend and sync to Firebase
-      const initialMessages = await firebaseChatService.loadInitialMessages(parseInt(chatId));
-      setMessages(initialMessages.reverse());
+      if (!append) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      // Load messages from backend with pagination
+      const response = await chatAPI.getChatMessages(parseInt(chatId), page, 20);
+      const newMessages = response.content.reverse(); // Reverse to show oldest first
+      
+      if (append) {
+        // Prepend older messages
+        setMessages(prev => [...newMessages, ...prev]);
+      } else {
+        // Initial load
+        setMessages(newMessages);
+      }
+      
+      setHasMoreMessages(response.content.length === 20); // If we got a full page, there might be more
+      setCurrentPage(page);
       setLoading(false);
+      setLoadingMore(false);
     } catch (error) {
       console.error('Error loading messages:', error);
       setErrorMessage('Unable to load messages right now.');
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMoreMessages = () => {
+    if (!loadingMore && hasMoreMessages && chatId) {
+      loadMessages(currentPage + 1, true);
     }
   };
 
@@ -316,8 +344,26 @@ export default function Conversation() {
       <ScrollView 
         ref={scrollViewRef}
         className="flex-1 px-4 py-4"
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={() => {
+          // Only auto-scroll to bottom on initial load or new messages (not when loading older messages)
+          if (!loadingMore) {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }
+        }}
+        onScroll={(event) => {
+          // Load more messages when user scrolls near the top
+          const { contentOffset } = event.nativeEvent;
+          if (contentOffset.y < 100 && hasMoreMessages && !loadingMore) {
+            loadMoreMessages();
+          }
+        }}
+        scrollEventThrottle={400}
       >
+        {loadingMore && (
+          <View className="py-4 items-center">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">Loading older messages...</Text>
+          </View>
+        )}
         {errorMessage && (
           <View className="bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-lg p-3 mb-4">
             <Text className="text-red-600 dark:text-red-400 text-sm">{errorMessage}</Text>
