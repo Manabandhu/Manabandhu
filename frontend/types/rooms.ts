@@ -38,6 +38,8 @@ export interface RoomListing {
   hiddenAt?: string | null;
   owner: boolean;
   canReview: boolean;
+  saved?: boolean;
+  viewCount?: number;
 }
 
 export interface RoomListingSummary {

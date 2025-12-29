@@ -71,7 +71,13 @@ export default function RoomFinderHome() {
       {/* Header with Search */}
       <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <View className="px-3 pt-2 pb-3">
-          <View className="mb-3 flex-row items-center justify-end">
+          <View className="mb-3 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={() => navigateTo("/rooms/saved")}
+              className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700"
+            >
+              <Text className="text-gray-700 dark:text-gray-300 font-medium text-sm">💾 Saved</Text>
+            </TouchableOpacity>
             {Platform.OS === 'web' && (
               <TouchableOpacity
                 onPress={() => navigateTo("/rooms/create")}

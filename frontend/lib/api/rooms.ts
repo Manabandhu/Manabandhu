@@ -349,4 +349,136 @@ export const roomsApi = {
       throw error;
     }
   },
+
+  // Saved Listings
+  async saveListing(id: string, notes?: string) {
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      const url = notes 
+        ? `${API_BASE_URL}/api/rooms/listings/${id}/save?notes=${encodeURIComponent(notes)}`
+        : `${API_BASE_URL}/api/rooms/listings/${id}/save`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Listing saved!') as { saved: boolean };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async unsaveListing(id: string) {
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/save`, {
+        method: "DELETE",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Listing removed from saved') as { saved: boolean };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async isSaved(id: string) {
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/saved`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { saved: boolean };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getSavedListings(filters: RoomFilters = {}) {
+    try {
+      const query = buildQuery(filters);
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/saved${query ? `?${query}` : ""}`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { content: RoomListingSummary[] };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Price Alerts
+  async createPriceAlert(payload: {
+    minRent?: number;
+    maxRent?: number;
+    roomType?: string;
+    listingFor?: string;
+    amenities?: string[];
+    minLat?: number;
+    maxLat?: number;
+    minLng?: number;
+    maxLng?: number;
+    areaLabel?: string;
+    availableBy?: string;
+  }) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await handleResponse(response, 'Price alert created!') as { id: string };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getPriceAlerts() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts`, {
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response) as { content: any[] };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async deletePriceAlert(alertId: string) {
+    try {
+      if (!alertId?.trim()) {
+        throw new Error('Alert ID is required');
+      }
+      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts/${alertId}`, {
+        method: "DELETE",
+        headers: await getAuthHeaders(),
+      });
+      return await handleResponse(response, 'Price alert deleted!');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Reporting
+  async reportListing(id: string, reason: string, description?: string) {
+    try {
+      if (!id?.trim()) {
+        throw new Error('Listing ID is required');
+      }
+      if (!reason) {
+        throw new Error('Report reason is required');
+      }
+      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/report`, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ reason, description }),
+      });
+      return await handleResponse(response, 'Thank you for reporting. We will review this listing.') as { reported: boolean };
+    } catch (error) {
+      throw error;
+    }
+  },
 };

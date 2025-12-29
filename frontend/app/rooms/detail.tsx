@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, Alert, Dimensions } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Alert, Dimensions, Share, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { openMapsDirections } from "@/lib/maps";
 import { roomsApi } from "@/lib/api/rooms";
@@ -8,6 +8,7 @@ import { MapPinIcon, HomeIcon } from "@/components/ui/Icons";
 import { formatRoomStatus, formatRoomType, formatListingFor } from "@/lib/rooms/format";
 import { useCurrency } from "@/lib/currency";
 import { normalizeImageUrls } from "@/lib/utils/firebaseStorage";
+import { API_BASE_URL } from "@/constants/api";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 
@@ -21,6 +22,8 @@ export default function RoomDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const [normalizedImageUrls, setNormalizedImageUrls] = useState<string[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { format } = useCurrency();
 
   const loadListing = async () => {
@@ -33,6 +36,7 @@ export default function RoomDetail() {
       ]);
       setListing(listingResponse);
       setReviews(reviewsResponse || []);
+      setIsSaved(listingResponse.saved || false);
       
       // Normalize image URLs (convert metadata URLs to download URLs)
       if (listingResponse.imageUrls && listingResponse.imageUrls.length > 0) {
@@ -88,6 +92,90 @@ export default function RoomDetail() {
       setListing(updated);
     } catch (err) {
       Alert.alert("Unable to update status", "Please try again.");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!id || listing?.owner) return;
+    setSaving(true);
+    try {
+      if (isSaved) {
+        await roomsApi.unsaveListing(id);
+        setIsSaved(false);
+      } else {
+        await roomsApi.saveListing(id);
+        setIsSaved(true);
+      }
+    } catch (err) {
+      Alert.alert("Error", "Unable to update saved status.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!listing || !id) return;
+    try {
+      const shareUrl = `${API_BASE_URL}/rooms/detail?id=${id}`;
+      const message = `Check out this room: ${listing.title}\n${shareUrl}`;
+      
+      if (Platform.OS === 'web') {
+        if (navigator.share) {
+          await navigator.share({
+            title: listing.title,
+            text: message,
+            url: shareUrl,
+          });
+        } else {
+          // Fallback: copy to clipboard
+          await navigator.clipboard.writeText(shareUrl);
+          Alert.alert("Link copied!", "Listing link copied to clipboard.");
+        }
+      } else {
+        await Share.share({
+          message,
+          title: listing.title,
+        });
+      }
+    } catch (err) {
+      // User cancelled or error occurred
+    }
+  };
+
+  const handleReport = () => {
+    if (!id) return;
+    Alert.alert(
+      "Report Listing",
+      "Why are you reporting this listing?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Spam",
+          onPress: () => reportListing("SPAM"),
+        },
+        {
+          text: "Fake Listing",
+          onPress: () => reportListing("FAKE_LISTING"),
+        },
+        {
+          text: "Scam",
+          onPress: () => reportListing("SCAM"),
+        },
+        {
+          text: "Other",
+          onPress: () => reportListing("OTHER"),
+        },
+      ]
+    );
+  };
+
+  const reportListing = async (reason: string) => {
+    if (!id) return;
+    try {
+      await roomsApi.reportListing(id, reason);
+      Alert.alert("Thank you", "We will review this listing.");
+    } catch (err) {
+      Alert.alert("Error", "Unable to submit report.");
     }
   };
 
@@ -174,11 +262,39 @@ export default function RoomDetail() {
 
       <View className="px-6 py-5 gap-4">
         <View className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-          <Text className="text-2xl font-bold text-gray-900">{listing.title}</Text>
-          <Text className="text-blue-600 text-lg mt-1">{format(listing.rentMonthly)}/month</Text>
-          <View className="flex-row items-center mt-3">
-            <MapPinIcon size={16} color="#9CA3AF" />
-            <Text className="text-gray-500 ml-1">{locationLabel}</Text>
+          <View className="flex-row items-start justify-between mb-2">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-900">{listing.title}</Text>
+              <Text className="text-blue-600 text-lg mt-1">{format(listing.rentMonthly)}/month</Text>
+            </View>
+            {!listing.owner && (
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  onPress={handleSave}
+                  disabled={saving}
+                  className={`p-2 rounded-full ${isSaved ? "bg-red-100" : "bg-gray-100"}`}
+                >
+                  <Text className={isSaved ? "text-red-600" : "text-gray-600"}>
+                    {isSaved ? "❤️" : "🤍"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleShare}
+                  className="p-2 rounded-full bg-gray-100"
+                >
+                  <Text>🔗</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+          <View className="flex-row items-center justify-between mt-3">
+            <View className="flex-row items-center">
+              <MapPinIcon size={16} color="#9CA3AF" />
+              <Text className="text-gray-500 ml-1">{locationLabel}</Text>
+            </View>
+            {listing.viewCount !== undefined && listing.viewCount > 0 && (
+              <Text className="text-xs text-gray-400">👁️ {listing.viewCount} views</Text>
+            )}
           </View>
           <View className="flex-row flex-wrap gap-2 mt-3">
             <View className="bg-blue-50 px-3 py-1 rounded-full">
@@ -213,6 +329,15 @@ export default function RoomDetail() {
             </TouchableOpacity>
           )}
         </View>
+        
+        {!listing.owner && (
+          <TouchableOpacity
+            onPress={handleReport}
+            className="mt-2 border border-red-200 rounded-xl py-2"
+          >
+            <Text className="text-red-600 text-center text-sm">Report listing</Text>
+          </TouchableOpacity>
+        )}
 
         {listing.owner && (
           <View className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">

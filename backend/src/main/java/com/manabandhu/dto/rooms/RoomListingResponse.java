@@ -44,6 +44,8 @@ public class RoomListingResponse {
     private LocalDateTime hiddenAt;
     private boolean owner;
     private boolean canReview;
+    private boolean saved;
+    private long viewCount;
 
     public RoomListingResponse(RoomListing listing, boolean owner, boolean canReview) {
         this.id = listing.getId();
@@ -80,6 +82,8 @@ public class RoomListingResponse {
         this.hiddenAt = listing.getHiddenAt();
         this.owner = owner;
         this.canReview = canReview;
+        this.saved = false;
+        this.viewCount = 0;
     }
 
     public UUID getId() {
@@ -216,5 +220,21 @@ public class RoomListingResponse {
 
     public boolean isCanReview() {
         return canReview;
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
+    }
+
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
     }
 }

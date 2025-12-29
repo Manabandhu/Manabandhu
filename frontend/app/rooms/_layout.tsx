@@ -8,6 +8,7 @@ export default function RoomsLayout() {
       <Stack.Screen name="detail" />
       <Stack.Screen name="edit" />
       <Stack.Screen name="my-listings" />
+      <Stack.Screen name="saved" />
       <Stack.Screen name="map" />
       <Stack.Screen name="review" />
     </Stack>

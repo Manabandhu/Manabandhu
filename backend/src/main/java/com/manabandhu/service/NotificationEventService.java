@@ -82,6 +82,7 @@ public class NotificationEventService {
             case RIDE_REQUESTED -> "New Ride Request";
             case USCIS_STATUS_CHANGE -> "USCIS Status Update";
             case LISTING_HIDDEN_DUE_TO_INACTIVITY -> "Listing Hidden";
+            case PRICE_ALERT_MATCHED -> "Price Alert Matched";
         };
     }
 
@@ -101,6 +102,12 @@ public class NotificationEventService {
             }
             case LISTING_HIDDEN_DUE_TO_INACTIVITY -> 
                 "Your listing has been hidden due to inactivity. Update it to make it visible again.";
+            case PRICE_ALERT_MATCHED -> {
+                String matchesCount = payload != null && payload.containsKey("matchesCount") 
+                    ? payload.get("matchesCount").toString() 
+                    : "new";
+                yield "Found " + matchesCount + " listing(s) matching your price alert criteria!";
+            }
         };
     }
 }
