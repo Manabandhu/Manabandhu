@@ -1,6 +1,5 @@
 package com.manabandhu.service.qa;
 
-import com.manabandhu.dto.qa.QuestionResponse;
 import com.manabandhu.model.qa.QaActivity;
 import com.manabandhu.model.qa.Question;
 import com.manabandhu.repository.UserRepository;

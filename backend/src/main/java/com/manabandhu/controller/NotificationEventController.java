@@ -1,7 +1,6 @@
 package com.manabandhu.controller;
 
 import com.manabandhu.dto.notification.NotificationEventRequest;
-import com.manabandhu.model.notification.NotificationEvent;
 import com.manabandhu.service.NotificationEventService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

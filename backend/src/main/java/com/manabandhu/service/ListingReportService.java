@@ -5,7 +5,6 @@ import com.manabandhu.exception.ResourceNotFoundException;
 import com.manabandhu.exception.UnauthorizedException;
 import com.manabandhu.exception.ValidationException;
 import com.manabandhu.model.room.ListingReport;
-import com.manabandhu.model.room.RoomListing;
 import com.manabandhu.repository.ListingReportRepository;
 import com.manabandhu.repository.RoomListingRepository;
 import lombok.RequiredArgsConstructor;

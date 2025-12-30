@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,7 +31,6 @@ public class ImmigrationNewsService {
     private final ImmigrationNewsArticleRepository articleRepository;
     private final ImmigrationNewsBookmarkRepository bookmarkRepository;
     private final ImmigrationNewsActivityRepository activityRepository;
-    private final NotificationEventService notificationService;
     
     @Cacheable(value = "immigrationNews", key = "#filterRequest.toString() + '_' + #userId")
     public Page<NewsArticleResponse> getNews(NewsFilterRequest filterRequest, String userId) {
@@ -135,16 +133,9 @@ public class ImmigrationNewsService {
     
     private void sendBreakingNewsNotification(ImmigrationNewsArticle article) {
         try {
-            Map<String, Object> payload = Map.of(
-                "title", "Breaking Immigration News",
-                "message", article.getTitle(),
-                "articleId", article.getId().toString(),
-                "impactLevel", article.getImpactLevel().toString()
-            );
-            
             // This would need to be enhanced to target specific users based on visa categories
             // For now, it's a placeholder for the notification structure
-            log.info("Breaking news notification prepared for article: {}", article.getId());
+            log.info("Breaking news notification prepared for article: {} - {}", article.getId(), article.getTitle());
         } catch (Exception e) {
             log.error("Failed to send breaking news notification for article: {}", article.getId(), e);
         }

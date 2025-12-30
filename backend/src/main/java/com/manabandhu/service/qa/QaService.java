@@ -4,7 +4,6 @@ import com.manabandhu.dto.qa.*;
 import com.manabandhu.exception.ResourceNotFoundException;
 import com.manabandhu.exception.UnauthorizedException;
 import com.manabandhu.exception.ValidationException;
-import com.manabandhu.model.User;
 import com.manabandhu.model.qa.*;
 import com.manabandhu.repository.UserRepository;
 import com.manabandhu.repository.qa.*;

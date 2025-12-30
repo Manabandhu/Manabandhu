@@ -1,6 +1,5 @@
 package com.manabandhu.dto.uscis;
 
-import com.manabandhu.model.uscis.UscisCase;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;

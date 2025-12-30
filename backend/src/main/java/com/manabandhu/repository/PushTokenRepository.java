@@ -2,7 +2,6 @@ package com.manabandhu.repository;
 
 import com.manabandhu.model.User;
 import com.manabandhu.model.notification.PushToken;
-import com.manabandhu.model.notification.PushToken.Platform;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

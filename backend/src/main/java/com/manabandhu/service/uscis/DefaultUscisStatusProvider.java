@@ -34,7 +34,7 @@ public class DefaultUscisStatusProvider implements UscisStatusProvider {
     }
     
     @Override
-    @Retryable(value = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 2000, multiplier = 2))
+    @Retryable(retryFor = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 2000, multiplier = 2))
     public UscisStatusResult fetchCaseStatus(String receiptNumber) {
         try {
             HttpHeaders headers = new HttpHeaders();

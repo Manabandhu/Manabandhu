@@ -143,7 +143,8 @@ public class UscisCaseService {
     }
     
     public List<TimelineResponse> getCaseTimeline(String userId, UUID caseId) {
-        UscisCase uscisCase = caseRepository.findByIdAndUserId(caseId, userId)
+        // Verify case exists and belongs to user
+        caseRepository.findByIdAndUserId(caseId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Case not found"));
         
         return historyRepository.findByUscisCaseIdOrderByStatusDateDesc(caseId)
