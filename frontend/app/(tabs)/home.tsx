@@ -27,6 +27,94 @@ import {
   MessageIcon,
 } from "@/components/ui/Icons";
 
+// Optimization: Moved static data outside of the component to prevent re-creation on every render.
+// This reduces memory allocation and improves rendering performance.
+const weatherDescription = (code: number) => {
+  const lookup: Record<number, string> = {
+    0: "Clear",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Rime fog",
+    51: "Light drizzle",
+    53: "Drizzle",
+    55: "Heavy drizzle",
+    61: "Light rain",
+    63: "Rain",
+    65: "Heavy rain",
+    71: "Light snow",
+    73: "Snow",
+    75: "Heavy snow",
+    80: "Rain showers",
+    81: "Showers",
+    82: "Heavy showers",
+    95: "Thunderstorm",
+  };
+  return lookup[code] ?? "Weather update";
+};
+
+const quickFilters = [
+  { label: "Jobs", icon: BriefcaseIcon, route: ROUTES.tabs.jobs, color: "#F59E0B", background: "#FEF3C7" },
+  { label: "Community", icon: UsersIcon, route: ROUTES.tabs.community, color: "#10B981", background: "#D1FAE5" },
+  { label: "Chat", icon: MessageIcon, route: ROUTES.tabs.chat, color: "#2563EB", background: "#DBEAFE" },
+];
+
+const nearbyUpdates = [
+  { title: "Breaking: New H-1B policy announced", meta: "1 min ago • Immigration", tag: "Breaking" },
+  { title: "Your I-485 case status updated", meta: "2 min ago • USCIS", tag: "Immigration" },
+  { title: "2 verified room listings near you", meta: "5 min ago • Fremont", tag: "Housing" },
+  { title: "Carpool to downtown leaves at 6 PM", meta: "Today • 1 seat left", tag: "Rides" },
+  { title: "Weekend hiring event for students", meta: "Sat 10 AM • Free entry", tag: "Jobs" },
+];
+
+const communityHighlights = [
+  { title: "F-1 students: New OPT extension rules", meta: "Immigration • 30 min ago" },
+  { title: "USCIS processing times updated", meta: "Immigration • 1h ago" },
+  { title: "Visa bulletin updated for F1/F2", meta: "Immigration • 2h ago" },
+  { title: "Best grocery deals this week", meta: "Deals • Crowdsourced" },
+];
+
+const events = [
+  { title: "Community meetup", meta: "Fri 6 PM • 1.2 mi away", tag: "Community" },
+  { title: "Budgeting workshop", meta: "Thu 5 PM • Online", tag: "Money" },
+];
+
+const supportActions = [
+  {
+    label: "SOS",
+    description: "Call local helplines",
+    color: "#FEE2E2",
+    textColor: "#B91C1C",
+    route: ROUTES.tabs.chat,
+  },
+  {
+    label: "Report issue",
+    description: "Flag scams or safety concerns",
+    color: "#E0E7FF",
+    textColor: "#3730A3",
+    route: ROUTES.tabs.community,
+  },
+  {
+    label: "Talk to support",
+    description: "Chat with ManaBandhu",
+    color: "#ECFDF3",
+    textColor: "#166534",
+    route: ROUTES.tabs.chat,
+  },
+];
+
+const popularCities = [
+  "San Francisco, CA",
+  "New York, NY",
+  "Los Angeles, CA",
+  "Chicago, IL",
+  "Houston, TX",
+  "Seattle, WA",
+  "Boston, MA",
+  "Austin, TX",
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
@@ -39,31 +127,6 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState<{ temperature: number; description: string } | null>(null);
   const [currencyRates, setCurrencyRates] = useState<{ [key: string]: number } | null>(null);
   const [metals, setMetals] = useState<{ gold: number; silver: number } | null>(null);
-
-  const weatherDescription = (code: number) => {
-    const lookup: Record<number, string> = {
-      0: "Clear",
-      1: "Mainly clear",
-      2: "Partly cloudy",
-      3: "Overcast",
-      45: "Fog",
-      48: "Rime fog",
-      51: "Light drizzle",
-      53: "Drizzle",
-      55: "Heavy drizzle",
-      61: "Light rain",
-      63: "Rain",
-      65: "Heavy rain",
-      71: "Light snow",
-      73: "Snow",
-      75: "Heavy snow",
-      80: "Rain showers",
-      81: "Showers",
-      82: "Heavy showers",
-      95: "Thunderstorm",
-    };
-    return lookup[code] ?? "Weather update";
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -159,71 +222,10 @@ export default function HomeScreen() {
     []
   );
 
-  const quickFilters = [
-    { label: "Jobs", icon: BriefcaseIcon, route: ROUTES.tabs.jobs, color: "#F59E0B", background: "#FEF3C7" },
-    { label: "Community", icon: UsersIcon, route: ROUTES.tabs.community, color: "#10B981", background: "#D1FAE5" },
-    { label: "Chat", icon: MessageIcon, route: ROUTES.tabs.chat, color: "#2563EB", background: "#DBEAFE" },
-  ];
-
-  const nearbyUpdates = [
-    { title: "Breaking: New H-1B policy announced", meta: "1 min ago • Immigration", tag: "Breaking" },
-    { title: "Your I-485 case status updated", meta: "2 min ago • USCIS", tag: "Immigration" },
-    { title: "2 verified room listings near you", meta: "5 min ago • Fremont", tag: "Housing" },
-    { title: "Carpool to downtown leaves at 6 PM", meta: "Today • 1 seat left", tag: "Rides" },
-    { title: "Weekend hiring event for students", meta: "Sat 10 AM • Free entry", tag: "Jobs" },
-  ];
-
-  const communityHighlights = [
-    { title: "F-1 students: New OPT extension rules", meta: "Immigration • 30 min ago" },
-    { title: "USCIS processing times updated", meta: "Immigration • 1h ago" },
-    { title: "Visa bulletin updated for F1/F2", meta: "Immigration • 2h ago" },
-    { title: "Best grocery deals this week", meta: "Deals • Crowdsourced" },
-  ];
-
-  const events = [
-    { title: "Community meetup", meta: "Fri 6 PM • 1.2 mi away", tag: "Community" },
-    { title: "Budgeting workshop", meta: "Thu 5 PM • Online", tag: "Money" },
-  ];
-
-  const supportActions = [
-    {
-      label: "SOS",
-      description: "Call local helplines",
-      color: "#FEE2E2",
-      textColor: "#B91C1C",
-      route: ROUTES.tabs.chat,
-    },
-    {
-      label: "Report issue",
-      description: "Flag scams or safety concerns",
-      color: "#E0E7FF",
-      textColor: "#3730A3",
-      route: ROUTES.tabs.community,
-    },
-    {
-      label: "Talk to support",
-      description: "Chat with ManaBandhu",
-      color: "#ECFDF3",
-      textColor: "#166534",
-      route: ROUTES.tabs.chat,
-    },
-  ];
-
   const handleSignOut = async () => {
     await signOut();
     router.replace(ROUTES.auth.root);
   };
-
-  const popularCities = [
-    "San Francisco, CA",
-    "New York, NY",
-    "Los Angeles, CA",
-    "Chicago, IL",
-    "Houston, TX",
-    "Seattle, WA",
-    "Boston, MA",
-    "Austin, TX",
-  ];
 
   const getCurrentLocation = async () => {
     try {
