@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Header from "@/components/ui/Header";
+import Header from '@/shared/components/ui/Header";
 import { communityAPI, CommunityPost } from "@/lib/api/community";
 import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
-import { MessageIcon, UserIcon, PlusIcon, SearchIcon, XIcon, HeartIcon } from "@/components/ui/Icons";
+import { MessageIcon, UserIcon, PlusIcon, SearchIcon, XIcon, HeartIcon } from '@/shared/components/ui/Icons";
 import CreatePostBottomSheet from "@/components/CreatePostBottomSheet";
 import CommentsBottomSheet from "@/components/CommentsBottomSheet";
 

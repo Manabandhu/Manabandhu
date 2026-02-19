@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, Image } from "react-native";
 import { useRouter } from "expo-router";
-import Header from "@/components/ui/Header";
+import Header from '@/shared/components/ui/Header";
 import { chatAPI, Chat } from "@/lib/api/chat";
 import { useThemeStore } from "@/store/theme.store";
-import { ChatContextTag } from "@/lib/utils/chatContext";
+import { ChatContextTag } from '@/shared/utils/chatContext";
 import { userApi, User } from "@/lib/api/users";
 import { useAuthStore } from "@/store/auth.store";
-import { SearchIcon, XIcon } from "@/components/ui/Icons";
+import { SearchIcon, XIcon } from '@/shared/components/ui/Icons";
 
 export default function ChatList() {
   const router = useRouter();

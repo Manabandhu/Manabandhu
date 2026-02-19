@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SplitIcon } from '@/components/ui/Icons';
+import { SplitIcon } from '@/shared/components/ui/Icons';
 import { expensesAPI, ExpenseCategory } from '@/lib/api/expenses';
 
 interface AddExpenseBottomSheetProps {

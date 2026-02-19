@@ -24,7 +24,7 @@ import { getFirestore, Firestore } from "firebase/firestore";
 import { getDatabase, Database } from "firebase/database";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 import { firebaseConfig } from "./config/firebase";
-import { ENV } from "@/constants/env";
+import { ENV } from '@/shared/constants/env";
 
 let app: FirebaseApp;
 let auth: Auth | null = null;

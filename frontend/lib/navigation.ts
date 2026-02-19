@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES } from '@/shared/constants/routes";
 import { useAuthStore } from "@/store/auth.store";
 import { userApi } from "@/lib/api";
 

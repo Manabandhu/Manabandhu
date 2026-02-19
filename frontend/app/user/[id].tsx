@@ -3,8 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } fr
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { userApi, User } from "@/lib/api/users";
 import { useThemeStore } from "@/store/theme.store";
-import { UserIcon, MessageIcon, MapPinIcon } from "@/components/ui/Icons";
-import Header from "@/components/ui/Header";
+import { UserIcon, MessageIcon, MapPinIcon } from '@/shared/components/ui/Icons";
+import Header from '@/shared/components/ui/Header";
 import { chatAPI } from "@/lib/api/chat";
 
 export default function UserProfile() {

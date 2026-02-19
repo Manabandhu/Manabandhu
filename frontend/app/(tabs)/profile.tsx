@@ -3,10 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity, Image, Alert, TextInput } fro
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
-import Header from '@/components/ui/Header';
+import Header from '@/shared/components/ui/Header';
 import { communityAPI, CommunityPost } from '@/lib/api/community';
 import { jobsAPI, Job } from '@/lib/api/jobs';
-import { UserIcon, SettingsIcon, BriefcaseIcon, HomeIcon, MessageIcon, TrashIcon, EditIcon } from '@/components/ui/Icons';
+import { UserIcon, SettingsIcon, BriefcaseIcon, HomeIcon, MessageIcon, TrashIcon, EditIcon } from '@/shared/components/ui/Icons';
 import PostJobBottomSheet from '@/components/PostJobBottomSheet';
 
 export default function Profile() {
