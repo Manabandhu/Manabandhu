@@ -23,17 +23,15 @@ A full-stack application with React Native frontend and Spring Boot backend.
 ### Backend
 - Spring Boot 3.x
 - Java 21
-- PostgreSQL (Neon Cloud)
-- Redis (Upstash)
+- PostgreSQL
+- Redis
 - Firebase Admin SDK
-- Google Cloud Platform
 
 ## Prerequisites
 
 - Node.js 18+
 - Java 21
 - Maven
-- Docker (optional)
 
 ## Getting Started
 
@@ -67,39 +65,37 @@ npm run dev
 ## Environment Variables
 
 ### Frontend (.env in frontend/)
-```
+
+Create `.env` file with Firebase and API configuration:
+
+```env
 EXPO_PUBLIC_API_URL=http://localhost:9090
-EXPO_PUBLIC_FIREBASE_API_KEY=your_key
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_client_id
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_client_id
 ```
 
 ### Backend (.env in backend/)
-```
-DATABASE_URL=postgresql://user:password@host/database
-REDIS_URL=redis://default:password@endpoint.upstash.io:6379
+
+Create `.env` file with database and service configuration:
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/manabandhu
+REDIS_URL=redis://localhost:6379
 FIREBASE_SERVICE_ACCOUNT=path/to/serviceAccountKey.json
-GOOGLE_CLOUD_PROJECT=your_project_id
-```
-
-## Deployment
-
-### Google Cloud Platform
-
-```bash
-npm run deploy:gcp
+JWT_SECRET=your_jwt_secret_key
 ```
 
 ## Development
 
-- Frontend runs on Expo dev server
+- Frontend runs on Expo dev server (port 9091)
 - Backend runs on http://localhost:9090
-- PostgreSQL on Neon Cloud
-- Redis on Upstash (serverless)
+- PostgreSQL on localhost:5432
+- Redis on localhost:6379
 
 ## License
 

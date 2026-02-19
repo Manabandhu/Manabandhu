@@ -11,8 +11,7 @@
     "backend": "cd backend && ./mvnw spring-boot:run",
     "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
     "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && ./mvnw clean package",
-    "deploy:gcp": "npm run build:backend && gcloud app deploy backend/app.yaml"
+    "build:backend": "cd backend && ./mvnw clean package"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
