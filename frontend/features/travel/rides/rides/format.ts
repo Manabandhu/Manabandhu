@@ -1,4 +1,4 @@
-import { RideStatus } from '@/shared/types";
+import { RideStatus } from "@/shared/types";
 
 export const formatRideStatus = (status: RideStatus) => {
   switch (status) {

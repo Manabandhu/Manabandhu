@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, TextInput, Switch } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { RideFilters } from '@/shared/types";
+import { RideFilters } from "@/shared/types";
 
 interface RideFiltersSheetProps {
   initialFilters: RideFilters;

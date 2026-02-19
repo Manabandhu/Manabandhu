@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { toast } from '../toast';
+import { toast } from '../../lib/toast';
 
 export interface User {
   id: number;

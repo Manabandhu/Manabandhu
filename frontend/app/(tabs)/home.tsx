@@ -3,11 +3,11 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Plat
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
-import { GRADIENTS } from '@/shared/constants/colors";
-import { ROUTES } from '@/shared/constants/routes";
+import { GRADIENTS } from "@/shared/constants/colors";
+import { ROUTES } from "@/shared/constants/routes";
 import * as Location from "expo-location";
 import { checkLocationPermission, requestLocationPermission } from "@/lib/permissions";
 import {
@@ -25,7 +25,7 @@ import {
   ChevronDownIcon,
   NavigationIcon,
   MessageIcon,
-} from '@/shared/components/ui/Icons";
+} from "@/shared/components/ui/Icons";
 
 export default function HomeScreen() {
   const router = useRouter();

@@ -2,10 +2,10 @@ import React, { useMemo, useState, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Image, Animated, KeyboardAvoidingView, Platform, Modal } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { ListingFor, RoomListing, RoomType, VisitType } from '@/shared/types";
-import { formatRoomType, formatListingFor } from '@/features/travel/rooms/format";
+import { ListingFor, RoomListing, RoomType, VisitType } from "@/shared/types";
+import { formatRoomType, formatListingFor } from "@/features/travel/rooms/format";
 import { AmenityIcon, UtilityIcon } from "./AmenityIcon";
-import { CheckIcon } from '@/shared/components/ui/Icons";
+import { CheckIcon } from "@/shared/components/ui/Icons";
 import { useCurrency } from "@/lib/currency";
 
 export interface RoomListingFormValues {

@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, Platform } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Header from '@/shared/components/ui/Header";
+import Header from "@/shared/components/ui/Header";
 import BottomSheet from "@gorhom/bottom-sheet";
-import RoomFiltersBottomSheet from '@/features/travel/rooms/components/RoomFiltersBottomSheet";
-import RoomListingCard from '@/features/travel/rooms/components/RoomListingCard";
-import RoomMapCanvas from '@/features/travel/rooms/components/RoomMapCanvas";
-import { roomsApi } from "@/lib/api/rooms";
-import { RoomFilters, RoomListingSummary } from '@/shared/types";
-import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon, PlusIcon } from '@/shared/components/ui/Icons";
+import RoomFiltersBottomSheet from "@/features/travel/rooms/components/RoomFiltersBottomSheet";
+import RoomListingCard from "@/features/travel/rooms/components/RoomListingCard";
+import RoomMapCanvas from "@/features/travel/rooms/components/RoomMapCanvas";
+import { roomsApi } from "@/shared/api/rooms";
+import { RoomFilters, RoomListingSummary } from "@/shared/types";
+import { HomeIcon, SearchIcon, MapPinIcon, FilterIcon, GridIcon, ListIcon, PlusIcon } from "@/shared/components/ui/Icons";
 import { useThemeStore } from "@/store/theme.store";
 
 export default function RoomFinderHome() {

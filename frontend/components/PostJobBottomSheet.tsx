@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
-import { jobsAPI, CreateJobRequest } from '@/lib/api/jobs';
+import { jobsAPI, CreateJobRequest } from '@/shared/api/jobs';
 
 interface PostJobBottomSheetProps {
   visible: boolean;

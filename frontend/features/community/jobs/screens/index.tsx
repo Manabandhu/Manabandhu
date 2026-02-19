@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Header from '@/shared/components/ui/Header";
-import { jobsAPI, Job } from "@/lib/api/jobs";
-import { BriefcaseIcon, SearchIcon, MapPinIcon, FilterIcon, XIcon, PlusIcon, CalendarIcon } from '@/shared/components/ui/Icons";
+import Header from "@/shared/components/ui/Header";
+import { jobsAPI, Job } from "@/shared/api/jobs";
+import { BriefcaseIcon, SearchIcon, MapPinIcon, FilterIcon, XIcon, PlusIcon, CalendarIcon } from "@/shared/components/ui/Icons";
 import PostJobBottomSheet from "@/components/PostJobBottomSheet";
 import { useThemeStore } from "@/store/theme.store";
 

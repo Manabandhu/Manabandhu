@@ -5,7 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Header from '@/shared/components/ui/Header';
 import { SplitIcon, UsersIcon, DollarSignIcon, PlusIcon, CalendarIcon, ArrowRightIcon } from '@/shared/components/ui/Icons';
 import { useCurrency } from '@/lib/currency';
-import { splitlyAPI, SplitGroup } from '@/lib/api/splitly';
+import { splitlyAPI, SplitGroup } from '@/shared/api/splitly';
 
 interface GroupWithBalance extends SplitGroup {
   totalExpenses: number;

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { auth } from '../firebase';
-import { toast } from '../toast';
+import { auth } from '../../lib/firebase';
+import { toast } from '../../lib/toast';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { roomsApi } from "@/lib/api/rooms";
-import RoomMapCanvas from '@/features/travel/rooms/components/RoomMapCanvas";
-import { RoomListingSummary } from '@/shared/types";
+import { roomsApi } from "@/shared/api/rooms";
+import RoomMapCanvas from "@/features/travel/rooms/components/RoomMapCanvas";
+import { RoomListingSummary } from "@/shared/types";
 
 export default function RoomsMap() {
   const router = useRouter();

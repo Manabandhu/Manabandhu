@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import RoomListingForm, { RoomListingFormValues } from '@/features/travel/rooms/components/RoomListingForm";
-import { roomsApi } from "@/lib/api/rooms";
-import { uploadRoomImages } from '@/features/travel/rooms/storage";
+import RoomListingForm, { RoomListingFormValues } from "@/features/travel/rooms/components/RoomListingForm";
+import { roomsApi } from "@/shared/api/rooms";
+import { uploadRoomImages } from "@/features/travel/rooms/storage";
 import { auth } from "@/lib/firebase";
 
 interface CreateRoomBottomSheetProps {

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { chatAPI, Chat } from "@/lib/api/chat";
-import { userApi, User } from "@/lib/api/users";
-import { MessageIcon, SearchIcon, UserIcon, XIcon, PlusIcon } from '@/shared/components/ui/Icons";
-import { ChatContextTag } from '@/shared/utils/chatContext";
+import { chatAPI, Chat } from "@/shared/api/chat";
+import { userApi, User } from "@/shared/api/users";
+import { MessageIcon, SearchIcon, UserIcon, XIcon, PlusIcon } from "@/shared/components/ui/Icons";
+import { ChatContextTag } from "@/shared/utils/chatContext";
 import { useThemeStore } from "@/store/theme.store";
 import { useAuthStore } from "@/store/auth.store";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { CheckIcon } from "./Icons";
-import { COLORS } from '@/shared/constants";
+import { COLORS } from "@/shared/constants";
 
 interface CheckboxProps {
   checked: boolean;

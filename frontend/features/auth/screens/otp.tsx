@@ -12,16 +12,16 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { OTPInput } from '@/shared/components/ui/OTPInput";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
-import { Logo } from '@/shared/components/ui/Logo";
+import { OTPInput } from "@/shared/components/ui/OTPInput";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
+import { Logo } from "@/shared/components/ui/Logo";
 import { verifyOTP, auth } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
 import { navigateAfterAuth } from "@/lib/navigation";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { TIMING } from '@/shared/constants/timing";
+import { TIMING } from "@/shared/constants/timing";
 import { ApplicationVerifier, RecaptchaVerifier } from "firebase/auth";
 
 export default function OTPScreen() {

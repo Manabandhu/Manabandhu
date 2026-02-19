@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { userApi, User } from "@/lib/api/users";
+import { userApi, User } from "@/shared/api/users";
 import { useThemeStore } from "@/store/theme.store";
-import { UserIcon, MessageIcon, MapPinIcon } from '@/shared/components/ui/Icons";
-import Header from '@/shared/components/ui/Header";
-import { chatAPI } from "@/lib/api/chat";
+import { UserIcon, MessageIcon, MapPinIcon } from "@/shared/components/ui/Icons";
+import Header from "@/shared/components/ui/Header";
+import { chatAPI } from "@/shared/api/chat";
 
 export default function UserProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();

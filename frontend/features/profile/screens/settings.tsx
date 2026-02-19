@@ -7,7 +7,7 @@ import { useFontStore } from '@/store/font.store';
 import { useThemeStore } from '@/store/theme.store';
 import { useScaledFont } from '@/lib/useScaledFont';
 import { useAuthStore } from '@/store/auth.store';
-import { userApi } from '@/lib/api/users';
+import { userApi } from '@/shared/api/users';
 import { getAvailableCurrencies, getCurrencySymbol, useCurrency } from '@/lib/currency';
 import { auth } from '@/lib/firebase';
 import { registerForPushNotifications, unregisterPushToken, getPushToken, getNotificationPermissions } from '@/lib/notifications';

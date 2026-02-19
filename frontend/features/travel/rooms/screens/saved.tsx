@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from '@/shared/components/ui/Header";
-import RoomListingCard from '@/features/travel/rooms/components/RoomListingCard";
-import { roomsApi } from "@/lib/api/rooms";
-import { RoomListingSummary } from '@/shared/types";
-import { HomeIcon } from '@/shared/components/ui/Icons";
+import Header from "@/shared/components/ui/Header";
+import RoomListingCard from "@/features/travel/rooms/components/RoomListingCard";
+import { roomsApi } from "@/shared/api/rooms";
+import { RoomListingSummary } from "@/shared/types";
+import { HomeIcon } from "@/shared/components/ui/Icons";
 
 export default function SavedListings() {
   const router = useRouter();

@@ -11,16 +11,16 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
+import { Logo } from "@/shared/components/ui/Logo";
 import {
   MapPinIcon,
   ShoppingBagIcon,
   UsersIcon,
-} from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+} from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { requestLocationPermission } from "@/lib/permissions";
 import * as Haptics from "expo-haptics";
-import { GRADIENTS } from '@/shared/constants/colors";
+import { GRADIENTS } from "@/shared/constants/colors";
 import Svg, { Rect, Line, Path, Circle, G } from "react-native-svg";
 
 const benefits = [

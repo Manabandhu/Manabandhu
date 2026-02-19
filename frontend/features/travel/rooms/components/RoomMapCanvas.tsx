@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useRef, useCallback } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Platform } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { RoomListingSummary } from '@/shared/types";
-import { MapPinIcon, HomeIcon } from '@/shared/components/ui/Icons";
-import { formatRoomStatus, formatRoomType, formatListingFor } from '@/features/travel/rooms/format";
+import { RoomListingSummary } from "@/shared/types";
+import { MapPinIcon, HomeIcon } from "@/shared/components/ui/Icons";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/features/travel/rooms/format";
 import { useCurrency } from "@/lib/currency";
 // Platform-specific imports - Metro will resolve .native.ts or .web.ts automatically
 // @ts-ignore - Platform-specific file resolution

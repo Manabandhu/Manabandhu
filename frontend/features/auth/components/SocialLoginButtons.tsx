@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
-import { GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from '@/shared/components/ui/Icons";
+import { GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon } from "@/shared/components/ui/Icons";
 
 const { width } = Dimensions.get("window");
 const buttonWidth = (width - 60) / 2; // 2 columns with 20px padding on each side and 20px gap

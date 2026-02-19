@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { DollarSignIcon, GlobeIcon, CalendarIcon, FileIcon, BellIcon, ShoppingBagIcon, SettingsIcon } from '@/shared/components/ui/Icons";
+import { DollarSignIcon, GlobeIcon, CalendarIcon, FileIcon, BellIcon, ShoppingBagIcon, SettingsIcon } from "@/shared/components/ui/Icons";
 
 interface UtilityItem {
   id: string;

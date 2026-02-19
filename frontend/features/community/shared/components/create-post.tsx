@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { communityAPI } from "@/lib/api/community";
+import { communityAPI } from "@/shared/api/community";
 
 export default function CreateCommunityPost() {
   const router = useRouter();

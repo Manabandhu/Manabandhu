@@ -4,11 +4,11 @@ import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileInput } from "@/lib/validators";
-import { GluestackInput } from '@/shared/components/ui/gluestack-index";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { GluestackInput } from "@/shared/components/ui/gluestack-index";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { onboardingApi } from "@/lib/api";
 import * as Haptics from "expo-haptics";
-import { ROUTES } from '@/shared/constants/routes";
+import { ROUTES } from "@/shared/constants/routes";
 
 const roles = [
   { value: "student", label: "Student" },

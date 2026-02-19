@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import RoomListingForm, { RoomListingFormValues } from '@/features/travel/rooms/components/RoomListingForm";
-import { roomsApi } from "@/lib/api/rooms";
-import { uploadRoomImages } from '@/features/travel/rooms/storage";
+import RoomListingForm, { RoomListingFormValues } from "@/features/travel/rooms/components/RoomListingForm";
+import { roomsApi } from "@/shared/api/rooms";
+import { uploadRoomImages } from "@/features/travel/rooms/storage";
 import { auth } from "@/lib/firebase";
-import { RoomListing } from '@/shared/types";
+import { RoomListing } from "@/shared/types";
 
 export default function EditRoomListing() {
   const router = useRouter();

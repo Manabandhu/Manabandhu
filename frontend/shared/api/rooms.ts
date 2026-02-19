@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/shared/constants/api";
+import { API_BASE_URL } from "@/shared/constants/api";
 import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import {
@@ -10,7 +10,7 @@ import {
   RoomFilters,
   ReviewType,
   ListingStatus,
-} from '@/shared/types";
+} from "@/shared/types";
 
 const buildQuery = (filters: RoomFilters & { status?: ListingStatus[] }) => {
   const params = new URLSearchParams();

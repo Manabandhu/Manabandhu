@@ -1,4 +1,4 @@
-import { PricingMode } from '@/shared/types";
+import { PricingMode } from "@/shared/types";
 
 const MIN_PER_MILE = 0.1;
 const MAX_PER_MILE = 4.0;

@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView, Dimensions } from "react-native";
-import { MapPinIcon, HomeIcon } from '@/shared/components/ui/Icons";
-import { RoomListingSummary } from '@/shared/types";
-import { formatRoomStatus, formatRoomType, formatListingFor } from '@/features/travel/rooms/format";
+import { MapPinIcon, HomeIcon } from "@/shared/components/ui/Icons";
+import { RoomListingSummary } from "@/shared/types";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/features/travel/rooms/format";
 import { useCurrency } from "@/lib/currency";
 import { useThemeStore } from "@/store/theme.store";
 

@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity, Alert, Dimensions, Share, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { openMapsDirections } from "@/lib/maps";
-import { roomsApi } from "@/lib/api/rooms";
-import { ListingStatus, RoomListing, RoomReview } from '@/shared/types";
-import { MapPinIcon, HomeIcon } from '@/shared/components/ui/Icons";
-import { formatRoomStatus, formatRoomType, formatListingFor } from '@/features/travel/rooms/format";
+import { roomsApi } from "@/shared/api/rooms";
+import { ListingStatus, RoomListing, RoomReview } from "@/shared/types";
+import { MapPinIcon, HomeIcon } from "@/shared/components/ui/Icons";
+import { formatRoomStatus, formatRoomType, formatListingFor } from "@/features/travel/rooms/format";
 import { useCurrency } from "@/lib/currency";
-import { normalizeImageUrls } from '@/shared/utils/firebaseStorage";
-import { API_BASE_URL } from '@/shared/constants/api";
+import { normalizeImageUrls } from "@/shared/utils/firebaseStorage";
+import { API_BASE_URL } from "@/shared/constants/api";
 
 const STATUS_OPTIONS: ListingStatus[] = ["AVAILABLE", "IN_TALKS", "BOOKED", "HIDDEN", "ARCHIVED"];
 

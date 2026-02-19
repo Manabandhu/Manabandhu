@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { roomsApi } from "@/lib/api/rooms";
-import { ReviewType } from '@/shared/types";
+import { roomsApi } from "@/shared/api/rooms";
+import { ReviewType } from "@/shared/types";
 
 const REVIEW_TYPES: ReviewType[] = ["HOUSE", "USER"];
 

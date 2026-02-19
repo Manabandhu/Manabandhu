@@ -14,13 +14,13 @@ import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
-import { UserIcon, GlobeIcon, ChevronDownIcon, CheckIcon } from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { Logo } from "@/shared/components/ui/Logo";
+import { UserIcon, GlobeIcon, ChevronDownIcon, CheckIcon } from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { profileSchema, ProfileInput } from "@/lib/validators";
 import * as Haptics from "expo-haptics";
-import { COUNTRY_LIST, DEFAULT_COUNTRY } from '@/shared/constants/countryCodes";
-import { GRADIENTS } from '@/shared/constants/colors";
+import { COUNTRY_LIST, DEFAULT_COUNTRY } from "@/shared/constants/countryCodes";
+import { GRADIENTS } from "@/shared/constants/colors";
 import { onboardingApi } from "@/lib/api";
 
 const purposes = [

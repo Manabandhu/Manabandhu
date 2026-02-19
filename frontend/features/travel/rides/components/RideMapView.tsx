@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from "react-native";
-import { RidePost } from '@/shared/types";
+import { RidePost } from "@/shared/types";
 import { openMapsDirectionsWithCoords } from "@/lib/maps";
-import { MapPinIcon } from '@/shared/components/ui/Icons";
+import { MapPinIcon } from "@/shared/components/ui/Icons";
 // Platform-specific imports
 // @ts-ignore - Platform-specific file resolution
 import { MapView, Marker, Polyline, PROVIDER_GOOGLE } from "../rooms/MapComponents";

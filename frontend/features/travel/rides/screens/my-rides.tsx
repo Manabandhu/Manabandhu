@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { ridesApi } from '@/features/travel/rides/api";
-import { RidePostSummary, RideStatus } from '@/shared/types";
+import { ridesApi } from "@/features/travel/rides/api";
+import { RidePostSummary, RideStatus } from "@/shared/types";
 import RideCard from "@/components/rides/RideCard";
 import { useRouter } from "expo-router";
-import { CarIcon } from '@/shared/components/ui/Icons";
+import { CarIcon } from "@/shared/components/ui/Icons";
 
 const TABS: { label: string; status: RideStatus }[] = [
   { label: "Active", status: "OPEN" },

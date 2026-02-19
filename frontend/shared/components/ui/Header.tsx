@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeftIcon, BellIcon, UserIcon } from "./Icons";
 import * as Haptics from "expo-haptics";
-import { ROUTES } from '@/shared/constants/routes";
+import { ROUTES } from "@/shared/constants/routes";
 import { useThemeStore } from "@/store/theme.store";
 
 interface HeaderProps {

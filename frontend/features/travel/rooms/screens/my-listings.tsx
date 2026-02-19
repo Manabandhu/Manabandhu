@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert, TextInput, Modal, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { roomsApi } from "@/lib/api/rooms";
-import { ListingStatus, RoomListingSummary } from '@/shared/types";
-import { formatRoomStatus } from '@/features/travel/rooms/format";
+import { roomsApi } from "@/shared/api/rooms";
+import { ListingStatus, RoomListingSummary } from "@/shared/types";
+import { formatRoomStatus } from "@/features/travel/rooms/format";
 import { useCurrency } from "@/lib/currency";
-import { HomeIcon, EditIcon, TrashIcon, ShareIcon, SearchIcon, FilterIcon, PlusIcon, XIcon, MapPinIcon } from '@/shared/components/ui/Icons";
+import { HomeIcon, EditIcon, TrashIcon, ShareIcon, SearchIcon, FilterIcon, PlusIcon, XIcon, MapPinIcon } from "@/shared/components/ui/Icons";
 
 const TABS: { label: string; statuses: ListingStatus[]; color: string }[] = [
   { label: "All", statuses: ["AVAILABLE", "IN_TALKS", "HIDDEN", "ARCHIVED"], color: "#6366F1" },

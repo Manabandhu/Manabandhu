@@ -1,7 +1,7 @@
 import { Redirect } from "expo-router";
 import { useAuthStore } from "@/store/auth.store";
-import { ROUTES } from '@/shared/constants/routes";
-import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner";
+import { ROUTES } from "@/shared/constants/routes";
+import { LoadingSpinner } from "@/shared/components/ui/LoadingSpinner";
 
 export default function Index() {
   const { isLoading, isAuthenticated, onboardingCompleted } = useAuthStore();

@@ -2,15 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, TextInput, Platform, Modal, Pressable } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Header from '@/shared/components/ui/Header";
+import Header from "@/shared/components/ui/Header";
 import * as Location from "expo-location";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { ridesApi } from '@/features/travel/rides/api";
-import { RideFilters, RidePostSummary, RidePostType } from '@/shared/types";
+import { ridesApi } from "@/features/travel/rides/api";
+import { RideFilters, RidePostSummary, RidePostType } from "@/shared/types";
 import RideCard from "@/components/rides/RideCard";
 import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
 import RideMapCanvas from "@/components/rides/RideMapCanvas";
-import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from '@/shared/components/ui/Icons";
+import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from "@/shared/components/ui/Icons";
 import { useThemeStore } from "@/store/theme.store";
 
 const TAB_CONFIG: { label: string; type: RidePostType }[] = [

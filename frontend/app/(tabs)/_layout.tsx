@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { Pressable, View, Modal, StyleSheet, Text, TouchableOpacity, Dimensions, Platform } from "react-native";
 import { useState } from "react";
-import { COLORS } from '@/shared/constants/colors";
+import { COLORS } from '@/shared/constants/colors';
 import { 
   HomeIcon, 
   SearchIcon, 
@@ -16,7 +16,7 @@ import {
   PlusIcon,
   SplitIcon,
   XIcon
-} from '@/shared/components/ui/Icons";
+} from '@/shared/components/ui/Icons';
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeStore } from "@/store/theme.store";

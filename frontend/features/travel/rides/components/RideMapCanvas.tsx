@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useRef, useCallback } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { RidePostSummary } from '@/shared/types";
-import { MapPinIcon, CarIcon } from '@/shared/components/ui/Icons";
-import { formatDepartTime, hoursUntil } from '@/features/travel/rides/api/format";
+import { RidePostSummary } from "@/shared/types";
+import { MapPinIcon, CarIcon } from "@/shared/components/ui/Icons";
+import { formatDepartTime, hoursUntil } from "@/features/travel/rides/api/format";
 import { useCurrency } from "@/lib/currency";
 import RideStatusBadge from "./RideStatusBadge";
 // Platform-specific imports - Metro will resolve .native.ts or .web.ts automatically

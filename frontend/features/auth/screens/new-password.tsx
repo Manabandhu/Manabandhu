@@ -14,13 +14,13 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
 import { resetPasswordSchema, ResetPasswordInput } from "@/lib/validators";
-import { Logo } from '@/shared/components/ui/Logo";
-import { LockIcon, EyeIcon, EyeOffIcon, CheckIcon } from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { Logo } from "@/shared/components/ui/Logo";
+import { LockIcon, EyeIcon, EyeOffIcon, CheckIcon } from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { confirmPasswordReset } from "@/lib/firebase";
 import * as Haptics from "expo-haptics";
-import { GRADIENTS } from '@/shared/constants";
-import { ROUTES } from '@/shared/constants/routes";
+import { GRADIENTS } from "@/shared/constants";
+import { ROUTES } from "@/shared/constants/routes";
 import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { SettingsIcon, UserIcon, FileIcon, ShieldIcon, AlertTriangleIcon, BanIcon } from '@/shared/components/ui/Icons";
+import { SettingsIcon, UserIcon, FileIcon, ShieldIcon, AlertTriangleIcon, BanIcon } from "@/shared/components/ui/Icons";
 
 interface AdminItem {
   id: string;

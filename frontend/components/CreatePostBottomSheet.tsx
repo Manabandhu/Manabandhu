@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
-import { communityAPI } from '@/lib/api/community';
+import { communityAPI } from '@/shared/api/community';
 import { useThemeStore } from '@/store/theme.store';
 
 interface CreatePostBottomSheetProps {

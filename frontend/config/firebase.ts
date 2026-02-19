@@ -1,4 +1,4 @@
-import { ENV } from '@/shared/constants/env";
+import { ENV } from "@/shared/constants/env";
 
 // Validate that required Firebase config values exist
 if (!ENV.firebase.apiKey || !ENV.firebase.authDomain || !ENV.firebase.projectId) {

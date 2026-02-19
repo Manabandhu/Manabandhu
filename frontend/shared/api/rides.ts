@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/shared/constants/api";
+import { API_BASE_URL } from "@/shared/constants/api";
 import { auth } from "@/lib/firebase";
 import {
   RideFilters,
@@ -8,7 +8,7 @@ import {
   RidePostUpsertResponse,
   RideStatus,
   RideTrackingSession,
-} from '@/shared/types";
+} from "@/shared/types";
 
 const getAuthHeaders = async () => {
   const token = await auth?.currentUser?.getIdToken();

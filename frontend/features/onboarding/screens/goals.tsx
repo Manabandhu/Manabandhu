@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
+import { Logo } from "@/shared/components/ui/Logo";
 import {
   BriefcaseIcon,
   HomeIcon,
@@ -25,10 +25,10 @@ import {
   FileIcon,
   MessageIcon,
   CheckIcon,
-} from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+} from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
-import { GRADIENTS } from '@/shared/constants/colors";
+import { GRADIENTS } from "@/shared/constants/colors";
 import { onboardingApi } from "@/lib/api";
 
 const interests = [

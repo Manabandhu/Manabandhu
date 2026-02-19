@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { RideStatus } from '@/shared/types";
-import { formatRideStatus } from '@/features/travel/rides/api/format";
+import { RideStatus } from "@/shared/types";
+import { formatRideStatus } from "@/features/travel/rides/api/format";
 
 export default function RideStatusBadge({ status }: { status: RideStatus }) {
   const statusStyle =

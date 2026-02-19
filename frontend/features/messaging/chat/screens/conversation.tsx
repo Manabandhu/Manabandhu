@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { chatAPI, Message, Chat, ChatContext } from "@/lib/api/chat";
-import { roomsApi } from "@/lib/api/rooms";
-import { ridesApi } from '@/features/travel/rides/api";
-import { MessageIcon, UserIcon } from '@/shared/components/ui/Icons";
+import { chatAPI, Message, Chat, ChatContext } from "@/shared/api/chat";
+import { roomsApi } from "@/shared/api/rooms";
+import { ridesApi } from "@/features/travel/rides/api";
+import { MessageIcon, UserIcon } from "@/shared/components/ui/Icons";
 import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
-import { ChatContextTag } from '@/shared/utils/chatContext";
-import { userApi, User } from "@/lib/api/users";
-import { firebaseChatService, FirebaseMessage, ChatPresence } from '@/features/messaging/chat/firebaseChat";
+import { ChatContextTag } from "@/shared/utils/chatContext";
+import { userApi, User } from "@/shared/api/users";
+import { firebaseChatService, FirebaseMessage, ChatPresence } from "@/features/messaging/chat/chat/firebaseChat";
 
 export default function Conversation() {
   const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();

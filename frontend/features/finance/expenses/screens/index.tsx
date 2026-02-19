@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Alert, Modal, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Header from '@/shared/components/ui/Header";
+import Header from "@/shared/components/ui/Header";
 import { 
   CreditCardIcon, 
   UsersIcon, 
@@ -20,10 +20,10 @@ import {
   ActivityIcon,
   ShoppingBagIcon,
   SettingsIcon
-} from '@/shared/components/ui/Icons";
+} from "@/shared/components/ui/Icons";
 import AddExpenseBottomSheet from "@/components/AddExpenseBottomSheet";
 import { useCurrency } from "@/lib/currency";
-import { expensesAPI, Expense, ExpenseCategory } from "@/lib/api/expenses";
+import { expensesAPI, Expense, ExpenseCategory } from "@/shared/api/expenses";
 import { useThemeStore } from "@/store/theme.store";
 
 // Expense interface is imported from API

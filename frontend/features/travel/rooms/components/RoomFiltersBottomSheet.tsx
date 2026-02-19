@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { ListingFor, RoomFilters, RoomType } from '@/shared/types";
-import { formatRoomType, formatListingFor } from '@/features/travel/rooms/format";
+import { ListingFor, RoomFilters, RoomType } from "@/shared/types";
+import { formatRoomType, formatListingFor } from "@/features/travel/rooms/format";
 
 interface RoomFiltersBottomSheetProps {
   initialFilters: RoomFilters;

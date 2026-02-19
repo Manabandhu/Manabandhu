@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { ChatContext } from "@/lib/api/chat";
-import { HomeIcon, CarIcon, UsersIcon, UserIcon, MessageIcon } from '@/shared/components/ui/Icons";
+import { ChatContext } from "@/shared/api/chat";
+import { HomeIcon, CarIcon, UsersIcon, UserIcon, MessageIcon } from "@/shared/components/ui/Icons";
 
 export interface ChatContextTagProps {
   context?: ChatContext;

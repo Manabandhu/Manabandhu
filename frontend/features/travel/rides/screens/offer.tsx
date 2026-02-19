@@ -3,9 +3,9 @@ import { ScrollView, Text, View, TouchableOpacity, KeyboardAvoidingView, Platfor
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import RidePostForm from "@/components/rides/RidePostForm";
-import { ridesApi } from '@/features/travel/rides/api";
-import { RidePost } from '@/shared/types";
-import { ArrowLeftIcon, CarIcon } from '@/shared/components/ui/Icons";
+import { ridesApi } from "@/features/travel/rides/api";
+import { RidePost } from "@/shared/types";
+import { ArrowLeftIcon, CarIcon } from "@/shared/components/ui/Icons";
 
 export default function CreateRideOffer() {
   const router = useRouter();

@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
 import Header from '@/shared/components/ui/Header';
-import { communityAPI, CommunityPost } from '@/lib/api/community';
-import { jobsAPI, Job } from '@/lib/api/jobs';
+import { communityAPI, CommunityPost } from '@/shared/api/community';
+import { jobsAPI, Job } from '@/shared/api/jobs';
 import { UserIcon, SettingsIcon, BriefcaseIcon, HomeIcon, MessageIcon, TrashIcon, EditIcon } from '@/shared/components/ui/Icons';
 import PostJobBottomSheet from '@/components/PostJobBottomSheet';
 

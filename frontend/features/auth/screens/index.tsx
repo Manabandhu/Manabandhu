@@ -3,14 +3,14 @@ import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, Tou
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { SocialLoginButtons } from '@/features/auth/components/SocialLoginButtons";
-import { Logo } from '@/shared/components/ui/Logo";
-import { EmailIcon } from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { SocialLoginButtons } from "@/features/auth/components/SocialLoginButtons";
+import { Logo } from "@/shared/components/ui/Logo";
+import { EmailIcon } from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { signInWithGoogle, signInWithApple } from "@/lib/firebase";
 import { useAuthStore } from "@/store/auth.store";
-import { GRADIENTS } from '@/shared/constants";
-import { ROUTES } from '@/shared/constants/routes";
+import { GRADIENTS } from "@/shared/constants";
+import { ROUTES } from "@/shared/constants/routes";
 import { navigateAfterAuth } from "@/lib/navigation";
 import * as Haptics from "expo-haptics";
 

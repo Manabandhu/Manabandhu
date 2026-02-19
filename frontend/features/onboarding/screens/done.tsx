@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
+import { Logo } from "@/shared/components/ui/Logo";
 import {
   SearchIcon,
   UsersIcon,
   BellIcon,
-} from '@/shared/components/ui/Icons";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+} from "@/shared/components/ui/Icons";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 import { onboardingApi } from "@/lib/api";

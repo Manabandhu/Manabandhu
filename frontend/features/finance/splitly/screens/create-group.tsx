@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { splitlyAPI } from '@/lib/api/splitly';
+import { splitlyAPI } from '@/shared/api/splitly';
 
 export default function CreateGroup() {
   const router = useRouter();

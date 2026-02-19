@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { REGEX } from '@/shared/constants/regex";
+import { REGEX } from "@/shared/constants/regex";
 
 export const emailSchema = z.object({
   email: z.string().email("Invalid email address"),

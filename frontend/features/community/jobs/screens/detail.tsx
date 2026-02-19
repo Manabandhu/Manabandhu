@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { jobsAPI, Job } from '@/lib/api/jobs';
+import { jobsAPI, Job } from '@/shared/api/jobs';
 import { MapPinIcon, BriefcaseIcon, DollarSignIcon } from '@/shared/components/ui/Icons';
 
 export default function JobDetail() {

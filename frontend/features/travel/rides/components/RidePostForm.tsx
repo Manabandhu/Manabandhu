@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Switch, Modal, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { PricingMode, RidePost, RidePostType, RideRequirements } from '@/shared/types";
-import { validatePerMile } from '@/features/travel/rides/api/pricing";
-import { MapPinIcon, CalendarIcon, UsersIcon, DollarSignIcon, TypeIcon, NavigationIcon } from '@/shared/components/ui/Icons";
+import { PricingMode, RidePost, RidePostType, RideRequirements } from "@/shared/types";
+import { validatePerMile } from "@/features/travel/rides/api/pricing";
+import { MapPinIcon, CalendarIcon, UsersIcon, DollarSignIcon, TypeIcon, NavigationIcon } from "@/shared/components/ui/Icons";
 import LocationPicker from "./LocationPicker";
 
 interface RidePostFormProps {

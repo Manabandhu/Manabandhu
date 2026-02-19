@@ -1,4 +1,4 @@
-import { ListingStatus, RoomType, ListingFor } from '@/shared/types/rooms";
+import { ListingStatus, RoomType, ListingFor } from "@/shared/types/rooms";
 
 export const formatRoomStatus = (status: ListingStatus): string => {
   switch (status) {

@@ -10,12 +10,12 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
+import { Logo } from "@/shared/components/ui/Logo";
 import Svg, { Path, Circle } from "react-native-svg";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
-import { GRADIENTS } from '@/shared/constants";
-import { ROUTES } from '@/shared/constants/routes";
+import { GRADIENTS } from "@/shared/constants";
+import { ROUTES } from "@/shared/constants/routes";
 
 export default function PasswordResetSuccessScreen() {
   const router = useRouter();

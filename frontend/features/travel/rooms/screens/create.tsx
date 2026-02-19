@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Alert, Animated, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import RoomListingForm, { RoomListingFormValues } from '@/features/travel/rooms/components/RoomListingForm";
-import { roomsApi } from "@/lib/api/rooms";
-import { uploadRoomImages } from '@/features/travel/rooms/storage";
+import RoomListingForm, { RoomListingFormValues } from "@/features/travel/rooms/components/RoomListingForm";
+import { roomsApi } from "@/shared/api/rooms";
+import { uploadRoomImages } from "@/features/travel/rooms/storage";
 import { auth } from "@/lib/firebase";
-import { CheckIcon, HomeIcon } from '@/shared/components/ui/Icons";
+import { CheckIcon, HomeIcon } from "@/shared/components/ui/Icons";
 
 export default function CreateRoomListing() {
   const router = useRouter();

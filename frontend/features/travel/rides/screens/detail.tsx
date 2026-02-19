@@ -3,9 +3,9 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import RideMapView from "@/components/rides/RideMapView";
 import RideStatusBadge from "@/components/rides/RideStatusBadge";
-import { ridesApi } from '@/features/travel/rides/api";
-import { formatDepartTime, hoursUntil } from '@/features/travel/rides/api/format";
-import { RidePost } from '@/shared/types";
+import { ridesApi } from "@/features/travel/rides/api";
+import { formatDepartTime, hoursUntil } from "@/features/travel/rides/api/format";
+import { RidePost } from "@/shared/types";
 import { useAuthStore } from "@/store/auth.store";
 
 export default function RideDetail() {

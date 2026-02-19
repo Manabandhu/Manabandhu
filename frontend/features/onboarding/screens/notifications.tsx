@@ -10,16 +10,16 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { Logo } from '@/shared/components/ui/Logo";
+import { Logo } from "@/shared/components/ui/Logo";
 import {
   BriefcaseIcon,
   HomeIcon,
   CarIcon,
   CreditCardIcon,
   EyeIconPreview,
-} from '@/shared/components/ui/Icons";
-import { GluestackSwitch } from '@/shared/components/ui/gluestack-index";
-import { GluestackButton } from '@/shared/components/ui/gluestack-index";
+} from "@/shared/components/ui/Icons";
+import { GluestackSwitch } from "@/shared/components/ui/gluestack-index";
+import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import * as Haptics from "expo-haptics";
 import { onboardingApi } from "@/lib/api";
 
