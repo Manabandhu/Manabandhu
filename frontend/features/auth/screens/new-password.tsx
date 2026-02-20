@@ -17,11 +17,11 @@ import { resetPasswordSchema, ResetPasswordInput } from "@/lib/validators";
 import { Logo } from "@/shared/components/ui/Logo";
 import { LockIcon, EyeIcon, EyeOffIcon, CheckIcon } from "@/shared/components/ui/Icons";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";
-import { confirmPasswordReset } from "@/lib/firebase";
+import { confirmPasswordReset } from "@/services/auth";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/shared/constants";
 import { ROUTES } from "@/shared/constants/routes";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { getAuthErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 
 interface PasswordRequirement {
@@ -117,7 +117,7 @@ export default function NewPasswordScreen() {
       const appError = normalizeError(error);
       logger.error("Password reset failed", { oobCode: params.oobCode }, error);
       form.setError("password", {
-        message: appError.userMessage || getFirebaseErrorMessage(error),
+        message: appError.userMessage || getAuthErrorMessage(error),
       });
     } finally {
       setLoading(false);

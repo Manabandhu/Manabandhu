@@ -1,6 +1,6 @@
-declare module "@/lib/firebase" {
-  const firebaseModule: any;
-  export = firebaseModule;
+declare module "@/services/auth" {
+  const authProviderModule: any;
+  export = authProviderModule;
 }
 
 declare module "@/lib/*" {

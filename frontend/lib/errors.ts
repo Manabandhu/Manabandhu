@@ -39,7 +39,7 @@ export class NetworkError extends AppError {
   }
 }
 
-export class FirebaseError extends AppError {
+export class AuthProviderError extends AppError {
   constructor(
     message: string,
     code: string,
@@ -47,21 +47,21 @@ export class FirebaseError extends AppError {
     userMessage?: string
   ) {
     super(message, code, 500, userMessage);
-    this.name = "FirebaseError";
-    Object.setPrototypeOf(this, FirebaseError.prototype);
+    this.name = "AuthProviderError";
+    Object.setPrototypeOf(this, AuthProviderError.prototype);
   }
 }
 
 /**
- * Maps Firebase error codes to user-friendly messages
+ * Maps Auth provider error codes to user-friendly messages
  */
-export const getFirebaseErrorMessage = (error: unknown): string => {
+export const getAuthProviderErrorMessage = (error: unknown): string => {
   if (typeof error !== "object" || error === null) {
     return "An unexpected error occurred. Please try again.";
   }
 
-  const firebaseError = error as { code?: string; message?: string };
-  const code = firebaseError.code || "";
+  const providerError = error as { code?: string; message?: string };
+  const code = providerError.code || "";
 
   const errorMap: Record<string, string> = {
     "auth/invalid-email": "Please enter a valid email address.",
@@ -81,13 +81,13 @@ export const getFirebaseErrorMessage = (error: unknown): string => {
     "auth/requires-recent-login": "For security reasons, please sign in again.",
   };
 
-  return errorMap[code] || firebaseError.message || "An unexpected error occurred. Please try again.";
+  return errorMap[code] || providerError.message || "An unexpected error occurred. Please try again.";
 };
 
 /**
- * Checks if an error is a Firebase error
+ * Checks if an error is a Auth provider error
  */
-export const isFirebaseError = (error: unknown): error is { code: string; message: string } => {
+export const isAuthProviderError = (error: unknown): error is { code: string; message: string } => {
   return (
     typeof error === "object" &&
     error !== null &&
@@ -119,12 +119,12 @@ export const normalizeError = (error: unknown): AppError => {
     }
   }
 
-  if (isFirebaseError(error)) {
-    return new FirebaseError(
+  if (isAuthProviderError(error)) {
+    return new AuthProviderError(
       error.message,
       error.code,
       error,
-      getFirebaseErrorMessage(error)
+      getAuthProviderErrorMessage(error)
     );
   }
 

@@ -6,7 +6,11 @@
     "start": "expo start --port 9091",
     "android": "expo start --android --port 9091",
     "ios": "expo start --ios --port 9091",
-    "web": "expo start --web --port 9091"
+    "web": "expo start --web --port 9091",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "format": "echo \"No formatter configured\"",
+    "test": "echo \"No tests configured\""
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",
@@ -35,7 +39,6 @@
     "expo-secure-store": "~15.0.8",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
-    "firebase": "^11.0.0",
     "nativewind": "^4.0.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",

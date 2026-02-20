@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "User Management", description = "APIs for user operations")
-@SecurityRequirement(name = "Firebase Auth")
+@SecurityRequirement(name = "Bearer Auth")
 public class UserController {
 
     private final UserService userService;
@@ -37,8 +37,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        String firebaseUid = (String) authentication.getPrincipal();
-        UserDTO user = userService.getUserByFirebaseUid(firebaseUid);
+        String authUserId = (String) authentication.getPrincipal();
+        UserDTO user = userService.getUserByAuthUserId(authUserId);
         return ResponseEntity.ok(user);
     }
 
@@ -67,8 +67,8 @@ public class UserController {
     public ResponseEntity<UserDTO> updateCurrentUser(
             Authentication authentication,
             @Valid @RequestBody CreateUserRequest request) {
-        String firebaseUid = (String) authentication.getPrincipal();
-        UserDTO user = userService.updateUser(firebaseUid, request);
+        String authUserId = (String) authentication.getPrincipal();
+        UserDTO user = userService.updateUser(authUserId, request);
         return ResponseEntity.ok(user);
     }
 
@@ -80,8 +80,8 @@ public class UserController {
     public ResponseEntity<UserDTO> updateOnboarding(
             Authentication authentication,
             @Valid @RequestBody OnboardingRequest request) {
-        String firebaseUid = (String) authentication.getPrincipal();
-        UserDTO user = userService.updateOnboarding(firebaseUid, request);
+        String authUserId = (String) authentication.getPrincipal();
+        UserDTO user = userService.updateOnboarding(authUserId, request);
         return ResponseEntity.ok(user);
     }
 }

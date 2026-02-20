@@ -31,10 +31,10 @@ export default function ChatIndex() {
       setChats(chatsResponse);
       setUsers(usersResponse);
       
-      // Create a map of firebaseUid -> User for quick lookup
+      // Create a map of authUserId -> User for quick lookup
       const map = new Map<string, User>();
       usersResponse.forEach(user => {
-        map.set(user.firebaseUid, user);
+        map.set(user.authUserId, user);
       });
       setUserMap(map);
     } catch (error) {
@@ -88,7 +88,7 @@ export default function ChatIndex() {
 
   const startDirectChat = async (user: User) => {
     try {
-      const chat = await chatAPI.getOrCreateDirectChat(user.firebaseUid);
+      const chat = await chatAPI.getOrCreateDirectChat(user.authUserId);
       router.push(`/chat/conversation?chatId=${chat.id}&name=${encodeURIComponent(user.name)}`);
     } catch (error) {
       console.error('Failed to start chat:', error);
@@ -310,7 +310,7 @@ export default function ChatIndex() {
                 <TouchableOpacity
                   key={user.id}
                   className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-md border border-gray-100 dark:border-gray-700 flex-row items-center"
-                  onPress={() => router.push(`/user/${user.firebaseUid}`)}
+                  onPress={() => router.push(`/user/${user.authUserId}`)}
                   activeOpacity={0.7}
                 >
                   <View className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full items-center justify-center mr-4 overflow-hidden">

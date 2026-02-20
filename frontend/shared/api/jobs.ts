@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/shared/constants/api';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/services/auth';
 
 export interface Job {
   id: number;

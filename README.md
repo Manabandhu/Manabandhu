@@ -17,7 +17,7 @@ A full-stack application with React Native frontend and Spring Boot backend.
 - React Native + Expo
 - TypeScript
 - NativeWind (TailwindCSS)
-- Firebase Auth
+- Bearer Auth
 - Zustand (State Management)
 
 ### Backend
@@ -25,7 +25,7 @@ A full-stack application with React Native frontend and Spring Boot backend.
 - Java 21
 - PostgreSQL
 - Redis
-- Firebase Admin SDK
+- Legacy provider Admin SDK
 
 ## Prerequisites
 
@@ -66,13 +66,13 @@ npm run dev
 
 ### Frontend (.env in frontend/)
 
-Create `.env` file with Firebase and API configuration:
+Create `.env` file with Legacy provider and API configuration:
 
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:9090
-EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_domain
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+EXPO_PUBLIC_FIREBASE_API_KEY=your_legacy-provider_api_key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_legacy-provider_domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_legacy-provider_project_id
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id

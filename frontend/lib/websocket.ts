@@ -1,4 +1,4 @@
-import { auth } from '@/lib/firebase';
+import { auth } from '@/services/auth';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';

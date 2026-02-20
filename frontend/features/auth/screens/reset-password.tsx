@@ -17,11 +17,11 @@ import { GluestackInput } from "@/shared/components/ui/gluestack-index";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { Logo } from "@/shared/components/ui/Logo";
 import { EmailIcon, PhoneIcon, HelpIcon } from "@/shared/components/ui/Icons";
-import { resetPassword } from "@/lib/firebase";
+import { resetPassword } from "@/services/auth";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/shared/constants";
 import { ROUTES } from "@/shared/constants/routes";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { getAuthErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
 
@@ -53,7 +53,7 @@ export default function ResetPasswordScreen() {
       const appError = normalizeError(error);
       logger.error("Password reset failed", { email: data.email }, error);
       form.setError("email", {
-        message: appError.userMessage || getFirebaseErrorMessage(error),
+        message: appError.userMessage || getAuthErrorMessage(error),
       });
     } finally {
       setLoading(false);

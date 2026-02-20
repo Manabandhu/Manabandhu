@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '@/shared/constants/api';
 import { useAuthStore } from '@/store/auth.store';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/services/auth';
 
 export type ChatContext = 'ROOM' | 'RIDE' | 'COMMUNITY' | 'GROUP' | 'PERSONAL' | 'ONE_ON_ONE';
 

@@ -8,7 +8,7 @@ Spring Boot backend for ManaBandhu application.
 - Spring Boot 3.2.1
 - PostgreSQL
 - Redis
-- Firebase Admin SDK
+- JWT auth module
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Spring Boot backend for ManaBandhu application.
 - Maven 3.9+
 - PostgreSQL
 - Redis
-- Firebase Service Account Key
+- JWT secret
 
 ## Setup
 
@@ -31,9 +31,9 @@ FIREBASE_SERVICE_ACCOUNT=/path/to/serviceAccountKey.json
 JWT_SECRET=your-jwt-secret-key
 ```
 
-### 2. Firebase Setup
+### 2. Auth Setup
 
-1. Download your Firebase service account key from Firebase Console
+1. Set JWT secret in environment
 2. Save it as `serviceAccountKey.json` in the backend directory
 3. Update the path in the `.env` file
 
@@ -51,10 +51,10 @@ Access Swagger UI at: `http://localhost:9090/swagger-ui.html`
 
 ### Authentication
 
-All protected endpoints require a Firebase ID token in the Authorization header:
+All protected endpoints require a access token in the Authorization header:
 
 ```
-Authorization: Bearer <firebase-id-token>
+Authorization: Bearer <access-token>
 ```
 
 ## Database Migrations

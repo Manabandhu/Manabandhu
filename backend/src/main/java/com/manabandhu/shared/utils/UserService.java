@@ -24,17 +24,17 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserDTO getUserByFirebaseUid(String firebaseUid) {
+    public UserDTO getUserByAuthUserId(String authUserId) {
         try {
-            if (!StringUtils.hasText(firebaseUid)) {
-                throw new ValidationException("Firebase UID is required");
+            if (!StringUtils.hasText(authUserId)) {
+                throw new ValidationException("Auth user ID is required");
             }
             
-            User user = userRepository.findByFirebaseUid(firebaseUid)
+            User user = userRepository.findByAuthUserId(authUserId)
                 .orElseGet(() -> {
-                    log.info("Creating new user for Firebase UID: {}", firebaseUid);
+                    log.info("Creating new user for Auth user ID: {}", authUserId);
                     User newUser = new User();
-                    newUser.setFirebaseUid(firebaseUid);
+                    newUser.setAuthUserId(authUserId);
                     newUser.setName("User");
                     newUser.setProxyName(generateProxyName());
                     newUser.setOnboardingCompleted(false);
@@ -42,7 +42,7 @@ public class UserService {
                 });
             return mapToDTO(user);
         } catch (Exception e) {
-            log.error("Error fetching user by Firebase UID {}: {}", firebaseUid, e.getMessage(), e);
+            log.error("Error fetching user by Auth user ID {}: {}", authUserId, e.getMessage(), e);
             throw e;
         }
     }
@@ -64,12 +64,12 @@ public class UserService {
         try {
             validateCreateUserRequest(request);
             
-            if (userRepository.findByFirebaseUid(request.getFirebaseUid()).isPresent()) {
-                throw new ValidationException("User already exists with this Firebase UID");
+            if (userRepository.findByAuthUserId(request.getAuthUserId()).isPresent()) {
+                throw new ValidationException("User already exists with this Auth user ID");
             }
             
             User user = new User();
-            user.setFirebaseUid(request.getFirebaseUid());
+            user.setAuthUserId(request.getAuthUserId());
             user.setName(request.getName());
             user.setEmail(request.getEmail());
             user.setPhoneNumber(request.getPhoneNumber());
@@ -90,16 +90,16 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(String firebaseUid, CreateUserRequest request) {
+    public UserDTO updateUser(String authUserId, CreateUserRequest request) {
         try {
-            if (!StringUtils.hasText(firebaseUid)) {
-                throw new ValidationException("Firebase UID is required");
+            if (!StringUtils.hasText(authUserId)) {
+                throw new ValidationException("Auth user ID is required");
             }
             
             validateCreateUserRequest(request);
             
-            User user = userRepository.findByFirebaseUid(firebaseUid)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with Firebase UID: " + firebaseUid));
+            User user = userRepository.findByAuthUserId(authUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with Auth user ID: " + authUserId));
             
             user.setName(request.getName());
             user.setEmail(request.getEmail());
@@ -113,28 +113,28 @@ public class UserService {
             }
             
             User updatedUser = userRepository.save(user);
-            log.info("User updated successfully: {}", firebaseUid);
+            log.info("User updated successfully: {}", authUserId);
             return mapToDTO(updatedUser);
         } catch (Exception e) {
-            log.error("Error updating user {}: {}", firebaseUid, e.getMessage(), e);
+            log.error("Error updating user {}: {}", authUserId, e.getMessage(), e);
             throw e;
         }
     }
 
     @Transactional
-    public UserDTO updateOnboarding(String firebaseUid, OnboardingRequest request) {
+    public UserDTO updateOnboarding(String authUserId, OnboardingRequest request) {
         try {
-            if (!StringUtils.hasText(firebaseUid)) {
-                throw new ValidationException("Firebase UID is required");
+            if (!StringUtils.hasText(authUserId)) {
+                throw new ValidationException("Auth user ID is required");
             }
             
             validateOnboardingRequest(request);
             
-            User user = userRepository.findByFirebaseUid(firebaseUid)
+            User user = userRepository.findByAuthUserId(authUserId)
                 .orElseGet(() -> {
-                    log.info("Creating new user during onboarding for Firebase UID: {}", firebaseUid);
+                    log.info("Creating new user during onboarding for Auth user ID: {}", authUserId);
                     User newUser = new User();
-                    newUser.setFirebaseUid(firebaseUid);
+                    newUser.setAuthUserId(authUserId);
                     newUser.setName(request.getDisplayName());
                     newUser.setCountry(request.getCountry());
                     newUser.setCity(request.getCity());
@@ -154,20 +154,27 @@ public class UserService {
             if (request.getOnboardingCompleted() != null) user.setOnboardingCompleted(request.getOnboardingCompleted());
             
             User updatedUser = userRepository.save(user);
-            log.info("User onboarding updated successfully: {}", firebaseUid);
+            log.info("User onboarding updated successfully: {}", authUserId);
             return mapToDTO(updatedUser);
         } catch (Exception e) {
-            log.error("Error updating onboarding for user {}: {}", firebaseUid, e.getMessage(), e);
+            log.error("Error updating onboarding for user {}: {}", authUserId, e.getMessage(), e);
             throw e;
         }
+    }
+
+
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return mapToDTO(user);
     }
 
     private void validateCreateUserRequest(CreateUserRequest request) {
         if (request == null) {
             throw new ValidationException("User request is required");
         }
-        if (!StringUtils.hasText(request.getFirebaseUid())) {
-            throw new ValidationException("Firebase UID is required");
+        if (!StringUtils.hasText(request.getAuthUserId())) {
+            throw new ValidationException("Auth user ID is required");
         }
         if (!StringUtils.hasText(request.getName()) || request.getName().trim().length() < 2) {
             throw new ValidationException("Name must be at least 2 characters");
@@ -193,7 +200,7 @@ public class UserService {
     private UserDTO mapToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
-        dto.setFirebaseUid(user.getFirebaseUid());
+        dto.setAuthUserId(user.getAuthUserId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhoneNumber());

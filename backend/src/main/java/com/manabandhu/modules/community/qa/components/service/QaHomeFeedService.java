@@ -49,9 +49,9 @@ public class QaHomeFeedService {
             .collect(Collectors.toList());
         
         Map<String, String> userNames = userRepository.findAll().stream()
-            .filter(user -> userIds.contains(user.getFirebaseUid()))
+            .filter(user -> userIds.contains(user.getAuthUserId()))
             .collect(Collectors.toMap(
-                user -> user.getFirebaseUid(),
+                user -> user.getAuthUserId(),
                 user -> user.getName()
             ));
         

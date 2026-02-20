@@ -25,7 +25,7 @@ export default function UserProfile() {
     setError(null);
     try {
       const allUsers = await userApi.getAllUsers();
-      const foundUser = allUsers.find(u => u.firebaseUid === id || u.id.toString() === id);
+      const foundUser = allUsers.find(u => u.authUserId === id || u.id.toString() === id);
       if (foundUser) {
         setUser(foundUser);
       } else {
@@ -42,7 +42,7 @@ export default function UserProfile() {
   const startChat = async () => {
     if (!user) return;
     try {
-      const chat = await chatAPI.getOrCreateDirectChat(user.firebaseUid);
+      const chat = await chatAPI.getOrCreateDirectChat(user.authUserId);
       router.push(`/chat/conversation?chatId=${chat.id}&name=${encodeURIComponent(user.name)}`);
     } catch (error) {
       console.error("Failed to start chat:", error);

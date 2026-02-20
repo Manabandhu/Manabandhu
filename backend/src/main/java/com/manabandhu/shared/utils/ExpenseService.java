@@ -106,9 +106,9 @@ public class ExpenseService {
     }
 
     private User getCurrentUser() {
-        String firebaseUid = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByFirebaseUid(firebaseUid)
-            .orElseThrow(() -> new RuntimeException("User not found with firebaseUid: " + firebaseUid));
+        String authUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByAuthUserId(authUserId)
+            .orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
     }
 }
 

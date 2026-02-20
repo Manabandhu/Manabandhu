@@ -22,13 +22,13 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("ManaBandhu Team")
                                 .email("support@manabandhu.com")))
-                .addSecurityItem(new SecurityRequirement().addList("Firebase Auth"))
+                .addSecurityItem(new SecurityRequirement().addList("Bearer Auth"))
                 .components(new Components()
-                        .addSecuritySchemes("Firebase Auth", 
+                        .addSecuritySchemes("Bearer Auth", 
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
-                                        .description("Firebase JWT Token")));
+                                        .description("Bearer JWT token")));
     }
 }
