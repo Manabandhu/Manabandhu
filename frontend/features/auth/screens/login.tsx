@@ -19,13 +19,13 @@ import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { GluestackCheckbox } from "@/shared/components/ui/gluestack-index";
 import { Logo } from "@/shared/components/ui/Logo";
 import { EmailIcon, LockIcon, EyeIcon, EyeOffIcon, GoogleIcon, FacebookIcon, AppleIcon, PhoneIcon, FingerprintIcon } from "@/shared/components/ui/Icons";
-import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/lib/firebase";
+import { signInWithEmail, signInWithGoogle, signInWithApple } from "@/services/auth";
 import { useAuthStore } from "@/store/auth.store";
 import * as Haptics from "expo-haptics";
 import { ROUTES } from "@/shared/constants/routes";
 import { GRADIENTS } from "@/shared/constants";
 import { navigateAfterAuth } from "@/lib/navigation";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { getAuthErrorMessage, normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail } from "@/lib/sanitize";
 import { secureStorage } from "@/lib/storage";
@@ -156,7 +156,7 @@ export default function LoginScreen() {
       const appError = normalizeError(error);
       logger.error("Login failed", { email: data.email }, error);
       form.setError("password", {
-        message: appError.userMessage || getFirebaseErrorMessage(error),
+        message: appError.userMessage || getAuthErrorMessage(error),
       });
     } finally {
       setLoading(false);

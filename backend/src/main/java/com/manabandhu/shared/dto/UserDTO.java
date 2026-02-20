@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDTO {
     private Long id;
-    private String firebaseUid;
+    private String authUserId;
     private String name;
     private String email;
     private String phoneNumber;

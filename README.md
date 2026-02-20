@@ -17,15 +17,15 @@ A full-stack application with React Native frontend and Spring Boot backend.
 - React Native + Expo
 - TypeScript
 - NativeWind (TailwindCSS)
-- Firebase Auth
-- Zustand (State Management)
+- JWT/Bearer auth client
+- Zustand
 
 ### Backend
 - Spring Boot 3.x
 - Java 21
 - PostgreSQL
 - Redis
-- Firebase Admin SDK
+- JWT authentication
 
 ## Prerequisites
 
@@ -35,28 +35,25 @@ A full-stack application with React Native frontend and Spring Boot backend.
 
 ## Getting Started
 
-### Root Level
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### Frontend
+### Run frontend
 
 ```bash
-cd frontend
-npm install
-npm start
+npm run frontend
 ```
 
-### Backend
+### Run backend
 
 ```bash
-cd backend
-./mvnw spring-boot:run
+npm run backend
 ```
 
-### Run Both (Development)
+### Run both (development)
 
 ```bash
 npm run dev
@@ -64,38 +61,30 @@ npm run dev
 
 ## Environment Variables
 
-### Frontend (.env in frontend/)
+Use `.env.example` at repo root as the baseline.
 
-Create `.env` file with Firebase and API configuration:
+### Frontend
 
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:9090
-EXPO_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_domain
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_client_id
+EXPO_PUBLIC_AUTH_PROVIDER=mock
+EXPO_PUBLIC_APP_ENV=development
 ```
 
-### Backend (.env in backend/)
-
-Create `.env` file with database and service configuration:
+### Backend
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/manabandhu
 REDIS_URL=redis://localhost:6379
-FIREBASE_SERVICE_ACCOUNT=path/to/serviceAccountKey.json
-JWT_SECRET=your_jwt_secret_key
+JWT_SECRET=change-me-change-me-change-me-change-me
+JWT_ACCESS_TTL_SECONDS=3600
+JWT_REFRESH_TTL_SECONDS=2592000
 ```
 
 ## Development
 
-- Frontend runs on Expo dev server (port 9091)
-- Backend runs on http://localhost:9090
-- PostgreSQL on localhost:5432
-- Redis on localhost:6379
+- Frontend: Expo dev server on port 9091
+- Backend: `http://localhost:9090`
 
 ## License
 

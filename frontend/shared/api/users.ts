@@ -3,7 +3,7 @@ import { toast } from '../../lib/toast';
 
 export interface User {
   id: number;
-  firebaseUid: string;
+  authUserId: string;
   name: string;
   email?: string;
   phoneNumber?: string;
@@ -13,10 +13,11 @@ export interface User {
   photoUrl?: string;
   currency?: string;
   isActive: boolean;
+  onboardingCompleted?: boolean;
 }
 
 export interface CreateUserRequest {
-  firebaseUid: string;
+  authUserId: string;
   name: string;
   email?: string;
   phoneNumber?: string;
@@ -77,8 +78,8 @@ export const userApi = {
       if (!data.name?.trim()) {
         throw new Error('Name is required');
       }
-      if (!data.firebaseUid?.trim()) {
-        throw new Error('Firebase UID is required');
+      if (!data.authUserId?.trim()) {
+        throw new Error('Auth user ID is required');
       }
       
       const response = await apiClient.post('/api/users', data);

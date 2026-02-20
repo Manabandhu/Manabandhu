@@ -6,8 +6,15 @@ export interface SignupRequest {
   password: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
 export interface AuthResponse {
-  idToken: string;
+  idToken?: string;
+  accessToken?: string;
+  refreshToken?: string;
   user: any;
   message?: string;
 }
@@ -17,9 +24,16 @@ export const authApi = {
     const response = await apiClient.post('/api/auth/signup', data);
     return response.data;
   },
-
-  verifyToken: async (idToken: string): Promise<{ valid: boolean; user?: any }> => {
-    const response = await apiClient.post('/api/auth/verify-token', { idToken });
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post('/api/auth/login', data);
     return response.data;
+  },
+  refresh: async (refreshToken: string): Promise<AuthResponse> => {
+    const response = await apiClient.post('/api/auth/refresh', { refreshToken });
+    return response.data;
+  },
+  verifyToken: async (_idToken: string): Promise<{ valid: boolean; user?: any }> => {
+    const response = await apiClient.get('/api/users/me');
+    return { valid: true, user: response.data };
   },
 };

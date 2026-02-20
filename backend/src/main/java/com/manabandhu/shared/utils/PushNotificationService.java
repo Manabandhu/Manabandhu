@@ -77,7 +77,7 @@ public class PushNotificationService {
      * Send push notification to a specific user
      */
     public void sendPushNotificationToUser(String userId, String title, String body, Map<String, Object> data) {
-        User user = userRepository.findByFirebaseUid(userId)
+        User user = userRepository.findByAuthUserId(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
         List<PushToken> tokens = pushTokenRepository.findByUserAndIsActiveTrue(user);
@@ -98,7 +98,7 @@ public class PushNotificationService {
      */
     public void sendPushNotificationsToUsers(List<String> userIds, String title, String body, Map<String, Object> data) {
         List<User> users = userIds.stream()
-            .map(userId -> userRepository.findByFirebaseUid(userId))
+            .map(userId -> userRepository.findByAuthUserId(userId))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .toList();
@@ -187,9 +187,9 @@ public class PushNotificationService {
     }
 
     private User getCurrentUser() {
-        String firebaseUid = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByFirebaseUid(firebaseUid)
-            .orElseThrow(() -> new RuntimeException("User not found with firebaseUid: " + firebaseUid));
+        String authUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByAuthUserId(authUserId)
+            .orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
     }
 }
 

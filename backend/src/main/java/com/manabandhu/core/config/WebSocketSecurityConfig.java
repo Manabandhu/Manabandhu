@@ -12,8 +12,8 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
 
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
 
-    public WebSocketSecurityConfig() {
-        this.webSocketAuthInterceptor = new WebSocketAuthInterceptor();
+    public WebSocketSecurityConfig(WebSocketAuthInterceptor webSocketAuthInterceptor) {
+        this.webSocketAuthInterceptor = webSocketAuthInterceptor;
     }
 
     @Override

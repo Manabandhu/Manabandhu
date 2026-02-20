@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import RoomListingForm, { RoomListingFormValues } from "@/features/travel/rooms/components/RoomListingForm";
 import { roomsApi } from "@/shared/api/rooms";
 import { uploadRoomImages } from "@/features/travel/rooms/storage";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/services/auth";
 import { RoomListing } from "@/shared/types";
 
 export default function EditRoomListing() {

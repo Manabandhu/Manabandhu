@@ -7,7 +7,7 @@ import { SocialLoginButtons } from "@/features/auth/components/SocialLoginButton
 import { Logo } from "@/shared/components/ui/Logo";
 import { EmailIcon } from "@/shared/components/ui/Icons";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";
-import { signInWithGoogle, signInWithApple } from "@/lib/firebase";
+import { signInWithGoogle, signInWithApple } from "@/services/auth";
 import { useAuthStore } from "@/store/auth.store";
 import { GRADIENTS } from "@/shared/constants";
 import { ROUTES } from "@/shared/constants/routes";

@@ -1,73 +1,58 @@
 import axios from 'axios';
-import { auth } from '../../lib/firebase';
 import { toast } from '../../lib/toast';
+import { tokenStorage, signOut } from '@/services/auth';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
 
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-apiClient.interceptors.request.use(
-  async (config) => {
-    const user = auth.currentUser;
-    if (user) {
-      const token = await user.getIdToken();
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+apiClient.interceptors.request.use(async (config) => {
+  const token = await tokenStorage.getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const status = error.response?.status;
-    const message = error.response?.data?.message || error.message;
-    
-    switch (status) {
-      case 400:
-        if (error.response?.data?.fieldErrors) {
-          const fieldMessages = Object.values(error.response.data.fieldErrors).join('\n');
-          toast.showError(fieldMessages, 'Validation Error');
-        } else {
-          toast.showError(message || 'Invalid request');
+let isRefreshing = false;
+
+apiClient.interceptors.response.use((response) => response, async (error) => {
+  const original = error.config;
+  const status = error.response?.status;
+
+  if (status === 401 && !original?._retry) {
+    original._retry = true;
+    const refreshToken = await tokenStorage.getRefreshToken();
+
+    if (refreshToken && !isRefreshing) {
+      try {
+        isRefreshing = true;
+        const refreshedResp = await axios.post(`${API_URL}/api/auth/refresh`, { refreshToken });
+        const refreshed = refreshedResp.data;
+        const nextAccess = refreshed.accessToken || refreshed.idToken;
+        if (nextAccess) {
+          await tokenStorage.setTokens(nextAccess, refreshed.refreshToken || refreshToken);
+          original.headers.Authorization = `Bearer ${nextAccess}`;
+          return apiClient(original);
         }
-        break;
-      case 401:
-        toast.showError('Please log in to continue', 'Authentication Required');
-        break;
-      case 403:
-        toast.showError('You don\'t have permission to perform this action', 'Access Denied');
-        break;
-      case 404:
-        toast.showError('The requested resource was not found', 'Not Found');
-        break;
-      case 409:
-        toast.showError(message || 'This action conflicts with existing data', 'Conflict');
-        break;
-      case 500:
-        toast.showError('Server error. Please try again later', 'Server Error');
-        break;
-      default:
-        if (error.code === 'ECONNABORTED') {
-          toast.showError('Request timeout. Please try again.', 'Timeout');
-        } else if (error.code === 'NETWORK_ERROR') {
-          toast.showError('Network error. Please check your connection.', 'Network Error');
-        } else {
-          toast.showError(message || 'An unexpected error occurred');
-        }
+      } catch {
+        await signOut();
+      } finally {
+        isRefreshing = false;
+      }
     }
-    
-    return Promise.reject(error);
+    toast.showError('Please log in to continue', 'Authentication Required');
   }
-);
+
+  if (status && status >= 500) {
+    toast.showError('Server error. Please try again later', 'Server Error');
+  }
+
+  return Promise.reject(error);
+});
 
 export default apiClient;

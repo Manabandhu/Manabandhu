@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/shared/constants/api';
-import { getAuthToken } from '@/lib/firebase';
+import { getAuthToken } from '@/services/auth';
 
 export interface UscisCase {
   id: string;

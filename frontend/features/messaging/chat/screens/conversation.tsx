@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
 import { ChatContextTag } from "@/shared/utils/chatContext";
 import { userApi, User } from "@/shared/api/users";
-import { firebaseChatService, FirebaseMessage, ChatPresence } from "@/features/messaging/chat/chat/firebaseChat";
+import { realtimeChatService, RealtimeMessage, UserPresence } from "@/features/messaging/chat/chat/realtimeChat";
 
 export default function Conversation() {
   const { chatId, name, listingId, ridePostId } = useLocalSearchParams<{ chatId: string; name: string; listingId?: string; ridePostId?: string }>();
@@ -24,7 +24,7 @@ export default function Conversation() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const [onlineStatus, setOnlineStatus] = useState<Map<string, ChatPresence>>(new Map());
+  const [onlineStatus, setOnlineStatus] = useState<Map<string, UserPresence>>(new Map());
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -56,8 +56,8 @@ export default function Conversation() {
             const allUsers = await userApi.getAllUsers();
             const map = new Map<string, User>();
             allUsers.forEach(user => {
-              if (chat.participants.includes(user.firebaseUid)) {
-                map.set(user.firebaseUid, user);
+              if (chat.participants.includes(user.authUserId)) {
+                map.set(user.authUserId, user);
               }
             });
             setUserMap(map);
@@ -140,8 +140,8 @@ export default function Conversation() {
     setSending(true);
     setErrorMessage(null);
     try {
-      // Send via Firebase Realtime Database (real-time delivery)
-      await firebaseChatService.sendMessage(parseInt(chatId), newMessage.trim(), 'TEXT');
+      // Send via Realtime Realtime Database (real-time delivery)
+      await realtimeChatService.sendMessage(parseInt(chatId), newMessage.trim(), 'TEXT');
       setNewMessage('');
       scrollViewRef.current?.scrollToEnd({ animated: true });
       if (listingId) {
@@ -161,24 +161,24 @@ export default function Conversation() {
   useEffect(() => {
     if (!chatId || !currentUserId) return;
 
-    // Initialize Firebase chat service
-    firebaseChatService.initialize(currentUserId);
+    // Initialize Realtime chat service
+    realtimeChatService.initialize(currentUserId);
 
     loadChatInfo();
     loadMessages();
 
-    // Subscribe to Firebase Realtime Database messages
-    const unsubscribeMessages = firebaseChatService.subscribeToMessages(
+    // Subscribe to Realtime Realtime Database messages
+    const unsubscribeMessages = realtimeChatService.subscribeToMessages(
       parseInt(chatId),
-      (firebaseMessage: FirebaseMessage) => {
-        // Convert Firebase message to Message format
+      (realtimeMessage: RealtimeMessage) => {
+        // Convert Realtime message to Message format
         const message: Message = {
-          id: parseInt(firebaseMessage.id || '0') || Date.now(),
-          chatId: firebaseMessage.chatId,
-          senderId: firebaseMessage.senderId,
-          content: firebaseMessage.content,
-          type: firebaseMessage.type,
-          createdAt: new Date(firebaseMessage.createdAt).toISOString(),
+          id: parseInt(realtimeMessage.id || '0') || Date.now(),
+          chatId: realtimeMessage.chatId,
+          senderId: realtimeMessage.senderId,
+          content: realtimeMessage.content,
+          type: realtimeMessage.type,
+          createdAt: new Date(realtimeMessage.createdAt).toISOString(),
         };
 
         // Check if message already exists (avoid duplicates)
@@ -201,7 +201,7 @@ export default function Conversation() {
         }, 100);
       },
       (error) => {
-        console.error('Error in Firebase message listener:', error);
+        console.error('Error in Realtime message listener:', error);
         setErrorMessage('Connection error. Messages may not update in real-time.');
       }
     );
@@ -211,7 +211,7 @@ export default function Conversation() {
     if (chatInfo) {
       chatInfo.participants.forEach((participantId) => {
         if (participantId !== currentUserId) {
-          const unsubscribe = firebaseChatService.subscribeToUserPresence(
+          const unsubscribe = realtimeChatService.subscribeToUserPresence(
             participantId,
             (presence) => {
               setOnlineStatus(prev => {

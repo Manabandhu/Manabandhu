@@ -31,8 +31,6 @@ import * as Haptics from "expo-haptics";
 import { normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { sanitizeEmail, sanitizeText, sanitizePhone } from "@/lib/sanitize";
-import { signInWithCustomToken } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 const { width } = Dimensions.get("window");
 
@@ -110,7 +108,7 @@ export default function SignupScreen() {
       });
 
       if (response.idToken) {
-        await signInWithCustomToken(auth, response.idToken);
+        // session is already established by service layer
         router.push(ROUTES.auth.profile);
       }
     } catch (error: unknown) {

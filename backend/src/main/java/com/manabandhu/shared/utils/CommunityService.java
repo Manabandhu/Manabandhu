@@ -104,7 +104,7 @@ public class CommunityService {
         postRepository.save(post);
         
         // Get author name
-        String authorName = userRepository.findByFirebaseUid(authorId)
+        String authorName = userRepository.findByAuthUserId(authorId)
             .map(user -> user.getName())
             .orElse("Anonymous");
         
@@ -120,7 +120,7 @@ public class CommunityService {
     public Page<CommentDTO> getPostComments(Long postId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
         return comments.map(comment -> {
-            String authorName = userRepository.findByFirebaseUid(comment.getAuthorId())
+            String authorName = userRepository.findByAuthUserId(comment.getAuthorId())
                 .map(user -> user.getName())
                 .orElse("Anonymous");
             return new CommentDTO(comment, authorName);
@@ -143,7 +143,7 @@ public class CommunityService {
         
         Long postId = comment.getPostId();
         CommentDTO commentDTO = new CommentDTO(comment, 
-            userRepository.findByFirebaseUid(comment.getAuthorId())
+            userRepository.findByAuthUserId(comment.getAuthorId())
                 .map(user -> user.getName())
                 .orElse("Anonymous"));
         

@@ -1,13 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { User } from "@/shared/types";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import { userApi } from "@/lib/api";
+import { auth, initializeSession, signOut as authSignOut } from "@/services/auth";
+import { userApi } from "@/shared/api";
 import { secureStorage } from "@/lib/storage";
-
-const userDocCache = new Map<string, { data: User; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000;
 
 interface AuthState {
   user: User | null;
@@ -24,60 +20,6 @@ interface AuthState {
   cleanup: () => void;
 }
 
-
-const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User> => {
-  const uid = firebaseUser.uid;
-  
-  const cached = userDocCache.get(uid);
-  const now = Date.now();
-  
-  if (cached && (now - cached.timestamp) < CACHE_TTL) {
-    return {
-      ...cached.data,
-      email: firebaseUser.email || cached.data.email,
-      phoneNumber: firebaseUser.phoneNumber || cached.data.phoneNumber,
-      displayName: firebaseUser.displayName || cached.data.displayName,
-      photoURL: firebaseUser.photoURL || cached.data.photoURL,
-    };
-  }
-
-  try {
-    const userData = await userApi.getCurrentUser();
-    
-    const user: User = {
-      uid,
-      email: firebaseUser.email || undefined,
-      phoneNumber: firebaseUser.phoneNumber || undefined,
-      displayName: firebaseUser.displayName || userData?.name || undefined,
-      photoURL: firebaseUser.photoURL || userData?.photoUrl || undefined,
-      country: userData?.country || undefined,
-      city: userData?.city || undefined,
-      role: userData?.role || undefined,
-      currency: userData?.currency || "USD",
-      onboardingCompleted: userData?.onboardingCompleted || false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    userDocCache.set(uid, { data: user, timestamp: now });
-
-    return user;
-  } catch (error) {
-    const basicUser: User = {
-      uid,
-      email: firebaseUser.email || undefined,
-      phoneNumber: firebaseUser.phoneNumber || undefined,
-      displayName: firebaseUser.displayName || undefined,
-      photoURL: firebaseUser.photoURL || undefined,
-      onboardingCompleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    return basicUser;
-  }
-};
-
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -86,149 +28,73 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       onboardingCompleted: false,
       unsubscribe: null,
-
-      setUser: (user) =>
-        set({
-          user,
-          isAuthenticated: !!user,
-          onboardingCompleted: user?.onboardingCompleted || false,
-        }),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      setOnboardingCompleted: (completed) => {
-        set((state) => {
-          const updatedUser = state.user
-            ? { ...state.user, onboardingCompleted: completed }
-            : null;
-          
-          // Update cache if user exists
-          if (updatedUser) {
-            userDocCache.set(updatedUser.uid, { 
-              data: updatedUser, 
-              timestamp: Date.now() 
-            });
-          }
-          
-          return {
-            onboardingCompleted: completed,
-            user: updatedUser,
-          };
-        });
-      },
-
+      setUser: (user) => set({ user, isAuthenticated: !!user, onboardingCompleted: user?.onboardingCompleted || false }),
+      setLoading: (isLoading) => set({ isLoading }),
+      setOnboardingCompleted: (completed) => set((state) => ({
+        onboardingCompleted: completed,
+        user: state.user ? { ...state.user, onboardingCompleted: completed } : null,
+      })),
       initializeAuth: async () => {
-        // Don't reinitialize if already authenticated and not loading
-        const currentState = get();
-        if (currentState.isAuthenticated && currentState.user && !currentState.isLoading) {
-          return;
-        }
-
-        // Clean up any existing listener
-        const { unsubscribe: existingUnsubscribe } = get();
-        if (existingUnsubscribe) {
-          existingUnsubscribe();
-        }
-
-        // Only set loading if we don't have persisted auth state
-        if (!currentState.user) {
-          set({ isLoading: true });
-        }
-
-        return new Promise<void>((resolve) => {
-          if (!auth) {
-            set({ isLoading: false, isAuthenticated: false, user: null, unsubscribe: null });
-            resolve();
+        set({ isLoading: true });
+        await initializeSession();
+        const unsubscribe = auth.subscribe(async (sessionUser) => {
+          if (!sessionUser) {
+            set({ user: null, isAuthenticated: false, isLoading: false, onboardingCompleted: false });
             return;
           }
-
-          let isResolved = false;
-          const timeoutId = setTimeout(() => {
-            if (!isResolved) {
-              isResolved = true;
-              set({ isLoading: false });
-              resolve();
-            }
-          }, 10000); // 10 second timeout
-
-          const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            clearTimeout(timeoutId);
-            
-            if (firebaseUser) {
-              try {
-                const user = await firebaseUserToUser(firebaseUser);
-                set({
-                  user,
-                  isAuthenticated: true,
-                  isLoading: false,
-                  onboardingCompleted: user.onboardingCompleted,
-                  unsubscribe,
-                });
-              } catch (error) {
-                console.error('Error converting Firebase user:', error);
-                set({ isLoading: false, isAuthenticated: false, user: null, unsubscribe });
-              }
-            } else {
-              set({
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
+          try {
+            const profile = await userApi.getCurrentUser();
+            set({
+              user: {
+                uid: sessionUser.uid,
+                email: sessionUser.email,
+                displayName: profile?.name || sessionUser.displayName,
+                phoneNumber: profile?.phoneNumber,
+                photoURL: profile?.photoUrl,
+                onboardingCompleted: profile?.onboardingCompleted || false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              isAuthenticated: true,
+              isLoading: false,
+              onboardingCompleted: profile?.onboardingCompleted || false,
+            });
+          } catch {
+            set({
+              user: {
+                uid: sessionUser.uid,
+                email: sessionUser.email,
+                displayName: sessionUser.displayName,
                 onboardingCompleted: false,
-                unsubscribe,
-              });
-            }
-            
-            if (!isResolved) {
-              isResolved = true;
-              resolve();
-            }
-          });
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              isAuthenticated: true,
+              isLoading: false,
+              onboardingCompleted: false,
+            });
+          }
         });
+        set({ unsubscribe });
       },
-
       cleanup: () => {
-        const { unsubscribe } = get();
-        if (unsubscribe) {
-          unsubscribe();
-          set({ unsubscribe: null });
-        }
+        const unsub = get().unsubscribe;
+        if (unsub) unsub();
+        set({ unsubscribe: null });
       },
-
       updateUserProfile: async (updates) => {
-        const { user } = get();
-        if (!user) return;
-
-        try {
-          const updatedUser = { ...user, ...updates, updatedAt: new Date().toISOString() };
-          
-          userDocCache.set(user.uid, { data: updatedUser, timestamp: Date.now() });
-          
-          set({ user: updatedUser });
-        } catch (error) {
-          throw error;
-        }
+        set((state) => ({ user: state.user ? { ...state.user, ...updates } : null }));
       },
-
       signOut: async () => {
-        const { signOut: firebaseSignOut } = await import("../lib/firebase");
-        const { cleanup } = get();
-        cleanup();
-        await firebaseSignOut();
-        set({
-          user: null,
-          isAuthenticated: false,
-          onboardingCompleted: false,
-          unsubscribe: null,
-        });
+        get().cleanup();
+        await authSignOut();
+        set({ user: null, isAuthenticated: false, onboardingCompleted: false });
       },
     }),
     {
       name: "auth-storage",
       storage: createJSONStorage(() => secureStorage),
-      partialize: (state) => ({
-        user: state.user,
-        onboardingCompleted: state.onboardingCompleted,
-      }),
+      partialize: (state) => ({ user: state.user, onboardingCompleted: state.onboardingCompleted }),
     }
   )
 );

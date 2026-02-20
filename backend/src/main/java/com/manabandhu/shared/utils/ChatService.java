@@ -141,7 +141,7 @@ public class ChatService {
     private void sendChatPushNotifications(Chat chat, String senderId, String content, MessageDTO messageDTO) {
         try {
             // Get sender's name
-            Optional<User> senderOpt = userRepository.findByFirebaseUid(senderId);
+            Optional<User> senderOpt = userRepository.findByAuthUserId(senderId);
             String senderName = senderOpt.map(User::getName).orElse("Someone");
             
             // Get recipient user IDs (all participants except sender)
