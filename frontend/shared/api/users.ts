@@ -13,6 +13,7 @@ export interface User {
   photoUrl?: string;
   currency?: string;
   isActive: boolean;
+  onboardingCompleted?: boolean;
 }
 
 export interface CreateUserRequest {

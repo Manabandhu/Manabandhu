@@ -140,3 +140,5 @@ export const normalizeError = (error: unknown): AppError => {
   );
 };
 
+
+export const getAuthErrorMessage = getAuthProviderErrorMessage;

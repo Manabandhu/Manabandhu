@@ -9,13 +9,20 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Component
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
+    private final JwtTokenService jwtTokenService;
+
+    public WebSocketAuthInterceptor(JwtTokenService jwtTokenService) {
+        this.jwtTokenService = jwtTokenService;
+    }
 
     private final JwtTokenService jwtTokenService = new JwtTokenService("change-me-change-me-change-me-change-me", 3600, 2592000);
 
