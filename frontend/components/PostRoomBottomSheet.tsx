@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
 import { API_BASE_URL } from '@/shared/constants/api';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/services/auth';
 
 interface PostRoomBottomSheetProps {
   visible: boolean;

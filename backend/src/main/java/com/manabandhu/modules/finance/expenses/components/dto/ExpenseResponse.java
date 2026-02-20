@@ -26,7 +26,7 @@ public class ExpenseResponse {
         this.category = expense.getCategory();
         this.expenseDate = expense.getExpenseDate();
         this.createdAt = expense.getCreatedAt();
-        this.userId = expense.getUser().getFirebaseUid();
+        this.userId = expense.getUser().getAuthUserId();
         this.userName = expense.getUser().getName();
     }
 }

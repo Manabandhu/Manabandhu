@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateUserRequest {
     
-    @NotBlank(message = "Firebase UID is required")
-    private String firebaseUid;
+    @NotBlank(message = "Auth user ID is required")
+    private String authUserId;
     
     @NotBlank(message = "Name is required")
     private String name;

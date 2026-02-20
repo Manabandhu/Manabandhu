@@ -13,7 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Logo } from "@/shared/components/ui/Logo";
 import { EmailIcon } from "@/shared/components/ui/Icons";
-import { resetPassword } from "@/lib/firebase";
+import { resetPassword } from "@/services/auth";
 import * as Haptics from "expo-haptics";
 import { GRADIENTS } from "@/shared/constants";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";

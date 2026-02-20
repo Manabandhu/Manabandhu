@@ -9,7 +9,7 @@ import { useScaledFont } from '@/lib/useScaledFont';
 import { useAuthStore } from '@/store/auth.store';
 import { userApi } from '@/shared/api/users';
 import { getAvailableCurrencies, getCurrencySymbol, useCurrency } from '@/lib/currency';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/services/auth';
 import { registerForPushNotifications, unregisterPushToken, getPushToken, getNotificationPermissions } from '@/lib/notifications';
 
 type SettingsItem = 
@@ -82,7 +82,7 @@ export default function Settings() {
     try {
       
       await userApi.updateCurrentUser({
-        firebaseUid: currentUser.uid,
+        authUserId: currentUser.uid,
         name: user.displayName || user.email || 'User',
         currency: newCurrency,
       });

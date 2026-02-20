@@ -489,7 +489,7 @@ public class QaService {
         
         // Get author name
         try {
-            userRepository.findByFirebaseUid(question.getAuthorUserId())
+            userRepository.findByAuthUserId(question.getAuthorUserId())
                 .ifPresent(user -> response.setAuthorName(user.getName()));
         } catch (Exception e) {
             log.warn("Failed to fetch author name for question {}: {}", question.getId(), e.getMessage());
@@ -514,7 +514,7 @@ public class QaService {
         
         // Get author name
         try {
-            userRepository.findByFirebaseUid(answer.getAuthorUserId())
+            userRepository.findByAuthUserId(answer.getAuthorUserId())
                 .ifPresent(user -> response.setAuthorName(user.getName()));
         } catch (Exception e) {
             log.warn("Failed to fetch author name for answer {}: {}", answer.getId(), e.getMessage());

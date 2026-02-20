@@ -15,14 +15,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { OTPInput } from "@/shared/components/ui/OTPInput";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { Logo } from "@/shared/components/ui/Logo";
-import { verifyOTP, auth } from "@/lib/firebase";
+import { verifyOTP } from "@/services/auth";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
 import { navigateAfterAuth } from "@/lib/navigation";
-import { getFirebaseErrorMessage, normalizeError } from "@/lib/errors";
+import { normalizeError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { TIMING } from "@/shared/constants/timing";
-import { ApplicationVerifier, RecaptchaVerifier } from "firebase/auth";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -39,7 +38,7 @@ export default function OTPScreen() {
   const [otpValue, setOtpValue] = useState("");
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-  const recaptchaVerifier = useRef<ApplicationVerifier | null>(null);
+  
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -75,22 +74,6 @@ export default function OTPScreen() {
     }
   }, [showSuccess]);
 
-  useEffect(() => {
-    if (Platform.OS === "web" && auth) {
-      const verifier = new RecaptchaVerifier(auth, "otp-recaptcha-container", {
-        size: "invisible",
-      });
-      void verifier.render();
-      recaptchaVerifier.current = verifier;
-    }
-
-    return () => {
-      const verifier = recaptchaVerifier.current as RecaptchaVerifier | null;
-      verifier?.clear();
-      recaptchaVerifier.current = null;
-    };
-  }, []);
-
   const formatPhoneNumber = (phone: string): string => {
     // Format phone number to (XXX) XXX-XXXX format
     const cleaned = phone.replace(/\D/g, "");
@@ -121,7 +104,7 @@ export default function OTPScreen() {
       if (params.verificationId) {
         await verifyOTP(params.verificationId, otp);
       } else if (params.email && params.emailLink) {
-        // Email link verification - needs to be implemented in firebase.ts
+        // Email link verification - needs to be implemented in auth service
         // For now, throw an error indicating this feature needs implementation
         throw new Error("Email link verification is not yet implemented");
       } else {
@@ -158,19 +141,13 @@ export default function OTPScreen() {
       return;
     }
 
-    if (!recaptchaVerifier.current) {
-      logger.warn("Recaptcha verifier unavailable for resend attempt");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-
     try {
       setResendTimer(TIMING.OTP_RESEND_COOLDOWN);
       setCanResend(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const { sendOTP } = await import("../../lib/firebase");
-      const id = await sendOTP(params.phoneNumber, recaptchaVerifier.current);
+      const { sendOTP } = await import("@/services/auth");
+      const id = await sendOTP(params.phoneNumber);
       router.setParams({ verificationId: id });
     } catch (error) {
       setResendTimer(0);
@@ -203,9 +180,6 @@ export default function OTPScreen() {
       className="flex-1"
       style={{ backgroundColor: "#F2F2F2" }}
     >
-      {Platform.OS === "web" && (
-        <View nativeID="otp-recaptcha-container" style={{ display: "none" }} />
-      )}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"

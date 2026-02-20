@@ -27,10 +27,10 @@ export default function ChatList() {
       ]);
       setChats(userChats);
       
-      // Create a map of firebaseUid -> User for quick lookup
+      // Create a map of authUserId -> User for quick lookup
       const map = new Map<string, User>();
       allUsers.forEach(user => {
-        map.set(user.firebaseUid, user);
+        map.set(user.authUserId, user);
       });
       setUserMap(map);
     } catch (error) {
