@@ -8,7 +8,7 @@ Spring Boot backend for ManaBandhu application.
 - Spring Boot 3.2.1
 - PostgreSQL
 - Redis
-- JWT authentication
+- JWT auth module
 
 ## Prerequisites
 
@@ -16,6 +16,7 @@ Spring Boot backend for ManaBandhu application.
 - Maven 3.9+
 - PostgreSQL
 - Redis
+- JWT secret
 
 ## Setup
 
@@ -29,7 +30,13 @@ JWT_ACCESS_TTL_SECONDS=3600
 JWT_REFRESH_TTL_SECONDS=2592000
 ```
 
-## Run locally
+### 2. Auth Setup
+
+1. Set JWT secret in environment
+2. Save it as `serviceAccountKey.json` in the backend directory
+3. Update the path in the `.env` file
+
+### 3. Running Locally
 
 ```bash
 ./mvnw spring-boot:run
@@ -43,7 +50,9 @@ Swagger UI: `http://localhost:9090/swagger-ui.html`
 
 Protected endpoints require:
 
-```http
+All protected endpoints require a access token in the Authorization header:
+
+```
 Authorization: Bearer <access-token>
 ```
 
