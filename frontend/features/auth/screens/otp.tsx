@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { OTPInput } from "@/shared/components/ui/OTPInput";
 import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { Logo } from "@/shared/components/ui/Logo";
-import { verifyOTP } from "@/services/auth";
+import { sendOTP, verifyOTP } from "@/services/auth";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Path } from "react-native-svg";
 import { navigateAfterAuth } from "@/lib/navigation";
@@ -146,7 +146,6 @@ export default function OTPScreen() {
       setCanResend(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const { sendOTP } = await import("@/services/auth");
       const id = await sendOTP(params.phoneNumber);
       router.setParams({ verificationId: id });
     } catch (error) {

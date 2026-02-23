@@ -10,7 +10,7 @@ import {
   QuestionsFilter 
 } from '@/shared/types/qa';
 import { toast } from '@/lib/toast';
-import { getAuthToken } from '../auth-token';
+import { getAuthToken } from '@/services/auth';
 
 export interface ApiError {
   status: number;
@@ -97,7 +97,11 @@ class QaApiService {
 
   private async getAuthHeaders() {
     const token = await getAuthToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   async getQuestions(filter: QuestionsFilter = {}) {
