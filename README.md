@@ -63,17 +63,15 @@ npm run dev
 
 Use `.env.example` at repo root as the baseline.
 
-Create `.env` file with Legacy provider and API configuration:
+Create `.env` file with API/auth configuration:
 
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:9090
-EXPO_PUBLIC_FIREBASE_API_KEY=your_legacy-provider_api_key
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_legacy-provider_domain
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_legacy-provider_project_id
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_client_id
+EXPO_PUBLIC_AUTH_PROVIDER=mock
+EXPO_PUBLIC_APP_ENV=development
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+EXPO_PUBLIC_APPLE_TEAM_ID=your_apple_team_id
+EXPO_PUBLIC_EAS_PROJECT_ID=your_eas_project_id
 ```
 
 ### Backend

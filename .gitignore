@@ -136,7 +136,6 @@ target/
 
 # Secrets & Credentials (NEVER COMMIT!)
 serviceAccountKey.json
-firebase-adminsdk-*.json
 gcloud-service-key.json
 *.p12
 *.pfx
@@ -155,4 +154,3 @@ docker-compose.override.yml
 
 # Redis
 dump.rdb
-
