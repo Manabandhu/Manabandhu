@@ -1,9 +1,9 @@
 package com.manabandhu.rides;
 
-import com.manabandhu.model.ride.RidePost;
+import com.manabandhu.modules.travel.rides.components.model.RidePost;
 import com.manabandhu.repository.RidePostActivityRepository;
 import com.manabandhu.repository.RidePostRepository;
-import com.manabandhu.service.ride.RidePostService;
+import com.manabandhu.modules.travel.rides.components.service.RidePostService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

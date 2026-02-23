@@ -2,7 +2,7 @@ package com.manabandhu.shared.utils;
 
 import com.manabandhu.dto.SendMessageRequest;
 import com.manabandhu.modules.messaging.chat.components.model.Message;
-import com.manabandhu.service.ChatService;
+import com.manabandhu.shared.utils.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;

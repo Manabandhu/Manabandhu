@@ -55,6 +55,7 @@ const decodePolyline = (encoded: string): Array<{ latitude: number; longitude: n
 };
 
 export default function RideMapView({ ride, height = 300, showRoute = true }: RideMapViewProps) {
+  const isWeb = (Platform.OS as string) === "web";
   const routeCoordinates = useMemo(() => {
     if (showRoute && ride.routePolyline) {
       return decodePolyline(ride.routePolyline);
@@ -97,7 +98,7 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
   };
 
   // Web fallback
-  if (Platform.OS === 'web') {
+  if (isWeb) {
     const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || (typeof window !== 'undefined' && (window as any).__GOOGLE_MAPS_API_KEY__);
     const center = `${region.latitude},${region.longitude}`;
     
@@ -221,7 +222,7 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
                 borderRadius: 12,
                 borderWidth: 3,
                 borderColor: 'white',
-                ...(Platform.OS === 'web' ? {
+                ...(isWeb ? {
                   boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
                 } : {
                   shadowColor: '#000',
@@ -250,7 +251,7 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
                 borderRadius: 12,
                 borderWidth: 3,
                 borderColor: 'white',
-                ...(Platform.OS === 'web' ? {
+                ...(isWeb ? {
                   boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
                 } : {
                   shadowColor: '#000',
@@ -270,7 +271,7 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
         onPress={handleOpenDirections}
         className="absolute bottom-4 right-4 bg-blue-600 rounded-full px-4 py-3 flex-row items-center shadow-lg"
         style={{
-          ...(Platform.OS === 'web' ? {
+          ...(isWeb ? {
             boxShadow: '0 2px 3.84px rgba(0, 0, 0, 0.25)',
           } : {
             shadowColor: '#000',
@@ -288,4 +289,3 @@ export default function RideMapView({ ride, height = 300, showRoute = true }: Ri
     </View>
   );
 }
-

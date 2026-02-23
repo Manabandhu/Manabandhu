@@ -1,4 +1,14 @@
 package com.manabandhu.repository;
 
-public interface RoomReviewRepository extends com.manabandhu.shared.utils.RoomReviewRepository {
+import com.manabandhu.modules.travel.rooms.components.model.RoomReview;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface RoomReviewRepository extends JpaRepository<RoomReview, UUID> {
+    Optional<RoomReview> findByListingIdAndReviewerUserIdAndType(UUID listingId, String reviewerUserId, RoomReview.ReviewType type);
+
+    List<RoomReview> findByListingIdOrderByCreatedAtDesc(UUID listingId);
 }

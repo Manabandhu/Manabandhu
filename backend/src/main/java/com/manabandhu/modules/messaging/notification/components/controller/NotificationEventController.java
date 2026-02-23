@@ -1,7 +1,7 @@
 package com.manabandhu.modules.messaging.notification.components.controller;
 
 import com.manabandhu.modules.messaging.notification.components.dto.NotificationEventRequest;
-import com.manabandhu.service.NotificationEventService;
+import com.manabandhu.shared.utils.NotificationEventService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

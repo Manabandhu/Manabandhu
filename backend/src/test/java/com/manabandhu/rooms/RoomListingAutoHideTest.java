@@ -1,9 +1,9 @@
 package com.manabandhu.rooms;
 
-import com.manabandhu.model.room.RoomListing;
+import com.manabandhu.modules.travel.rooms.components.model.RoomListing;
 import com.manabandhu.repository.RoomListingActivityRepository;
 import com.manabandhu.repository.RoomListingRepository;
-import com.manabandhu.service.RoomListingService;
+import com.manabandhu.shared.utils.RoomListingService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,8 @@ import java.util.List;
         "spring.datasource.url=jdbc:h2:mem:roomautohide;DB_CLOSE_DELAY=-1",
         "spring.datasource.driverClassName=org.h2.Driver",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.show-sql=false"
+        "spring.jpa.show-sql=false",
+        "spring.flyway.enabled=false"
 })
 class RoomListingAutoHideTest {
 

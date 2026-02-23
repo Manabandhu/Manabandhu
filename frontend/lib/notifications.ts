@@ -12,6 +12,8 @@ if (!isExpoGo) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: true,
     }),
@@ -219,4 +221,3 @@ export async function scheduleLocalNotification(
     trigger: trigger || null, // null means show immediately
   });
 }
-

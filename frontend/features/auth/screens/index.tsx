@@ -23,10 +23,8 @@ export default function AuthIndex() {
     try {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const result = await signInWithGoogle();
-      if (result.user) {
-        await navigateAfterAuth();
-      }
+      await signInWithGoogle();
+      await navigateAfterAuth();
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -38,10 +36,8 @@ export default function AuthIndex() {
     try {
       setLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const result = await signInWithApple();
-      if (result.user) {
-        await navigateAfterAuth();
-      }
+      await signInWithApple();
+      await navigateAfterAuth();
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

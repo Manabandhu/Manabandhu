@@ -3,7 +3,7 @@ package com.manabandhu.modules.community.discussions.components.controller;
 import com.manabandhu.dto.CommentDTO;
 import com.manabandhu.dto.CommunityPostDTO;
 import com.manabandhu.dto.CreateCommentRequest;
-import com.manabandhu.service.CommunityService;
+import com.manabandhu.shared.utils.CommunityService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

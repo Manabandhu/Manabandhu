@@ -2,7 +2,7 @@ package com.manabandhu.modules.user.components.controller;
 
 import com.manabandhu.core.security.JwtTokenService;
 import com.manabandhu.dto.*;
-import com.manabandhu.service.UserService;
+import com.manabandhu.shared.utils.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

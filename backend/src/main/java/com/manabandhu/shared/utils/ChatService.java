@@ -1,9 +1,9 @@
 package com.manabandhu.shared.utils;
 
-import com.manabandhu.dto.ChatDTO;
-import com.manabandhu.dto.MessageDTO;
+import com.manabandhu.modules.messaging.chat.components.dto.ChatDTO;
+import com.manabandhu.shared.dto.MessageDTO;
 import com.manabandhu.modules.messaging.shared.dto.ChatMessageEvent;
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.modules.messaging.chat.components.model.Chat;
 import com.manabandhu.modules.messaging.chat.components.model.Message;
 import com.manabandhu.repository.ChatRepository;

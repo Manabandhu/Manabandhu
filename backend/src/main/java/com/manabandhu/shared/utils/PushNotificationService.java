@@ -1,6 +1,6 @@
 package com.manabandhu.shared.utils;
 
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.modules.messaging.notification.components.model.PushToken;
 import com.manabandhu.repository.PushTokenRepository;
 import com.manabandhu.repository.UserRepository;

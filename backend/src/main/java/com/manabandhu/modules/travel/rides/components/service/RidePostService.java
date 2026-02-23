@@ -5,13 +5,14 @@ import com.manabandhu.modules.travel.rides.components.model.RideConversationLink
 import com.manabandhu.modules.travel.rides.components.model.RidePost;
 import com.manabandhu.modules.travel.rides.components.model.RidePostActivity;
 import com.manabandhu.modules.travel.rides.components.model.RideRequest;
+import com.manabandhu.modules.travel.rides.components.dto.RideRequirements;
 import com.manabandhu.repository.RideConversationLinkRepository;
 import com.manabandhu.repository.RidePostActivityRepository;
 import com.manabandhu.repository.RidePostRepository;
 import com.manabandhu.repository.RideRequestRepository;
-import com.manabandhu.service.ChatService;
-import com.manabandhu.service.NotificationEventService;
-import com.manabandhu.service.WebSocketService;
+import com.manabandhu.shared.utils.ChatService;
+import com.manabandhu.shared.utils.NotificationEventService;
+import com.manabandhu.shared.utils.WebSocketService;
 import com.manabandhu.modules.travel.rides.components.dto.RidePostResponse;
 import com.manabandhu.modules.messaging.shared.dto.RideUpdateEvent;
 import com.manabandhu.modules.messaging.notification.components.model.NotificationEvent;
@@ -318,7 +319,7 @@ public class RidePostService {
         String chatThreadId = chatService.getOrCreateDirectChat(
             post.getOwnerUserId(), 
             currentUserId,
-            com.manabandhu.model.chat.Chat.ChatContext.RIDE
+            com.manabandhu.modules.messaging.chat.components.model.Chat.ChatContext.RIDE
         ).getId().toString();
         RideConversationLink link = conversationLinkRepository
                 .findByRidePostIdAndOwnerUserIdAndOtherUserId(postId, post.getOwnerUserId(), currentUserId)
@@ -489,7 +490,7 @@ public class RidePostService {
         return post;
     }
 
-    private Map<String, Object> requirementsToMap(com.manabandhu.dto.rides.RideRequirements requirements) {
+    private Map<String, Object> requirementsToMap(RideRequirements requirements) {
         if (requirements == null) {
             return null;
         }

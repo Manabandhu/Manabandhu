@@ -3,7 +3,7 @@ package com.manabandhu.modules.finance.expenses.components.controller;
 import com.manabandhu.modules.finance.expenses.components.dto.ExpenseRequest;
 import com.manabandhu.modules.finance.expenses.components.dto.ExpenseResponse;
 import com.manabandhu.modules.finance.expenses.components.model.Expense.ExpenseCategory;
-import com.manabandhu.service.ExpenseService;
+import com.manabandhu.shared.utils.ExpenseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

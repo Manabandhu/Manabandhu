@@ -49,8 +49,8 @@ public class NotificationEventService {
 
         // Send WebSocket notification
         try {
-            com.manabandhu.dto.websocket.NotificationEvent wsEvent = 
-                new com.manabandhu.dto.websocket.NotificationEvent(
+            com.manabandhu.modules.messaging.shared.dto.NotificationEvent wsEvent =
+                new com.manabandhu.modules.messaging.shared.dto.NotificationEvent(
                     type.toString(), 
                     title, 
                     body, 

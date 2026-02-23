@@ -9,10 +9,10 @@ interface LocationPickerProps {
   placeholder: string;
   value: {
     label: string;
-    lat?: number;
-    lng?: number;
+    lat: number | undefined;
+    lng: number | undefined;
   };
-  onChange: (location: { label: string; lat: number; lng: number }) => void;
+  onChange: (location: { label: string; lat: number | undefined; lng: number | undefined }) => void;
   required?: boolean;
 }
 
@@ -233,5 +233,3 @@ export default function LocationPicker({
     </View>
   );
 }
-
-

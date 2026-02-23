@@ -7,7 +7,7 @@ import com.manabandhu.modules.immigration.components.model.ImmigrationNewsActivi
 import com.manabandhu.modules.immigration.components.model.ImmigrationNewsArticle;
 import com.manabandhu.modules.immigration.components.model.ImmigrationNewsBookmark;
 import com.manabandhu.repository.*;
-import com.manabandhu.service.NotificationEventService;
+import com.manabandhu.shared.utils.NotificationEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;

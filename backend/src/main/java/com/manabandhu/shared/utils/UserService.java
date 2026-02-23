@@ -5,7 +5,7 @@ import com.manabandhu.dto.OnboardingRequest;
 import com.manabandhu.dto.UserDTO;
 import com.manabandhu.core.exception.ResourceNotFoundException;
 import com.manabandhu.core.exception.ValidationException;
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

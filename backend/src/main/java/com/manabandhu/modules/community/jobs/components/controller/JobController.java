@@ -2,7 +2,7 @@ package com.manabandhu.modules.community.jobs.components.controller;
 
 import com.manabandhu.dto.JobDTO;
 import com.manabandhu.modules.community.jobs.components.model.Job;
-import com.manabandhu.service.JobService;
+import com.manabandhu.shared.utils.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

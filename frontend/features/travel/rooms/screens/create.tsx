@@ -6,6 +6,11 @@ import { roomsApi } from "@/shared/api/rooms";
 import { uploadRoomImages } from "@/features/travel/rooms/storage";
 import { auth } from "@/services/auth";
 import { CheckIcon, HomeIcon } from "@/shared/components/ui/Icons";
+import {
+  buildRoomListingPayload,
+  validateRoomListingValues,
+} from "@/features/travel/rooms/utils/listingPayload";
+import { getRequestErrorMessage } from "@/shared/api/request-utils";
 
 export default function CreateRoomListing() {
   const router = useRouter();
@@ -14,51 +19,9 @@ export default function CreateRoomListing() {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const checkScaleAnim = useRef(new Animated.Value(0)).current;
-  const parseContactPreference = (value: string) => {
-    if (!value.trim()) return null;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  };
 
   const handleSubmit = async (values: RoomListingFormValues) => {
-    // Comprehensive validation
-    const errors: string[] = [];
-    
-    if (!values.title.trim()) {
-      errors.push("Title is required");
-    }
-    if (!values.rentMonthly.trim() || isNaN(Number(values.rentMonthly)) || Number(values.rentMonthly) <= 0) {
-      errors.push("Valid rent amount is required");
-    }
-    if (!values.latApprox.trim() || isNaN(Number(values.latApprox))) {
-      errors.push("Approximate location (latitude) is required");
-    }
-    if (!values.lngApprox.trim() || isNaN(Number(values.lngApprox))) {
-      errors.push("Approximate location (longitude) is required");
-    }
-    if (!values.approxAreaLabel.trim()) {
-      errors.push("Area label is required");
-    }
-    if (!values.listingFor) {
-      errors.push("Listing type is required");
-    }
-    if (!values.roomType) {
-      errors.push("Room type is required");
-    }
-    if (!values.visitType) {
-      errors.push("Visit type is required");
-    }
-    if (values.locationExactEnabled) {
-      if (!values.latExact.trim() || isNaN(Number(values.latExact))) {
-        errors.push("Exact location (latitude) is required when exact location is enabled");
-      }
-      if (!values.lngExact.trim() || isNaN(Number(values.lngExact))) {
-        errors.push("Exact location (longitude) is required when exact location is enabled");
-      }
-    }
+    const errors = validateRoomListingValues(values);
 
     if (errors.length > 0) {
       Alert.alert(
@@ -82,43 +45,7 @@ export default function CreateRoomListing() {
       const uploadedUrls = newImageUris.length ? await uploadRoomImages(newImageUris, ownerUserId) : [];
       const existingUrls = values.images.filter((image) => image.isRemote).map((image) => image.uri);
 
-      const payload = {
-        title: values.title.trim(),
-        listingFor: values.listingFor,
-        roomType: values.roomType,
-        peopleAllowed: Number(values.peopleAllowed) || 1,
-        rentMonthly: Number(values.rentMonthly),
-        deposit: values.deposit ? Number(values.deposit) : null,
-        leaseStartDate: values.leaseStartDate || null,
-        leaseEndDate: values.leaseEndDate || null,
-        leaseExtendable: values.leaseExtendable,
-        utilitiesIncluded: values.utilitiesIncluded,
-        utilities: values.utilities
-          ? values.utilities.split(",").map((item) => item.trim()).filter(Boolean)
-          : [],
-        amenities: values.amenities
-          ? values.amenities.split(",").map((item) => item.trim()).filter(Boolean)
-          : [],
-        visitType: values.visitType,
-        contactPreference: parseContactPreference(values.contactPreference),
-        description: values.description,
-        locationExactEnabled: values.locationExactEnabled,
-        latExact: values.locationExactEnabled && values.latExact ? Number(values.latExact) : null,
-        lngExact: values.locationExactEnabled && values.lngExact ? Number(values.lngExact) : null,
-        latApprox: Number(values.latApprox),
-        lngApprox: Number(values.lngApprox),
-        approxAreaLabel: values.approxAreaLabel,
-        nearbyLocalities: values.nearbyLocalities
-          ? values.nearbyLocalities.split(",").map((item) => item.trim()).filter(Boolean)
-          : [],
-        nearbySchools: values.nearbySchools
-          ? values.nearbySchools.split(",").map((item) => item.trim()).filter(Boolean)
-          : [],
-        nearbyCompanies: values.nearbyCompanies
-          ? values.nearbyCompanies.split(",").map((item) => item.trim()).filter(Boolean)
-          : [],
-        imageUrls: [...existingUrls, ...uploadedUrls],
-      };
+      const payload = buildRoomListingPayload(values, [...existingUrls, ...uploadedUrls]);
 
       await roomsApi.createListing(payload);
       setShowSuccess(true);
@@ -154,9 +81,7 @@ export default function CreateRoomListing() {
       }, 2500);
     } catch (err) {
       console.error("Error creating listing:", err);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : "An unexpected error occurred. Please try again.";
+      const errorMessage = getRequestErrorMessage(err);
       
       Alert.alert(
         "Failed to Create Listing",

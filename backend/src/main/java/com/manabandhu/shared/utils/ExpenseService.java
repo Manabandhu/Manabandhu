@@ -3,7 +3,7 @@ package com.manabandhu.shared.utils;
 import com.manabandhu.modules.finance.expenses.components.dto.ExpenseRequest;
 import com.manabandhu.modules.finance.expenses.components.dto.ExpenseResponse;
 import com.manabandhu.core.exception.ResourceNotFoundException;
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.modules.finance.expenses.components.model.Expense;
 import com.manabandhu.repository.ExpenseRepository;
 import com.manabandhu.repository.UserRepository;

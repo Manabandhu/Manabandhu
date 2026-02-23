@@ -12,7 +12,6 @@ interface AddExpenseBottomSheetProps {
 
 export default function AddExpenseBottomSheet({ visible, onClose, onExpenseAdded }: AddExpenseBottomSheetProps) {
   const router = useRouter();
-  const { isDarkMode } = useThemeStore();
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');

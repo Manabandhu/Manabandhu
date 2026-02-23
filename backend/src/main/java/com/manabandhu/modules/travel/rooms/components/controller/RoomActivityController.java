@@ -1,8 +1,8 @@
 package com.manabandhu.modules.travel.rooms.components.controller;
 
 import com.manabandhu.modules.travel.rooms.components.dto.RoomListingActivityResponse;
-import com.manabandhu.service.RoomListingActivityService;
-import com.manabandhu.service.RoomListingService;
+import com.manabandhu.shared.utils.RoomListingActivityService;
+import com.manabandhu.shared.utils.RoomListingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

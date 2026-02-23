@@ -1,6 +1,6 @@
 package com.manabandhu.modules.finance.splitly.components.repository;
 
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.modules.finance.splitly.components.model.ExpenseSplit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

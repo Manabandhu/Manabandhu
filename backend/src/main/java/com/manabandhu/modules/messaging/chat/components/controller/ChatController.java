@@ -1,10 +1,10 @@
 package com.manabandhu.modules.messaging.chat.components.controller;
 
-import com.manabandhu.dto.ChatDTO;
-import com.manabandhu.dto.MessageDTO;
+import com.manabandhu.modules.messaging.chat.components.dto.ChatDTO;
+import com.manabandhu.shared.dto.MessageDTO;
 import com.manabandhu.modules.messaging.chat.components.model.Chat;
 import com.manabandhu.modules.messaging.chat.components.model.Message;
-import com.manabandhu.service.ChatService;
+import com.manabandhu.shared.utils.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

@@ -9,7 +9,7 @@ import com.manabandhu.modules.immigration.components.model.UscisCaseHistory;
 import com.manabandhu.repository.UscisCaseActivityRepository;
 import com.manabandhu.repository.UscisCaseHistoryRepository;
 import com.manabandhu.repository.UscisCaseRepository;
-import com.manabandhu.service.NotificationEventService;
+import com.manabandhu.shared.utils.NotificationEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -239,7 +239,7 @@ public class UscisCaseService {
             );
             
             notificationService.createEvent(userId, 
-                com.manabandhu.model.notification.NotificationEvent.NotificationType.USCIS_STATUS_CHANGE, 
+                com.manabandhu.modules.messaging.notification.components.model.NotificationEvent.NotificationType.USCIS_STATUS_CHANGE,
                 payload);
         } catch (Exception e) {
             log.error("Failed to send notification for case: {}", uscisCase.getReceiptNumber(), e);

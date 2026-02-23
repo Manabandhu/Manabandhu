@@ -2,7 +2,7 @@ package com.manabandhu.modules.messaging.notification.components.controller;
 
 import com.manabandhu.modules.messaging.notification.components.dto.PushTokenRequest;
 import com.manabandhu.modules.messaging.notification.components.model.PushToken;
-import com.manabandhu.service.PushNotificationService;
+import com.manabandhu.shared.utils.PushNotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

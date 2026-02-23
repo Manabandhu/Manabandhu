@@ -1,7 +1,7 @@
 package com.manabandhu.modules.finance.splitly.components.controller;
 
 import com.manabandhu.modules.finance.splitly.components.dto.*;
-import com.manabandhu.service.SplitlyService;
+import com.manabandhu.shared.utils.SplitlyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

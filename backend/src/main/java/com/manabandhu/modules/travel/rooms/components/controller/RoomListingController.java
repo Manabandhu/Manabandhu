@@ -2,7 +2,7 @@ package com.manabandhu.modules.travel.rooms.components.controller;
 
 import com.manabandhu.modules.travel.rooms.components.dto.*;
 import com.manabandhu.modules.travel.rooms.components.model.RoomListing;
-import com.manabandhu.service.*;
+import com.manabandhu.shared.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,7 +242,7 @@ public class RoomListingController {
             Authentication authentication) {
         String userId = authentication.getName();
         Pageable pageable = PageRequest.of(page, size);
-        Page<com.manabandhu.model.room.SavedListing> saved = savedListingService.getSavedListings(userId, pageable);
+        Page<com.manabandhu.modules.travel.rooms.components.model.SavedListing> saved = savedListingService.getSavedListings(userId, pageable);
         Page<RoomListingSummary> response = saved.map(savedListing -> {
             RoomListing listing = roomListingService.getListing(savedListing.getListingId());
             return new RoomListingSummary(listing);
@@ -256,7 +256,7 @@ public class RoomListingController {
             @Valid @RequestBody PriceAlertRequest request,
             Authentication authentication) {
         String userId = authentication.getName();
-        com.manabandhu.model.room.PriceAlert alert = priceAlertService.createAlert(userId, request);
+        com.manabandhu.modules.travel.rooms.components.model.PriceAlert alert = priceAlertService.createAlert(userId, request);
         return ResponseEntity.ok(Map.of("id", alert.getId().toString()));
     }
 
@@ -295,7 +295,7 @@ public class RoomListingController {
             Authentication authentication) {
         String userId = authentication.getName();
         Pageable pageable = PageRequest.of(page, size);
-        Page<com.manabandhu.model.room.PriceAlert> alerts = priceAlertService.getUserAlerts(userId, pageable);
+        Page<com.manabandhu.modules.travel.rooms.components.model.PriceAlert> alerts = priceAlertService.getUserAlerts(userId, pageable);
         Page<Map<String, Object>> response = alerts.map(alert -> Map.of(
                 "id", alert.getId().toString(),
                 "maxRent", alert.getMaxRent() != null ? alert.getMaxRent() : "",

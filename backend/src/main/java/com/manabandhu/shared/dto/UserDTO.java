@@ -1,6 +1,6 @@
 package com.manabandhu.shared.dto;
 
-import com.manabandhu.model.AuthProvider;
+import com.manabandhu.shared.utils.AuthProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,7 @@
 package com.manabandhu.modules.messaging.chat.components.dto;
 
 import com.manabandhu.modules.messaging.chat.components.model.Chat;
+import com.manabandhu.shared.dto.MessageDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 

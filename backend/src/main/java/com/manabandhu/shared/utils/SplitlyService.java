@@ -1,7 +1,7 @@
 package com.manabandhu.shared.utils;
 
 import com.manabandhu.modules.finance.splitly.components.dto.*;
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import com.manabandhu.modules.finance.splitly.components.model.*;
 import com.manabandhu.repository.UserRepository;
 import com.manabandhu.modules.finance.splitly.components.repository.*;

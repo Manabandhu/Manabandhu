@@ -1,5 +1,5 @@
 import { auth, getAuthToken } from '@/services/auth';
-import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
 const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
@@ -154,14 +154,14 @@ class WebSocketClient {
         reconnectDelay: this.reconnectDelay,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
-        debug: (str) => {
+        debug: (str: string) => {
           if (__DEV__) {
             console.log('STOMP:', str);
           }
         },
       });
 
-      this.client.onConnect = (frame) => {
+      this.client.onConnect = (frame: IFrame) => {
         console.log('WebSocket STOMP connected successfully');
         console.log('STOMP frame:', frame);
         this.isConnected = true;
@@ -174,7 +174,7 @@ class WebSocketClient {
         }
       };
 
-      this.client.onStompError = (frame) => {
+      this.client.onStompError = (frame: IFrame) => {
         console.error('STOMP error occurred:');
         console.error('STOMP error frame:', frame);
         console.error('STOMP error headers:', frame.headers);
@@ -195,7 +195,7 @@ class WebSocketClient {
         }
       };
 
-      this.client.onWebSocketError = (error) => {
+      this.client.onWebSocketError = (error: unknown) => {
         console.error('WebSocket error:', error);
         // Log error details if available
         if (error instanceof Error) {

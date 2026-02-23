@@ -155,7 +155,7 @@ public class RidePostController {
         String userId = authentication.getName();
         RidePost post = ridePostService.getPost(id, userId);
         long requestCount = rideRequestRepository.countByRidePostIdAndStatus(id, 
-            com.manabandhu.model.ride.RideRequest.RequestStatus.PENDING);
+            com.manabandhu.modules.travel.rides.components.model.RideRequest.RequestStatus.PENDING);
         RidePostResponse response = new RidePostResponse(post);
         response.setRequestCount(requestCount);
         return ResponseEntity.ok(response);
@@ -179,7 +179,7 @@ public class RidePostController {
         String userId = authentication.getName();
         RidePost post = ridePostService.book(userId, id);
         long requestCount = rideRequestRepository.countByRidePostIdAndStatus(id, 
-            com.manabandhu.model.ride.RideRequest.RequestStatus.PENDING);
+            com.manabandhu.modules.travel.rides.components.model.RideRequest.RequestStatus.PENDING);
         RidePostResponse response = new RidePostResponse(post);
         response.setRequestCount(requestCount);
         return ResponseEntity.ok(response);

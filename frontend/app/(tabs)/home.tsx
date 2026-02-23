@@ -365,7 +365,9 @@ export default function HomeScreen() {
                   <Text className="text-white text-xs font-semibold ml-2">
                     {location}
                   </Text>
-                  <ChevronDownIcon size={12} color="rgba(255,255,255,0.8)" style={{ marginLeft: 4 }} />
+                  <View style={{ marginLeft: 4 }}>
+                    <ChevronDownIcon size={12} color="rgba(255,255,255,0.8)" />
+                  </View>
                 </TouchableOpacity>
                 <View className="flex-row items-center bg-white/10 rounded-full px-3 py-1.5">
                   <BellIcon size={14} color="#FFFFFF" />

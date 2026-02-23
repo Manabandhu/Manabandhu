@@ -3,7 +3,7 @@ package com.manabandhu.modules.user.components.controller;
 import com.manabandhu.dto.CreateUserRequest;
 import com.manabandhu.dto.OnboardingRequest;
 import com.manabandhu.dto.UserDTO;
-import com.manabandhu.service.UserService;
+import com.manabandhu.shared.utils.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

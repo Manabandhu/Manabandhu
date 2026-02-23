@@ -1,4 +1,21 @@
 package com.manabandhu.repository;
 
-public interface PushTokenRepository extends com.manabandhu.shared.utils.PushTokenRepository {
+import com.manabandhu.shared.utils.User;
+import com.manabandhu.modules.messaging.notification.components.model.PushToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
+    Optional<PushToken> findByTokenAndUser(String token, User user);
+    List<PushToken> findByUserAndIsActiveTrue(User user);
+    List<PushToken> findByUser(User user);
+    void deleteByToken(String token);
+    void deleteByUser(User user);
+    List<PushToken> findByIsActiveTrue();
 }
+
+

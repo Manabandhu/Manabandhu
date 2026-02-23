@@ -20,6 +20,7 @@ const TAB_CONFIG: { label: string; type: RidePostType }[] = [
 
 export default function RidesHome() {
   const insets = useSafeAreaInsets();
+  const isWeb = (Platform.OS as string) === "web";
   const { isDarkMode } = useThemeStore();
   const [activeTab, setActiveTab] = useState<RidePostType>("OFFER");
   const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
@@ -198,7 +199,7 @@ export default function RidesHome() {
               <Text className="text-2xl font-bold text-gray-900 dark:text-white">Find Your Ride</Text>
               <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Discover rides and carpool opportunities</Text>
             </View>
-            {Platform.OS === 'web' && (
+            {isWeb && (
               <TouchableOpacity
                 onPress={() => setShowActionModal(true)}
                 className="bg-blue-600 px-4 py-2.5 rounded-xl shadow-sm"
@@ -454,7 +455,7 @@ export default function RidesHome() {
       </Modal>
 
       {/* Floating Action Button - Mobile Only */}
-      {Platform.OS !== 'web' && (
+      {!isWeb && (
         <View
           pointerEvents="box-none"
           style={{
@@ -470,7 +471,7 @@ export default function RidesHome() {
             className="w-16 h-16 rounded-full items-center justify-center shadow-lg"
             style={{
               backgroundColor: "#2563EB", // Blue color for rides
-              ...(Platform.OS === 'web' ? {
+              ...(isWeb ? {
                 boxShadow: '0 4px 6px rgba(37, 99, 235, 0.4)',
               } : {
                 shadowColor: "#2563EB",

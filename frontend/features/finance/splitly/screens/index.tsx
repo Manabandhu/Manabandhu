@@ -46,8 +46,9 @@ export default function Splitly() {
             const balances = await splitlyAPI.getGroupBalances(group.id);
             const expenses = await splitlyAPI.getGroupExpenses(group.id, 0, 1);
             
-            const yourBalance = balances.find(b => b.status === 'owed')?.balance || 
-                               -balances.find(b => b.status === 'owes')?.balance || 0;
+            const owedBalance = balances.find((b) => b.status === 'owed')?.balance ?? 0;
+            const owesBalance = balances.find((b) => b.status === 'owes')?.balance ?? 0;
+            const yourBalance = owedBalance !== 0 ? owedBalance : -owesBalance;
             
             return {
               ...group,

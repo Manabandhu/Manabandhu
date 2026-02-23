@@ -1,6 +1,9 @@
 import { API_BASE_URL } from "@/shared/constants/api";
 import { getAuthHeaders } from "@/services/auth";
-import { toast } from "@/lib/toast";
+import {
+  handleApiJsonResponse,
+  handleApiNoContentResponse,
+} from "@/shared/api/request-utils";
 import {
   RoomListing,
   RoomListingActivity,
@@ -31,20 +34,6 @@ const buildQuery = (filters: RoomFilters & { status?: ListingStatus[] }) => {
   return params.toString();
 };
 
-const handleResponse = async (response: Response, successMessage?: string) => {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const message = errorData.message || `HTTP ${response.status}`;
-    throw new Error(message);
-  }
-  
-  if (successMessage) {
-    toast.showSuccess(successMessage);
-  }
-  
-  return response.json();
-};
-
 export const roomsApi = {
   async getListings(filters: RoomFilters & { status?: ListingStatus[] } = {}) {
     try {
@@ -52,7 +41,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings${query ? `?${query}` : ""}`,
         { headers: await getAuthHeaders() }
       );
-      return await handleResponse(response) as { content: RoomListingSummary[] };
+      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -63,7 +52,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/me`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { content: RoomListingSummary[] };
+      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -77,7 +66,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as RoomListing;
+      return await handleApiJsonResponse<RoomListing>(response);
     } catch (error) {
       throw error;
     }
@@ -114,15 +103,7 @@ export const roomsApi = {
         body: JSON.stringify(payload),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || `Failed to create listing (${response.status})`;
-        throw new Error(errorMessage);
-      }
-      
-      const result = await response.json();
-      toast.showSuccess('Room listing created successfully!');
-      return result as RoomListing;
+      return await handleApiJsonResponse<RoomListing>(response, "Room listing created successfully!");
     } catch (error) {
       // Re-throw with better error message
       if (error instanceof Error) {
@@ -143,7 +124,7 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
       });
-      return await handleResponse(response, 'Room listing updated successfully!') as RoomListing;
+      return await handleApiJsonResponse<RoomListing>(response, "Room listing updated successfully!");
     } catch (error) {
       throw error;
     }
@@ -159,7 +140,7 @@ export const roomsApi = {
         method: "DELETE",
         headers: await getAuthHeaders(),
       });
-      await handleResponse(response, 'Room listing deleted successfully!');
+      await handleApiNoContentResponse(response, "Room listing deleted successfully!");
     } catch (error) {
       throw error;
     }
@@ -175,7 +156,7 @@ export const roomsApi = {
         method: "POST",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Room listing reposted successfully!') as RoomListing;
+      return await handleApiJsonResponse<RoomListing>(response, "Room listing reposted successfully!");
     } catch (error) {
       throw error;
     }
@@ -195,7 +176,7 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
-      return await handleResponse(response, 'Listing status updated successfully!') as RoomListing;
+      return await handleApiJsonResponse<RoomListing>(response, "Listing status updated successfully!");
     } catch (error) {
       throw error;
     }
@@ -211,7 +192,7 @@ export const roomsApi = {
         method: "POST",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Chat started successfully!') as { chatThreadId: string };
+      return await handleApiJsonResponse<{ chatThreadId: string }>(response, "Chat started successfully!");
     } catch (error) {
       throw error;
     }
@@ -227,7 +208,7 @@ export const roomsApi = {
         method: "POST",
         headers: await getAuthHeaders(),
       });
-      await handleResponse(response);
+      await handleApiNoContentResponse(response);
     } catch (error) {
       // Don't show error toast for heartbeat failures
       throw error;
@@ -243,7 +224,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as RoomReview[];
+      return await handleApiJsonResponse<RoomReview[]>(response);
     } catch (error) {
       throw error;
     }
@@ -263,7 +244,7 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
       });
-      return await handleResponse(response, 'Review submitted successfully!') as RoomReview;
+      return await handleApiJsonResponse<RoomReview>(response, "Review submitted successfully!");
     } catch (error) {
       throw error;
     }
@@ -283,7 +264,7 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
       });
-      return await handleResponse(response, 'Review updated successfully!') as RoomReview;
+      return await handleApiJsonResponse<RoomReview>(response, "Review updated successfully!");
     } catch (error) {
       throw error;
     }
@@ -299,7 +280,7 @@ export const roomsApi = {
         method: "POST",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Review flagged successfully!') as RoomReview;
+      return await handleApiJsonResponse<RoomReview>(response, "Review flagged successfully!");
     } catch (error) {
       throw error;
     }
@@ -314,7 +295,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews/eligibility`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as ReviewEligibility;
+      return await handleApiJsonResponse<ReviewEligibility>(response);
     } catch (error) {
       throw error;
     }
@@ -325,7 +306,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/activities/home`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { content: RoomListingActivity[] };
+      return await handleApiJsonResponse<{ content: RoomListingActivity[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -336,7 +317,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/activities/me`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { content: RoomListingActivity[] };
+      return await handleApiJsonResponse<{ content: RoomListingActivity[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -355,7 +336,7 @@ export const roomsApi = {
         method: "POST",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Listing saved!') as { saved: boolean };
+      return await handleApiJsonResponse<{ saved: boolean }>(response, "Listing saved!");
     } catch (error) {
       throw error;
     }
@@ -370,7 +351,10 @@ export const roomsApi = {
         method: "DELETE",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Listing removed from saved') as { saved: boolean };
+      return await handleApiJsonResponse<{ saved: boolean }>(
+        response,
+        "Listing removed from saved"
+      );
     } catch (error) {
       throw error;
     }
@@ -384,7 +368,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/saved`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { saved: boolean };
+      return await handleApiJsonResponse<{ saved: boolean }>(response);
     } catch (error) {
       throw error;
     }
@@ -396,7 +380,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/listings/saved${query ? `?${query}` : ""}`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { content: RoomListingSummary[] };
+      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -422,7 +406,7 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
       });
-      return await handleResponse(response, 'Price alert created!') as { id: string };
+      return await handleApiJsonResponse<{ id: string }>(response, "Price alert created!");
     } catch (error) {
       throw error;
     }
@@ -433,7 +417,7 @@ export const roomsApi = {
       const response = await fetch(`${API_BASE_URL}/api/rooms/alerts`, {
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response) as { content: any[] };
+      return await handleApiJsonResponse<{ content: any[] }>(response);
     } catch (error) {
       throw error;
     }
@@ -448,7 +432,7 @@ export const roomsApi = {
         method: "DELETE",
         headers: await getAuthHeaders(),
       });
-      return await handleResponse(response, 'Price alert deleted!');
+      await handleApiNoContentResponse(response, "Price alert deleted!");
     } catch (error) {
       throw error;
     }
@@ -468,7 +452,10 @@ export const roomsApi = {
         headers: await getAuthHeaders(),
         body: JSON.stringify({ reason, description }),
       });
-      return await handleResponse(response, 'Thank you for reporting. We will review this listing.') as { reported: boolean };
+      return await handleApiJsonResponse<{ reported: boolean }>(
+        response,
+        "Thank you for reporting. We will review this listing."
+      );
     } catch (error) {
       throw error;
     }

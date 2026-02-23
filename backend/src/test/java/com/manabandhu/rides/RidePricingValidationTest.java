@@ -1,8 +1,8 @@
 package com.manabandhu.rides;
 
-import com.manabandhu.dto.rides.RidePostRequest;
-import com.manabandhu.model.ride.RidePost;
-import com.manabandhu.service.ride.RidePricingService;
+import com.manabandhu.modules.travel.rides.components.dto.RidePostRequest;
+import com.manabandhu.modules.travel.rides.components.model.RidePost;
+import com.manabandhu.modules.travel.rides.components.service.RidePricingService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

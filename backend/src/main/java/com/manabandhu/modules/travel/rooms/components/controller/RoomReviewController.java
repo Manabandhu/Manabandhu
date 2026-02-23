@@ -4,7 +4,7 @@ import com.manabandhu.modules.travel.rooms.components.dto.RoomReviewRequest;
 import com.manabandhu.modules.travel.rooms.components.dto.RoomReviewResponse;
 import com.manabandhu.modules.travel.rooms.components.dto.RoomReviewUpdateRequest;
 import com.manabandhu.modules.travel.rooms.components.model.RoomReview;
-import com.manabandhu.service.RoomReviewService;
+import com.manabandhu.shared.utils.RoomReviewService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

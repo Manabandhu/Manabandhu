@@ -1,6 +1,6 @@
 package com.manabandhu.modules.messaging.shared.dto;
 
-import com.manabandhu.dto.MessageDTO;
+import com.manabandhu.shared.dto.MessageDTO;
 
 public class ChatMessageEvent extends WebSocketMessage {
     private MessageDTO message;
@@ -32,4 +32,3 @@ public class ChatMessageEvent extends WebSocketMessage {
         this.chatId = chatId;
     }
 }
-

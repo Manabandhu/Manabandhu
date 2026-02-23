@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -75,11 +76,29 @@ const DropdownArrow = ({ size = 12, color = "#6b7280" }) => (
   </Svg>
 );
 
+type CountryCode = "US" | "IN" | "CA" | "GB";
+
+type Country = {
+  cca2: CountryCode;
+  callingCode: [string];
+  name: string;
+  flag: string;
+};
+
+const COUNTRY_OPTIONS: Country[] = [
+  { cca2: "US", callingCode: ["1"], name: "United States", flag: "🇺🇸" },
+  { cca2: "IN", callingCode: ["91"], name: "India", flag: "🇮🇳" },
+  { cca2: "CA", callingCode: ["1"], name: "Canada", flag: "🇨🇦" },
+  { cca2: "GB", callingCode: ["44"], name: "United Kingdom", flag: "🇬🇧" },
+];
+
+const DEFAULT_COUNTRY = COUNTRY_OPTIONS[0];
+
 export default function VerifyPhoneScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [countryCode, setCountryCode] = useState<CountryCode>('US');
-  const [country, setCountry] = useState<Country | null>(null);
+  const [countryCode, setCountryCode] = useState<CountryCode>(DEFAULT_COUNTRY.cca2);
+  const [country, setCountry] = useState<Country>(DEFAULT_COUNTRY);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   
   
@@ -175,22 +194,7 @@ export default function VerifyPhoneScreen() {
                   style={styles.countryCodeSelector}
                   onPress={() => setShowCountryPicker(true)}
                 >
-                  <CountryPicker
-                    countryCode={countryCode}
-                    withFilter
-                    withFlag
-                    withCallingCode
-                    onSelect={onSelectCountry}
-                    visible={showCountryPicker}
-                    onClose={() => setShowCountryPicker(false)}
-                    containerButtonStyle={{
-                      height: '60%',
-                      marginTop: 'auto'
-                    }}
-                    modalProps={{
-                      animationType: 'slide'
-                    }}
-                  />
+                  <Text style={styles.flagIcon}>{country.flag}</Text>
                   <Controller
                     control={control}
                     name="countryCode"
@@ -267,6 +271,34 @@ export default function VerifyPhoneScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showCountryPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCountryPicker(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.countryPickerBackdrop}
+          onPress={() => setShowCountryPicker(false)}
+        >
+          <View style={styles.countryPickerContainer}>
+            <Text style={styles.countryPickerTitle}>Select country</Text>
+            {COUNTRY_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.cca2}
+                style={styles.countryOption}
+                onPress={() => onSelectCountry(option)}
+              >
+                <Text style={styles.flagIcon}>{option.flag}</Text>
+                <Text style={styles.countryOptionText}>{option.name}</Text>
+                <Text style={styles.countryCode}>+{option.callingCode[0]}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -447,5 +479,34 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#6b7280",
     fontFamily: "Inter, -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  },
+  countryPickerBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  countryPickerContainer: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+  },
+  countryPickerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 12,
+  },
+  countryOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+  },
+  countryOptionText: {
+    flex: 1,
+    color: "#111827",
+    fontSize: 15,
+    marginLeft: 8,
   },
 });

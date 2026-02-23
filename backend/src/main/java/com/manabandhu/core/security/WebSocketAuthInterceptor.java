@@ -24,8 +24,6 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         this.jwtTokenService = jwtTokenService;
     }
 
-    private final JwtTokenService jwtTokenService = new JwtTokenService("change-me-change-me-change-me-change-me", 3600, 2592000);
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);

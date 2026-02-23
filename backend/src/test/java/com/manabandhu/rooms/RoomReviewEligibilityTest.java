@@ -1,15 +1,15 @@
 package com.manabandhu.rooms;
 
-import com.manabandhu.dto.rooms.RoomListingRequest;
-import com.manabandhu.model.chat.Chat;
-import com.manabandhu.model.chat.Message;
-import com.manabandhu.model.room.ConversationLink;
-import com.manabandhu.model.room.RoomListing;
+import com.manabandhu.modules.messaging.chat.components.model.Chat;
+import com.manabandhu.modules.messaging.chat.components.model.Message;
+import com.manabandhu.modules.travel.rooms.components.dto.RoomListingRequest;
+import com.manabandhu.modules.travel.rooms.components.model.ConversationLink;
+import com.manabandhu.modules.travel.rooms.components.model.RoomListing;
 import com.manabandhu.repository.ChatRepository;
 import com.manabandhu.repository.ConversationLinkRepository;
 import com.manabandhu.repository.MessageRepository;
-import com.manabandhu.service.RoomListingService;
-import com.manabandhu.service.RoomReviewService;
+import com.manabandhu.shared.utils.RoomListingService;
+import com.manabandhu.shared.utils.RoomReviewService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,8 @@ import java.util.List;
         "spring.datasource.url=jdbc:h2:mem:roomreview;DB_CLOSE_DELAY=-1",
         "spring.datasource.driverClassName=org.h2.Driver",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.show-sql=false"
+        "spring.jpa.show-sql=false",
+        "spring.flyway.enabled=false"
 })
 class RoomReviewEligibilityTest {
 

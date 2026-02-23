@@ -82,7 +82,9 @@ export const useAuthStore = create<AuthState>()(
         if (unsub) unsub();
         set({ unsubscribe: null });
       },
-      updateUserProfile: async (updates) => set((state) => ({ user: state.user ? { ...state.user, ...updates } : null })),
+      updateUserProfile: async (updates) => {
+        set((state) => ({ user: state.user ? { ...state.user, ...updates } : null }));
+      },
       signOut: async () => {
         get().cleanup();
         await authSignOut();

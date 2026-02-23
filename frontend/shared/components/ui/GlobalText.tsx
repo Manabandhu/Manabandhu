@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, TextProps } from 'react-native';
+import { StyleSheet, Text as RNText, TextProps, TextStyle } from 'react-native';
 import { useFontStore } from '@/store/font.store';
 
 const OriginalText = RNText;
@@ -8,12 +8,8 @@ const ScaledText: React.FC<TextProps> = ({ style, ...props }) => {
   const { scale } = useFontStore();
   
   const scaledStyle = React.useMemo(() => {
-    if (!style) return { fontSize: 16 * scale };
-    
-    const styleArray = Array.isArray(style) ? style : [style];
-    const flatStyle = styleArray.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-    const baseFontSize = flatStyle.fontSize || 16;
-    
+    const flatStyle = (StyleSheet.flatten(style) ?? {}) as TextStyle;
+    const baseFontSize = typeof flatStyle.fontSize === 'number' ? flatStyle.fontSize : 16;
     return [style, { fontSize: baseFontSize * scale }];
   }, [style, scale]);
 

@@ -1,6 +1,6 @@
 package com.manabandhu.modules.finance.splitly.components.model;
 
-import com.manabandhu.model.User;
+import com.manabandhu.shared.utils.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

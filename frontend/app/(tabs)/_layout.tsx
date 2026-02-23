@@ -67,7 +67,7 @@ export default function TabsLayout() {
           name="home" 
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => <HomeIcon size={size} color={color} />,
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => <HomeIcon size={size} color={color} />,
           }}
         />
         
@@ -75,7 +75,7 @@ export default function TabsLayout() {
           name="chat" 
           options={{
             title: "Chat",
-            tabBarIcon: ({ color, size }) => <MessageIcon size={size} color={color} />,
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => <MessageIcon size={size} color={color} />,
           }}
         />
         
@@ -83,7 +83,7 @@ export default function TabsLayout() {
           name="explore" 
           options={{
             title: "Explore",
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => (
               <View style={styles.exploreButton}>
                 <PlusIcon size={28} color="#FFFFFF" />
               </View>
@@ -91,7 +91,7 @@ export default function TabsLayout() {
             tabBarLabel: () => null,
           }}
           listeners={{
-            tabPress: (e) => {
+            tabPress: (e: { preventDefault: () => void }) => {
               e.preventDefault();
               setShowExploreMenu(true);
             },
@@ -102,7 +102,7 @@ export default function TabsLayout() {
           name="community" 
           options={{
             title: "Community",
-            tabBarIcon: ({ color, size }) => <UsersIcon size={size} color={color} />,
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => <UsersIcon size={size} color={color} />,
           }}
         />
         
@@ -110,7 +110,7 @@ export default function TabsLayout() {
           name="profile" 
           options={{
             title: "Profile",
-            tabBarIcon: ({ color, size }) => <UserIcon size={size} color={color} />,
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => <UserIcon size={size} color={color} />,
           }}
         />
         

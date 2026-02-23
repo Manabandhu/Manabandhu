@@ -14,6 +14,7 @@ import { useThemeStore } from "@/store/theme.store";
 
 export default function RoomFinderHome() {
   const insets = useSafeAreaInsets();
+  const isWeb = (Platform.OS as string) === "web";
   const { isDarkMode } = useThemeStore();
   const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
   const [filters, setFilters] = useState<RoomFilters>({});
@@ -78,7 +79,7 @@ export default function RoomFinderHome() {
             >
               <Text className="text-gray-700 dark:text-gray-300 font-medium text-sm">💾 Saved</Text>
             </TouchableOpacity>
-            {Platform.OS === 'web' && (
+            {isWeb && (
               <TouchableOpacity
                 onPress={() => navigateTo("/rooms/create")}
                 className="bg-indigo-600 px-4 py-2.5 rounded-xl shadow-sm"
@@ -222,14 +223,14 @@ export default function RoomFinderHome() {
       </BottomSheet>
 
       {/* Floating Action Button - Mobile Only (Rooms specific styling) */}
-      {Platform.OS !== 'web' && (
+      {!isWeb && (
         <TouchableOpacity
           onPress={() => navigateTo("/rooms/create")}
           className="absolute right-6 w-16 h-16 rounded-full items-center justify-center shadow-lg"
           style={{
             bottom: 24 + insets.bottom,
             backgroundColor: "#10B981", // Green color for rooms/housing
-            ...(Platform.OS === 'web' ? {
+            ...(isWeb ? {
               boxShadow: '0 4px 6px rgba(16, 185, 129, 0.4)',
             } : {
               shadowColor: "#10B981",

@@ -253,7 +253,7 @@ public class RoomListingService {
             String chatThreadId = chatService.getOrCreateDirectChat(
                 listing.getOwnerUserId(), 
                 currentUserId, 
-                com.manabandhu.model.chat.Chat.ChatContext.ROOM
+                com.manabandhu.modules.messaging.chat.components.model.Chat.ChatContext.ROOM
             ).getId().toString();
             ConversationLink link = conversationLinkRepository
                     .findByListingIdAndOwnerUserIdAndOtherUserId(listingId, listing.getOwnerUserId(), currentUserId)

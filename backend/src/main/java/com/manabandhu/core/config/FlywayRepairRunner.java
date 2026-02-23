@@ -4,6 +4,7 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@ConditionalOnBean(Flyway.class)
 @ConditionalOnProperty(name = "spring.flyway.repair-on-startup", havingValue = "true", matchIfMissing = false)
 public class FlywayRepairRunner implements CommandLineRunner {
 
@@ -61,4 +63,3 @@ public class FlywayRepairRunner implements CommandLineRunner {
         }
     }
 }
-
