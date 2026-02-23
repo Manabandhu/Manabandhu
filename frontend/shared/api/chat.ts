@@ -1,6 +1,5 @@
 import { API_BASE_URL } from '@/shared/constants/api';
-import { useAuthStore } from '@/store/auth.store';
-import { getAuthToken } from '@/services/auth';
+import { getAuthHeaders } from '@/services/auth';
 
 export type ChatContext = 'ROOM' | 'RIDE' | 'COMMUNITY' | 'GROUP' | 'PERSONAL' | 'ONE_ON_ONE';
 
@@ -36,20 +35,9 @@ export interface CreateChatRequest {
 }
 
 class ChatAPI {
-  private async getAuthHeaders() {
-    const token = await getAuthToken();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    return headers;
-  }
-
   async getUserChats(): Promise<Chat[]> {
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch chats');
     return response.json();
@@ -58,7 +46,7 @@ class ChatAPI {
   async createChat(request: CreateChatRequest): Promise<Chat> {
     const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(request),
     });
     if (!response.ok) throw new Error('Failed to create chat');
@@ -68,7 +56,7 @@ class ChatAPI {
   async getOrCreateDirectChat(userId: string): Promise<Chat> {
     const response = await fetch(`${API_BASE_URL}/api/chat/direct/${userId}`, {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to get/create direct chat');
     return response.json();
@@ -76,7 +64,7 @@ class ChatAPI {
 
   async getChatMessages(chatId: number, page = 0, size = 20): Promise<{ content: Message[]; totalElements: number }> {
     const response = await fetch(`${API_BASE_URL}/api/chat/${chatId}/messages?page=${page}&size=${size}`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch messages');
     return response.json();
@@ -85,7 +73,7 @@ class ChatAPI {
   async sendMessage(chatId: number, request: SendMessageRequest): Promise<Message> {
     const response = await fetch(`${API_BASE_URL}/api/chat/${chatId}/messages`, {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(request),
     });
     if (!response.ok) throw new Error('Failed to send message');

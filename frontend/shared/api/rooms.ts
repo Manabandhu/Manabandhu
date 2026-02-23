@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/shared/constants/api";
-import { getAuthToken } from "@/services/auth";
+import { getAuthHeaders } from "@/services/auth";
 import { toast } from "@/lib/toast";
 import {
   RoomListing,
@@ -29,17 +29,6 @@ const buildQuery = (filters: RoomFilters & { status?: ListingStatus[] }) => {
     filters.status.forEach((status) => params.append("status", status));
   }
   return params.toString();
-};
-
-const getAuthHeaders = async () => {
-  const token = await getAuthToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
 };
 
 const handleResponse = async (response: Response, successMessage?: string) => {

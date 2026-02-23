@@ -10,7 +10,7 @@ import {
   QuestionsFilter 
 } from '@/shared/types/qa';
 import { toast } from '@/lib/toast';
-import { getAuthToken } from '@/services/auth';
+import { getAuthHeaders } from '@/services/auth';
 
 export interface ApiError {
   status: number;
@@ -95,15 +95,6 @@ class QaApiService {
     }
   }
 
-  private async getAuthHeaders() {
-    const token = await getAuthToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    return headers;
-  }
-
   async getQuestions(filter: QuestionsFilter = {}) {
     const params = new URLSearchParams();
     if (filter.search) params.append('search', filter.search);
@@ -120,20 +111,20 @@ class QaApiService {
       number: number;
       size: number;
     }>(`/questions?${params.toString()}`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
   async getQuestion(id: string) {
     return this.request<Question>(`/questions/${id}`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
   async createQuestion(data: QuestionRequest) {
     const result = await this.request<Question>('/questions', {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -143,14 +134,14 @@ class QaApiService {
 
   async getAnswers(questionId: string) {
     return this.request<Answer[]>(`/questions/${questionId}/answers`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
   async createAnswer(questionId: string, data: AnswerRequest) {
     const result = await this.request<Answer>(`/questions/${questionId}/answers`, {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -161,7 +152,7 @@ class QaApiService {
   async acceptAnswer(answerId: string) {
     await this.request<void>(`/answers/${answerId}/accept`, {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     
     toast.showSuccess('Answer accepted successfully!');
@@ -170,7 +161,7 @@ class QaApiService {
   async vote(data: VoteRequest) {
     await this.request<void>('/votes', {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(data),
     }, false); // Don't show error toast for votes as they're frequent
   }
@@ -178,7 +169,7 @@ class QaApiService {
   async reportContent(data: ReportRequest) {
     await this.request<void>('/report', {
       method: 'POST',
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
       body: JSON.stringify(data),
     });
     
@@ -191,13 +182,13 @@ class QaApiService {
 
   async getUserQuestions(userId: string) {
     return this.request<Question[]>(`/users/${userId}/questions`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
   async getUserAnswers(userId: string) {
     return this.request<Answer[]>(`/users/${userId}/answers`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 }

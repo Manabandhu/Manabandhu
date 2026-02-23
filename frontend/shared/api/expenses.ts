@@ -1,5 +1,4 @@
 import apiClient from './client';
-import { getAuthHeaders } from './auth-token';
 
 export interface Expense {
   id: number;
@@ -84,5 +83,4 @@ class ExpensesAPI {
 }
 
 export const expensesAPI = new ExpensesAPI();
-
 

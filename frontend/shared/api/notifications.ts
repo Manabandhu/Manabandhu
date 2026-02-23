@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { getAuthToken } from './auth-token';
+import { getAuthHeaders } from './auth-token';
 
 export interface PushTokenRequest {
   token: string;
@@ -13,20 +13,12 @@ export interface NotificationPreferences {
 }
 
 class NotificationsAPI {
-  private async getAuthHeaders() {
-    const token = await getAuthToken();
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
-    };
-  }
-
   /**
    * Register a push token for the current user
    */
   async registerPushToken(request: PushTokenRequest): Promise<void> {
     await apiClient.post('/api/notifications/push-tokens', request, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
@@ -35,7 +27,7 @@ class NotificationsAPI {
    */
   async updatePushToken(token: string, request: PushTokenRequest): Promise<void> {
     await apiClient.put(`/api/notifications/push-tokens/${encodeURIComponent(token)}`, request, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
@@ -44,7 +36,7 @@ class NotificationsAPI {
    */
   async unregisterPushToken(token: string): Promise<void> {
     await apiClient.delete(`/api/notifications/push-tokens/${encodeURIComponent(token)}`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
@@ -53,7 +45,7 @@ class NotificationsAPI {
    */
   async getNotificationPreferences(): Promise<NotificationPreferences> {
     const response = await apiClient.get('/api/notifications/preferences', {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     return response.data;
   }
@@ -63,7 +55,7 @@ class NotificationsAPI {
    */
   async updateNotificationPreferences(preferences: NotificationPreferences): Promise<void> {
     await apiClient.put('/api/notifications/preferences', preferences, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
@@ -72,7 +64,7 @@ class NotificationsAPI {
    */
   async getNotificationHistory(page = 0, size = 20) {
     const response = await apiClient.get(`/api/notifications/history?page=${page}&size=${size}`, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
     return response.data;
   }
@@ -82,7 +74,7 @@ class NotificationsAPI {
    */
   async markAsRead(notificationId: string): Promise<void> {
     await apiClient.put(`/api/notifications/${notificationId}/read`, {}, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 
@@ -91,10 +83,9 @@ class NotificationsAPI {
    */
   async markAllAsRead(): Promise<void> {
     await apiClient.put('/api/notifications/read-all', {}, {
-      headers: await this.getAuthHeaders(),
+      headers: await getAuthHeaders(),
     });
   }
 }
 
 export const notificationsAPI = new NotificationsAPI();
-

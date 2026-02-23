@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/shared/constants/api";
-import { getAuthToken } from "@/services/auth";
+import { getAuthHeaders } from "@/services/auth";
 import {
   RideFilters,
   RidePost,
@@ -9,17 +9,6 @@ import {
   RideStatus,
   RideTrackingSession,
 } from "@/shared/types";
-
-const getAuthHeaders = async () => {
-  const token = await getAuthToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  return headers;
-};
 
 const buildQuery = (filters: RideFilters = {}) => {
   const params = new URLSearchParams();
