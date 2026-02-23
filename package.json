@@ -4,13 +4,18 @@
   "private": true,
   "workspaces": [
     "frontend",
+    "frontend-web",
     "backend"
   ],
   "scripts": {
-    "frontend": "cd frontend && npm start",
+    "mobile": "npm --workspace frontend run start",
+    "web": "npm --workspace frontend-web run dev",
+    "frontend": "npm run mobile",
     "backend": "cd backend && ./mvnw spring-boot:run",
-    "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
+    "dev": "concurrently \"npm run mobile\" \"npm run backend\"",
+    "dev:all": "concurrently \"npm run mobile\" \"npm run web\" \"npm run backend\"",
     "build:frontend": "cd frontend && npm run build",
+    "build:web": "npm --workspace frontend-web run build",
     "build:backend": "cd backend && ./mvnw clean package"
   },
   "devDependencies": {

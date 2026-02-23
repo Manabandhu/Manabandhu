@@ -1,12 +1,16 @@
 # ManaBandhu Monorepo
 
-A full-stack application with React Native frontend and Spring Boot backend.
+A full-stack application with:
+- Expo/React Native frontend for iOS and Android
+- Next.js frontend for web
+- Spring Boot backend
 
 ## Project Structure
 
 ```
 .
-├── frontend/           # React Native + Expo app
+├── frontend/           # Mobile app (Expo + React Native)
+├── frontend-web/       # Web app (Next.js)
 ├── backend/            # Spring Boot application
 └── package.json        # Monorepo root configuration
 ```
@@ -14,7 +18,8 @@ A full-stack application with React Native frontend and Spring Boot backend.
 ## Tech Stack
 
 ### Frontend
-- React Native + Expo
+- Mobile: React Native + Expo
+- Web: Next.js + React
 - TypeScript
 - NativeWind (TailwindCSS)
 - Bearer Auth
@@ -41,10 +46,16 @@ A full-stack application with React Native frontend and Spring Boot backend.
 npm install
 ```
 
-### Run frontend
+### Run mobile app (Expo)
 
 ```bash
-npm run frontend
+npm run mobile
+```
+
+### Run web app (Next.js)
+
+```bash
+npm run web
 ```
 
 ### Run backend
@@ -57,6 +68,12 @@ npm run backend
 
 ```bash
 npm run dev
+```
+
+### Run backend + web + mobile together
+
+```bash
+npm run dev:all
 ```
 
 ## Environment Variables
@@ -72,6 +89,7 @@ EXPO_PUBLIC_APP_ENV=development
 EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 EXPO_PUBLIC_APPLE_TEAM_ID=your_apple_team_id
 EXPO_PUBLIC_EAS_PROJECT_ID=your_eas_project_id
+NEXT_PUBLIC_API_URL=http://localhost:9090
 ```
 
 ### Backend
