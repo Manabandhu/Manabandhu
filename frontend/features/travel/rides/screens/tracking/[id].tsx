@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import * as Location from "expo-location";
-import RideMapPreview from "@/components/rides/RideMapPreview";
+import RideMapPreview from "@/features/travel/rides/components/RideMapPreview";
 import { ridesApi } from "@/features/travel/rides/api";
 import { RidePost, RideTrackingSession } from "@/shared/types";
 import { useAuthStore } from "@/store/auth.store";

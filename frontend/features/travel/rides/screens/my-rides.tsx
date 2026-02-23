@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { ridesApi } from "@/features/travel/rides/api";
 import { RidePostSummary, RideStatus } from "@/shared/types";
-import RideCard from "@/components/rides/RideCard";
+import RideCard from "@/features/travel/rides/components/RideCard";
 import { useRouter } from "expo-router";
 import { CarIcon } from "@/shared/components/ui/Icons";
 

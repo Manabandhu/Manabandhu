@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/shared/constants/api';
-import { auth } from '@/services/auth';
+import { getAuthToken } from '@/services/auth';
 
 export interface CommunityPost {
   id: number;
@@ -21,11 +21,14 @@ export interface CreatePostRequest {
 
 class CommunityAPI {
   private async getAuthHeaders() {
-    const token = await auth?.currentUser?.getIdToken();
-    return {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
     };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   async getAllPosts(page = 0, size = 10): Promise<{ content: CommunityPost[]; totalElements: number }> {

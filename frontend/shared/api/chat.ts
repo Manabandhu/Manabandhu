@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '@/shared/constants/api';
 import { useAuthStore } from '@/store/auth.store';
-import { auth } from '@/services/auth';
+import { getAuthToken } from '@/services/auth';
 
 export type ChatContext = 'ROOM' | 'RIDE' | 'COMMUNITY' | 'GROUP' | 'PERSONAL' | 'ONE_ON_ONE';
 
@@ -37,11 +37,14 @@ export interface CreateChatRequest {
 
 class ChatAPI {
   private async getAuthHeaders() {
-    const token = await auth?.currentUser?.getIdToken();
-    return {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : '',
     };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   async getUserChats(): Promise<Chat[]> {

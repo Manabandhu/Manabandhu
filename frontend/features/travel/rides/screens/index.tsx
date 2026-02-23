@@ -7,9 +7,9 @@ import * as Location from "expo-location";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { ridesApi } from "@/features/travel/rides/api";
 import { RideFilters, RidePostSummary, RidePostType } from "@/shared/types";
-import RideCard from "@/components/rides/RideCard";
-import RideFiltersSheet from "@/components/rides/RideFiltersSheet";
-import RideMapCanvas from "@/components/rides/RideMapCanvas";
+import RideCard from "@/features/travel/rides/components/RideCard";
+import RideFiltersSheet from "@/features/travel/rides/components/RideFiltersSheet";
+import RideMapCanvas from "@/features/travel/rides/components/RideMapCanvas";
 import { CarIcon, MapPinIcon, SearchIcon, FilterIcon, GridIcon, ListIcon, XIcon } from "@/shared/components/ui/Icons";
 import { useThemeStore } from "@/store/theme.store";
 

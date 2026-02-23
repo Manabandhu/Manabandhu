@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import RidePostForm from "@/components/rides/RidePostForm";
+import RidePostForm from "@/features/travel/rides/components/RidePostForm";
 import { ridesApi } from "@/features/travel/rides/api";
 import { RidePost } from "@/shared/types";
 

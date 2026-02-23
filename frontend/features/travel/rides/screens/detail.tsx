@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import RideMapView from "@/components/rides/RideMapView";
-import RideStatusBadge from "@/components/rides/RideStatusBadge";
+import RideMapView from "@/features/travel/rides/components/RideMapView";
+import RideStatusBadge from "@/features/travel/rides/components/RideStatusBadge";
 import { ridesApi } from "@/features/travel/rides/api";
 import { formatDepartTime, hoursUntil } from "@/features/travel/rides/api/format";
 import { RidePost } from "@/shared/types";

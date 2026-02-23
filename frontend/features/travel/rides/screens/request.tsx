@@ -2,7 +2,7 @@ import React from "react";
 import { ScrollView, Text, View, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import RidePostForm from "@/components/rides/RidePostForm";
+import RidePostForm from "@/features/travel/rides/components/RidePostForm";
 import { ridesApi } from "@/features/travel/rides/api";
 import { RidePost } from "@/shared/types";
 import { ArrowLeftIcon, MapPinIcon } from "@/shared/components/ui/Icons";

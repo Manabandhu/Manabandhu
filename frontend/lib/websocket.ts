@@ -1,4 +1,4 @@
-import { auth } from '@/services/auth';
+import { auth, getAuthToken } from '@/services/auth';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
@@ -98,14 +98,12 @@ class WebSocketClient {
     this.isConnecting = true;
 
     try {
-      const user = auth?.currentUser;
-      if (!user) {
+      const userId = auth?.currentUser?.uid;
+      const token = await getAuthToken();
+      if (!userId || !token) {
         throw new Error('User not authenticated');
       }
-
-      // Force token refresh to ensure we have a valid, non-expired token
-      const token = await user.getIdToken(true);
-      this.userId = user.uid;
+      this.userId = userId;
 
       // Create STOMP client with React Native WebSocket
       const wsUrl = `${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`;
@@ -387,4 +385,3 @@ export async function connectWebSocket(): Promise<void> {
 export function disconnectWebSocket(): void {
   websocketClient.disconnect();
 }
-

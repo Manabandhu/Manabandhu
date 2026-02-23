@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { RidePostSummary } from "@/shared/types";
-import RideStatusBadge from "@/components/rides/RideStatusBadge";
+import RideStatusBadge from "@/features/travel/rides/components/RideStatusBadge";
 import { formatDepartTime, hoursUntil } from "@/features/travel/rides/api/format";
 import { MapPinIcon, UsersIcon, CarIcon } from "@/shared/components/ui/Icons";
 import { useCurrency } from "@/lib/currency";
