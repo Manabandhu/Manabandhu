@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
@@ -76,6 +77,7 @@ public class PushNotificationService {
     /**
      * Send push notification to a specific user
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = RuntimeException.class)
     public void sendPushNotificationToUser(String userId, String title, String body, Map<String, Object> data) {
         User user = userRepository.findByAuthUserId(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -192,4 +194,3 @@ public class PushNotificationService {
             .orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
     }
 }
-

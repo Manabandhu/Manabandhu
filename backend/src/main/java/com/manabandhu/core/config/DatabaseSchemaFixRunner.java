@@ -3,6 +3,7 @@ package com.manabandhu.core.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @Order(-100) // Run very early, before most other components
+@ConditionalOnProperty(name = "app.schema-fix.enabled", havingValue = "true", matchIfMissing = true)
 public class DatabaseSchemaFixRunner implements CommandLineRunner {
 
     @Autowired
@@ -38,8 +40,8 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
             String checkColumnSql = """
                 SELECT COUNT(*) 
                 FROM information_schema.columns 
-                WHERE table_name = 'immigration_news_sources' 
-                AND column_name = 'rss_feed_url'
+                WHERE lower(table_name) = lower('immigration_news_sources') 
+                AND lower(column_name) = lower('rss_feed_url')
                 """;
             
             Integer count = jdbcTemplate.queryForObject(checkColumnSql, Integer.class);
@@ -63,4 +65,3 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
         }
     }
 }
-

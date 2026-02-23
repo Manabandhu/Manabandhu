@@ -1,6 +1,7 @@
 package com.manabandhu.core.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -14,9 +15,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.net.URI;
 
 @Configuration
+@ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis", matchIfMissing = true)
 public class RedisConfig {
 
-    @Value("${spring.data.redis.url}")
+    @Value("${spring.data.redis.url:redis://localhost:6379}")
     private String redisUrl;
 
     @Bean
