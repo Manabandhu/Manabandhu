@@ -1,5 +1,6 @@
-import { API_BASE_URL } from '@/shared/constants/api';
-import { getAuthHeaders } from '@/services/auth';
+import { apiRequestJson, apiRequestNoContent } from "@/shared/api/api-request";
+import { API_PATHS } from "@/shared/constants/api-paths";
+import { COMMUNITY_API_ERROR_MESSAGES } from "@/shared/constants/api-messages";
 
 export interface CommunityPost {
   id: number;
@@ -19,87 +20,6 @@ export interface CreatePostRequest {
   images?: string[];
 }
 
-class CommunityAPI {
-  async getAllPosts(page = 0, size = 10): Promise<{ content: CommunityPost[]; totalElements: number }> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts?page=${page}&size=${size}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch posts');
-    return response.json();
-  }
-
-  async getUserPosts(userId: string, page = 0, size = 10): Promise<{ content: CommunityPost[]; totalElements: number }> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/user/${userId}?page=${page}&size=${size}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch user posts');
-    return response.json();
-  }
-
-  async createPost(request: CreatePostRequest): Promise<CommunityPost> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) throw new Error('Failed to create post');
-    return response.json();
-  }
-
-  async likePost(postId: number): Promise<CommunityPost> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/like`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to like post');
-    return response.json();
-  }
-
-  async deletePost(postId: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}`, {
-      method: 'DELETE',
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to delete post');
-  }
-
-  async updatePost(postId: number, request: CreatePostRequest): Promise<CommunityPost> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}`, {
-      method: 'PUT',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) throw new Error('Failed to update post');
-    return response.json();
-  }
-
-  async getPostComments(postId: number, page = 0, size = 50): Promise<{ content: Comment[]; totalElements: number }> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments?page=${page}&size=${size}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch comments');
-    return response.json();
-  }
-
-  async addComment(postId: number, content: string): Promise<Comment> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify({ content }),
-    });
-    if (!response.ok) throw new Error('Failed to add comment');
-    return response.json();
-  }
-
-  async deleteComment(postId: number, commentId: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}/comments/${commentId}`, {
-      method: 'DELETE',
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to delete comment');
-  }
-}
-
 export interface Comment {
   id: number;
   postId: number;
@@ -108,6 +28,111 @@ export interface Comment {
   content: string;
   createdAt: string;
   updatedAt: string;
+}
+
+const withPaging = (path: string, page: number, size: number): string => {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  return `${path}?${params.toString()}`;
+};
+
+class CommunityAPI {
+  async getAllPosts(page = 0, size = 10): Promise<{ content: CommunityPost[]; totalElements: number }> {
+    return apiRequestJson<{ content: CommunityPost[]; totalElements: number }>(
+      withPaging(API_PATHS.community.posts, page, size),
+      {},
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.fetchPosts }
+    );
+  }
+
+  async getUserPosts(
+    userId: string,
+    page = 0,
+    size = 10
+  ): Promise<{ content: CommunityPost[]; totalElements: number }> {
+    return apiRequestJson<{ content: CommunityPost[]; totalElements: number }>(
+      withPaging(API_PATHS.community.userPosts(userId), page, size),
+      {},
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.fetchUserPosts }
+    );
+  }
+
+  async createPost(request: CreatePostRequest): Promise<CommunityPost> {
+    return apiRequestJson<CommunityPost>(
+      API_PATHS.community.posts,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.createPost }
+    );
+  }
+
+  async likePost(postId: number): Promise<CommunityPost> {
+    return apiRequestJson<CommunityPost>(
+      API_PATHS.community.likePost(postId),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.likePost }
+    );
+  }
+
+  async deletePost(postId: number): Promise<void> {
+    await apiRequestNoContent(
+      API_PATHS.community.post(postId),
+      {
+        method: "DELETE",
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.deletePost }
+    );
+  }
+
+  async updatePost(postId: number, request: CreatePostRequest): Promise<CommunityPost> {
+    return apiRequestJson<CommunityPost>(
+      API_PATHS.community.post(postId),
+      {
+        method: "PUT",
+        body: JSON.stringify(request),
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.updatePost }
+    );
+  }
+
+  async getPostComments(
+    postId: number,
+    page = 0,
+    size = 50
+  ): Promise<{ content: Comment[]; totalElements: number }> {
+    return apiRequestJson<{ content: Comment[]; totalElements: number }>(
+      withPaging(API_PATHS.community.postComments(postId), page, size),
+      {},
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.fetchComments }
+    );
+  }
+
+  async addComment(postId: number, content: string): Promise<Comment> {
+    return apiRequestJson<Comment>(
+      API_PATHS.community.postComments(postId),
+      {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.addComment }
+    );
+  }
+
+  async deleteComment(postId: number, commentId: number): Promise<void> {
+    await apiRequestNoContent(
+      API_PATHS.community.comment(postId, commentId),
+      {
+        method: "DELETE",
+      },
+      { fallbackErrorMessage: COMMUNITY_API_ERROR_MESSAGES.deleteComment }
+    );
+  }
 }
 
 export const communityAPI = new CommunityAPI();

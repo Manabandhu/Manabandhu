@@ -3,6 +3,7 @@ package com.manabandhu.shared.utils;
 import com.manabandhu.dto.JobDTO;
 import com.manabandhu.modules.community.jobs.components.model.Job;
 import com.manabandhu.repository.JobRepository;
+import com.manabandhu.shared.constants.JobMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +46,7 @@ public class JobService {
 
     public JobDTO getJobById(Long id) {
         Job job = jobRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+            .orElseThrow(() -> new RuntimeException(JobMessages.JOB_NOT_FOUND));
         return new JobDTO(job);
     }
 
@@ -64,10 +65,10 @@ public class JobService {
 
     public void deleteJob(Long id, String userId) {
         Job job = jobRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+            .orElseThrow(() -> new RuntimeException(JobMessages.JOB_NOT_FOUND));
         
         if (!job.getPostedBy().equals(userId)) {
-            throw new RuntimeException("Not authorized to delete this job");
+            throw new RuntimeException(JobMessages.JOB_DELETE_NOT_AUTHORIZED);
         }
         
         jobRepository.delete(job);

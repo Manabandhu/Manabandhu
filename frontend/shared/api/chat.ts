@@ -1,12 +1,13 @@
-import { API_BASE_URL } from '@/shared/constants/api';
-import { getAuthHeaders } from '@/services/auth';
+import { apiRequestJson } from "@/shared/api/api-request";
+import { API_PATHS } from "@/shared/constants/api-paths";
+import { CHAT_API_ERROR_MESSAGES } from "@/shared/constants/api-messages";
 
-export type ChatContext = 'ROOM' | 'RIDE' | 'COMMUNITY' | 'GROUP' | 'PERSONAL' | 'ONE_ON_ONE';
+export type ChatContext = "ROOM" | "RIDE" | "COMMUNITY" | "GROUP" | "PERSONAL" | "ONE_ON_ONE";
 
 export interface Chat {
   id: number;
   name: string;
-  type: 'DIRECT' | 'GROUP';
+  type: "DIRECT" | "GROUP";
   context?: ChatContext;
   participants: string[];
   createdAt: string;
@@ -19,65 +20,80 @@ export interface Message {
   chatId: number;
   senderId: string;
   content: string;
-  type: 'TEXT' | 'IMAGE' | 'FILE';
+  type: "TEXT" | "IMAGE" | "FILE";
   createdAt: string;
 }
 
 export interface SendMessageRequest {
   content: string;
-  type?: 'TEXT' | 'IMAGE' | 'FILE';
+  type?: "TEXT" | "IMAGE" | "FILE";
 }
 
 export interface CreateChatRequest {
   name: string;
-  type: 'DIRECT' | 'GROUP';
+  type: "DIRECT" | "GROUP";
   participants: string[];
 }
 
+const withPaging = (path: string, page: number, size: number): string => {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  return `${path}?${params.toString()}`;
+};
+
 class ChatAPI {
   async getUserChats(): Promise<Chat[]> {
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch chats');
-    return response.json();
+    return apiRequestJson<Chat[]>(
+      API_PATHS.chat.base,
+      {},
+      { fallbackErrorMessage: CHAT_API_ERROR_MESSAGES.fetchChats }
+    );
   }
 
   async createChat(request: CreateChatRequest): Promise<Chat> {
-    const response = await fetch(`${API_BASE_URL}/api/chat`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) throw new Error('Failed to create chat');
-    return response.json();
+    return apiRequestJson<Chat>(
+      API_PATHS.chat.base,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+      { fallbackErrorMessage: CHAT_API_ERROR_MESSAGES.createChat }
+    );
   }
 
   async getOrCreateDirectChat(userId: string): Promise<Chat> {
-    const response = await fetch(`${API_BASE_URL}/api/chat/direct/${userId}`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to get/create direct chat');
-    return response.json();
+    return apiRequestJson<Chat>(
+      API_PATHS.chat.directChat(userId),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: CHAT_API_ERROR_MESSAGES.getOrCreateDirectChat }
+    );
   }
 
-  async getChatMessages(chatId: number, page = 0, size = 20): Promise<{ content: Message[]; totalElements: number }> {
-    const response = await fetch(`${API_BASE_URL}/api/chat/${chatId}/messages?page=${page}&size=${size}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch messages');
-    return response.json();
+  async getChatMessages(
+    chatId: number,
+    page = 0,
+    size = 20
+  ): Promise<{ content: Message[]; totalElements: number }> {
+    return apiRequestJson<{ content: Message[]; totalElements: number }>(
+      withPaging(API_PATHS.chat.chatMessages(chatId), page, size),
+      {},
+      { fallbackErrorMessage: CHAT_API_ERROR_MESSAGES.fetchMessages }
+    );
   }
 
   async sendMessage(chatId: number, request: SendMessageRequest): Promise<Message> {
-    const response = await fetch(`${API_BASE_URL}/api/chat/${chatId}/messages`, {
-      method: 'POST',
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) throw new Error('Failed to send message');
-    return response.json();
+    return apiRequestJson<Message>(
+      API_PATHS.chat.chatMessages(chatId),
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+      { fallbackErrorMessage: CHAT_API_ERROR_MESSAGES.sendMessage }
+    );
   }
 }
 

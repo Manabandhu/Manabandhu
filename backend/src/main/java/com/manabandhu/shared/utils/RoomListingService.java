@@ -11,6 +11,7 @@ import com.manabandhu.modules.travel.rooms.components.model.RoomListingActivity;
 import com.manabandhu.repository.ConversationLinkRepository;
 import com.manabandhu.repository.RoomListingActivityRepository;
 import com.manabandhu.repository.RoomListingRepository;
+import static com.manabandhu.shared.constants.RoomListingMessages.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,7 +41,7 @@ public class RoomListingService {
     public RoomListing createListing(String ownerUserId, RoomListingRequest request) {
         try {
             if (!StringUtils.hasText(ownerUserId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             
             validateListingRequest(request);
@@ -70,10 +71,10 @@ public class RoomListingService {
     public RoomListing updateListing(String userId, UUID listingId, RoomListingRequest request) {
         try {
             if (!StringUtils.hasText(userId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             
             validateListingRequest(request);
@@ -98,7 +99,7 @@ public class RoomListingService {
     public RoomListing getListing(UUID listingId) {
         try {
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             
             return roomListingRepository.findById(listingId)
@@ -132,7 +133,7 @@ public class RoomListingService {
     public Page<RoomListing> getMyListings(String ownerUserId, Pageable pageable) {
         try {
             if (!StringUtils.hasText(ownerUserId)) {
-                throw new ValidationException("Owner user ID is required");
+                throw new ValidationException(OWNER_USER_ID_REQUIRED);
             }
             
             Page<RoomListing> page = roomListingRepository.findByOwnerUserIdOrderByCreatedAtDesc(ownerUserId, pageable);
@@ -149,13 +150,13 @@ public class RoomListingService {
     public RoomListing updateStatus(String userId, UUID listingId, RoomListing.Status status) {
         try {
             if (!StringUtils.hasText(userId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             if (status == null) {
-                throw new ValidationException("Status is required");
+                throw new ValidationException(STATUS_REQUIRED);
             }
             
             RoomListing listing = getOwnedListing(userId, listingId);
@@ -184,10 +185,10 @@ public class RoomListingService {
     public RoomListing repostListing(String userId, UUID listingId) {
         try {
             if (!StringUtils.hasText(userId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             
             RoomListing listing = getOwnedListing(userId, listingId);
@@ -212,10 +213,10 @@ public class RoomListingService {
     public void deleteListing(String userId, UUID listingId) {
         try {
             if (!StringUtils.hasText(userId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             
             RoomListing listing = getOwnedListing(userId, listingId);
@@ -236,15 +237,15 @@ public class RoomListingService {
     public String startChat(UUID listingId, String currentUserId) {
         try {
             if (listingId == null) {
-                throw new ValidationException("Listing ID is required");
+                throw new ValidationException(LISTING_ID_REQUIRED);
             }
             if (!StringUtils.hasText(currentUserId)) {
-                throw new UnauthorizedException("User authentication required");
+                throw new UnauthorizedException(USER_AUTHENTICATION_REQUIRED);
             }
             
             RoomListing listing = getListing(listingId);
             if (listing.getStatus() == RoomListing.Status.DELETED) {
-                throw new ResourceNotFoundException("Listing not found");
+                throw new ResourceNotFoundException(LISTING_NOT_FOUND);
             }
             if (listing.getOwnerUserId().equals(currentUserId)) {
                 throw new ValidationException("Cannot start chat with yourself");
@@ -289,7 +290,7 @@ public class RoomListingService {
     public void heartbeat(String chatThreadId) {
         try {
             if (!StringUtils.hasText(chatThreadId)) {
-                throw new ValidationException("Chat thread ID is required");
+                throw new ValidationException(CHAT_THREAD_ID_REQUIRED);
             }
             
             ConversationLink link = conversationLinkRepository.findByChatThreadId(chatThreadId)
@@ -345,7 +346,7 @@ public class RoomListingService {
     public List<UUID> getListingIdsForOwner(String ownerUserId) {
         try {
             if (!StringUtils.hasText(ownerUserId)) {
-                throw new ValidationException("Owner user ID is required");
+                throw new ValidationException(OWNER_USER_ID_REQUIRED);
             }
             
             return roomListingRepository.findByOwnerUserIdOrderByCreatedAtDesc(ownerUserId, Pageable.unpaged())
@@ -360,7 +361,7 @@ public class RoomListingService {
 
     private void validateListingRequest(RoomListingRequest request) {
         if (request == null) {
-            throw new ValidationException("Listing request is required");
+            throw new ValidationException(LISTING_REQUEST_REQUIRED);
         }
         if (!StringUtils.hasText(request.getTitle()) || request.getTitle().trim().length() < 5) {
             throw new ValidationException("Title must be at least 5 characters");

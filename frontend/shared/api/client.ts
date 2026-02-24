@@ -1,12 +1,17 @@
 import axios from 'axios';
 import { toast } from '../../lib/toast';
 import { tokenStorage, signOut } from '@/services/auth';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
+import { API_ERROR_MESSAGES } from '@/shared/constants/messages';
+import {
+  API_BASE_URL,
+  API_REQUEST_TIMEOUT_MS,
+  AUTH_REFRESH_ENDPOINT,
+} from '@/shared/constants/network';
+import { buildApiUrl } from '@/shared/utils/url';
 
 const apiClient = axios.create({
-  baseURL: API_URL,
-  timeout: 15000,
+  baseURL: API_BASE_URL,
+  timeout: API_REQUEST_TIMEOUT_MS,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -31,7 +36,7 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
     if (refreshToken && !isRefreshing) {
       try {
         isRefreshing = true;
-        const refreshedResp = await axios.post(`${API_URL}/api/auth/refresh`, { refreshToken });
+        const refreshedResp = await axios.post(buildApiUrl(AUTH_REFRESH_ENDPOINT), { refreshToken });
         const refreshed = refreshedResp.data;
         const nextAccess = refreshed.accessToken || refreshed.idToken;
         if (nextAccess) {
@@ -45,11 +50,17 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
         isRefreshing = false;
       }
     }
-    toast.showError('Please log in to continue', 'Authentication Required');
+    toast.showError(
+      API_ERROR_MESSAGES.authRequiredBody,
+      API_ERROR_MESSAGES.authRequiredTitle
+    );
   }
 
   if (status && status >= 500) {
-    toast.showError('Server error. Please try again later', 'Server Error');
+    toast.showError(
+      API_ERROR_MESSAGES.serverErrorBody,
+      API_ERROR_MESSAGES.serverErrorTitle
+    );
   }
 
   return Promise.reject(error);

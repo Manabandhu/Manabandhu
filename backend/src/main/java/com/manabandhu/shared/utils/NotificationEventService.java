@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manabandhu.modules.messaging.notification.components.model.NotificationEvent;
 import com.manabandhu.repository.NotificationEventRepository;
+import static com.manabandhu.shared.constants.NotificationConstants.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,8 +34,8 @@ public class NotificationEventService {
         String title = getNotificationTitle(type);
         String body = getNotificationBody(type, payload);
         Map<String, Object> notificationData = new HashMap<>();
-        notificationData.put("type", type.toString());
-        notificationData.put("eventId", event.getId().toString());
+        notificationData.put(DATA_TYPE_KEY, type.toString());
+        notificationData.put(DATA_EVENT_ID_KEY, event.getId().toString());
         if (payload != null) {
             notificationData.putAll(payload);
         }
@@ -79,34 +80,35 @@ public class NotificationEventService {
 
     private String getNotificationTitle(NotificationEvent.NotificationType type) {
         return switch (type) {
-            case RIDE_REQUESTED -> "New Ride Request";
-            case USCIS_STATUS_CHANGE -> "USCIS Status Update";
-            case LISTING_HIDDEN_DUE_TO_INACTIVITY -> "Listing Hidden";
-            case PRICE_ALERT_MATCHED -> "Price Alert Matched";
+            case RIDE_REQUESTED -> TITLE_RIDE_REQUESTED;
+            case USCIS_STATUS_CHANGE -> TITLE_USCIS_STATUS_CHANGE;
+            case LISTING_HIDDEN_DUE_TO_INACTIVITY -> TITLE_LISTING_HIDDEN;
+            case PRICE_ALERT_MATCHED -> TITLE_PRICE_ALERT_MATCHED;
         };
     }
 
     private String getNotificationBody(NotificationEvent.NotificationType type, Map<String, Object> payload) {
         return switch (type) {
             case RIDE_REQUESTED -> {
-                String requestedBy = payload != null && payload.containsKey("requestedBy") 
-                    ? payload.get("requestedBy").toString() 
-                    : "Someone";
-                yield requestedBy + " requested to join your ride";
+                String requestedBy = PayloadValueUtils.getStringOrDefault(
+                        payload,
+                        PAYLOAD_REQUESTED_BY,
+                        DEFAULT_REQUESTED_BY
+                );
+                yield requestedBy + RIDE_REQUESTED_BODY_SUFFIX;
             }
             case USCIS_STATUS_CHANGE -> {
-                String status = payload != null && payload.containsKey("status") 
-                    ? payload.get("status").toString() 
-                    : "updated";
-                yield "Your USCIS case status has changed to: " + status;
+                String status = PayloadValueUtils.getStringOrDefault(payload, PAYLOAD_STATUS, DEFAULT_STATUS);
+                yield USCIS_STATUS_CHANGE_BODY_PREFIX + status;
             }
-            case LISTING_HIDDEN_DUE_TO_INACTIVITY -> 
-                "Your listing has been hidden due to inactivity. Update it to make it visible again.";
+            case LISTING_HIDDEN_DUE_TO_INACTIVITY -> LISTING_HIDDEN_BODY;
             case PRICE_ALERT_MATCHED -> {
-                String matchesCount = payload != null && payload.containsKey("matchesCount") 
-                    ? payload.get("matchesCount").toString() 
-                    : "new";
-                yield "Found " + matchesCount + " listing(s) matching your price alert criteria!";
+                String matchesCount = PayloadValueUtils.getStringOrDefault(
+                        payload,
+                        PAYLOAD_MATCHES_COUNT,
+                        DEFAULT_MATCHES_COUNT
+                );
+                yield PRICE_ALERT_BODY_PREFIX + matchesCount + PRICE_ALERT_BODY_SUFFIX;
             }
         };
     }

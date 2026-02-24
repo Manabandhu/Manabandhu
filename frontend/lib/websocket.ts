@@ -1,8 +1,13 @@
 import { auth, getAuthToken } from '@/services/auth';
+import {
+  WS_BASE_URL,
+} from '@/shared/constants/network';
+import {
+  WS_HEARTBEAT_INTERVAL_MS,
+  WS_MAX_RECONNECT_ATTEMPTS,
+  WS_RECONNECT_DELAY_MS,
+} from '@/shared/constants/websocket';
 import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs';
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:9090';
-const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
 
 export type WebSocketMessageType = 
   | 'CHAT_MESSAGE'
@@ -82,8 +87,8 @@ type MessageHandler = (message: WebSocketMessage) => void;
 class WebSocketClient {
   private client: Client | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
+  private maxReconnectAttempts = WS_MAX_RECONNECT_ATTEMPTS;
+  private reconnectDelay = WS_RECONNECT_DELAY_MS;
   private messageHandlers: Map<WebSocketMessageType, Set<MessageHandler>> = new Map();
   private isConnecting = false;
   private isConnected = false;
@@ -152,8 +157,8 @@ class WebSocketClient {
           Authorization: `Bearer ${token}`,
         },
         reconnectDelay: this.reconnectDelay,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
+        heartbeatIncoming: WS_HEARTBEAT_INTERVAL_MS,
+        heartbeatOutgoing: WS_HEARTBEAT_INTERVAL_MS,
         debug: (str: string) => {
           if (__DEV__) {
             console.log('STOMP:', str);

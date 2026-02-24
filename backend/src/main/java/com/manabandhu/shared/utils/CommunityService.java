@@ -10,6 +10,7 @@ import com.manabandhu.modules.community.discussions.components.model.CommunityPo
 import com.manabandhu.repository.CommentRepository;
 import com.manabandhu.repository.CommunityPostRepository;
 import com.manabandhu.repository.UserRepository;
+import com.manabandhu.shared.constants.CommunityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,7 +54,7 @@ public class CommunityService {
         CommunityPostDTO postDTO = new CommunityPostDTO(post);
         
         // Publish WebSocket event
-        CommunityPostEvent event = new CommunityPostEvent("CREATED", postDTO);
+        CommunityPostEvent event = new CommunityPostEvent(CommunityConstants.EVENT_CREATED, postDTO);
         webSocketService.broadcastCommunityUpdate(event);
         
         return postDTO;
@@ -61,13 +62,13 @@ public class CommunityService {
 
     public CommunityPostDTO likePost(Long postId) {
         CommunityPost post = postRepository.findById(postId)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
+            .orElseThrow(() -> new RuntimeException(CommunityConstants.POST_NOT_FOUND));
         post.setLikes(post.getLikes() + 1);
         post = postRepository.save(post);
         CommunityPostDTO postDTO = new CommunityPostDTO(post);
         
         // Publish WebSocket event
-        CommunityPostEvent event = new CommunityPostEvent("LIKED", postDTO);
+        CommunityPostEvent event = new CommunityPostEvent(CommunityConstants.EVENT_LIKED, postDTO);
         webSocketService.broadcastCommunityUpdate(event);
         
         return postDTO;
@@ -75,23 +76,23 @@ public class CommunityService {
 
     public void deletePost(Long postId, String userId) {
         CommunityPost post = postRepository.findById(postId)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
+            .orElseThrow(() -> new RuntimeException(CommunityConstants.POST_NOT_FOUND));
         
         if (!post.getAuthorId().equals(userId)) {
-            throw new RuntimeException("Not authorized to delete this post");
+            throw new RuntimeException(CommunityConstants.POST_DELETE_NOT_AUTHORIZED);
         }
         
         CommunityPostDTO postDTO = new CommunityPostDTO(post);
         postRepository.delete(post);
         
         // Publish WebSocket event
-        CommunityPostEvent event = new CommunityPostEvent("DELETED", postDTO);
+        CommunityPostEvent event = new CommunityPostEvent(CommunityConstants.EVENT_DELETED, postDTO);
         webSocketService.broadcastCommunityUpdate(event);
     }
 
     public CommentDTO addComment(Long postId, String authorId, CreateCommentRequest request) {
         CommunityPost post = postRepository.findById(postId)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
+            .orElseThrow(() -> new RuntimeException(CommunityConstants.POST_NOT_FOUND));
         
         Comment comment = new Comment();
         comment.setPostId(postId);
@@ -103,15 +104,11 @@ public class CommunityService {
         post.setComments(post.getComments() + 1);
         postRepository.save(post);
         
-        // Get author name
-        String authorName = userRepository.findByAuthUserId(authorId)
-            .map(user -> user.getName())
-            .orElse("Anonymous");
-        
+        String authorName = resolveAuthorName(authorId);
         CommentDTO commentDTO = new CommentDTO(comment, authorName);
         
         // Publish WebSocket event
-        CommunityCommentEvent event = new CommunityCommentEvent("CREATED", commentDTO, postId);
+        CommunityCommentEvent event = new CommunityCommentEvent(CommunityConstants.EVENT_CREATED, commentDTO, postId);
         webSocketService.broadcastCommunityUpdate(event);
         
         return commentDTO;
@@ -119,38 +116,36 @@ public class CommunityService {
 
     public Page<CommentDTO> getPostComments(Long postId, Pageable pageable) {
         Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
-        return comments.map(comment -> {
-            String authorName = userRepository.findByAuthUserId(comment.getAuthorId())
-                .map(user -> user.getName())
-                .orElse("Anonymous");
-            return new CommentDTO(comment, authorName);
-        });
+        return comments.map(comment -> new CommentDTO(comment, resolveAuthorName(comment.getAuthorId())));
     }
 
     public void deleteComment(Long commentId, String userId) {
         Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new RuntimeException("Comment not found"));
+            .orElseThrow(() -> new RuntimeException(CommunityConstants.COMMENT_NOT_FOUND));
         
         if (!comment.getAuthorId().equals(userId)) {
-            throw new RuntimeException("Not authorized to delete this comment");
+            throw new RuntimeException(CommunityConstants.COMMENT_DELETE_NOT_AUTHORIZED);
         }
         
         // Update post comment count
         CommunityPost post = postRepository.findById(comment.getPostId())
-            .orElseThrow(() -> new RuntimeException("Post not found"));
+            .orElseThrow(() -> new RuntimeException(CommunityConstants.POST_NOT_FOUND));
         post.setComments(Math.max(0, post.getComments() - 1));
         postRepository.save(post);
         
         Long postId = comment.getPostId();
-        CommentDTO commentDTO = new CommentDTO(comment, 
-            userRepository.findByAuthUserId(comment.getAuthorId())
-                .map(user -> user.getName())
-                .orElse("Anonymous"));
+        CommentDTO commentDTO = new CommentDTO(comment, resolveAuthorName(comment.getAuthorId()));
         
         commentRepository.delete(comment);
         
         // Publish WebSocket event
-        CommunityCommentEvent event = new CommunityCommentEvent("DELETED", commentDTO, postId);
+        CommunityCommentEvent event = new CommunityCommentEvent(CommunityConstants.EVENT_DELETED, commentDTO, postId);
         webSocketService.broadcastCommunityUpdate(event);
+    }
+
+    private String resolveAuthorName(String authorId) {
+        return userRepository.findByAuthUserId(authorId)
+            .map(user -> user.getName())
+            .orElse(CommunityConstants.DEFAULT_AUTHOR_NAME);
     }
 }

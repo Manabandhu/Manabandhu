@@ -7,9 +7,16 @@ import { GluestackButton } from "@/shared/components/ui/gluestack-index";
 import { useAuthStore } from "@/store/auth.store";
 import { useThemeStore } from "@/store/theme.store";
 import { GRADIENTS } from "@/shared/constants/colors";
+import { HOME_MARKET_MESSAGES } from "@/shared/constants/messages";
 import { ROUTES } from "@/shared/constants/routes";
+import { buildApiUrl } from "@/shared/utils/url";
 import * as Location from "expo-location";
 import { checkLocationPermission, requestLocationPermission } from "@/lib/permissions";
+import {
+  DEFAULT_WEATHER_DESCRIPTION,
+  MARKET_ENDPOINTS,
+  WEATHER_CODE_DESCRIPTIONS,
+} from "@/features/home/constants/market";
 import {
   MapPinIcon,
   BellIcon,
@@ -41,28 +48,7 @@ export default function HomeScreen() {
   const [metals, setMetals] = useState<{ gold: number; silver: number } | null>(null);
 
   const weatherDescription = (code: number) => {
-    const lookup: Record<number, string> = {
-      0: "Clear",
-      1: "Mainly clear",
-      2: "Partly cloudy",
-      3: "Overcast",
-      45: "Fog",
-      48: "Rime fog",
-      51: "Light drizzle",
-      53: "Drizzle",
-      55: "Heavy drizzle",
-      61: "Light rain",
-      63: "Rain",
-      65: "Heavy rain",
-      71: "Light snow",
-      73: "Snow",
-      75: "Heavy snow",
-      80: "Rain showers",
-      81: "Showers",
-      82: "Heavy showers",
-      95: "Thunderstorm",
-    };
-    return lookup[code] ?? "Weather update";
+    return WEATHER_CODE_DESCRIPTIONS[code] ?? DEFAULT_WEATHER_DESCRIPTION;
   };
 
   useEffect(() => {
@@ -72,11 +58,9 @@ export default function HomeScreen() {
       setMarketLoading(true);
       setMarketError(null);
       try {
-        const weatherUrl =
-          "https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,weather_code&temperature_unit=fahrenheit";
-        const currencyUrl =
-          "https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,INR,NPR";
-        const metalsUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/metals/spot`;
+        const weatherUrl = MARKET_ENDPOINTS.weather;
+        const currencyUrl = MARKET_ENDPOINTS.currency;
+        const metalsUrl = buildApiUrl(MARKET_ENDPOINTS.metals);
 
         const [weatherRes, currencyRes, metalsRes] = await Promise.all([
           fetch(weatherUrl),
@@ -85,7 +69,7 @@ export default function HomeScreen() {
         ]);
 
         if (!weatherRes.ok || !currencyRes.ok || !metalsRes.ok) {
-          throw new Error("Failed to fetch live data");
+          throw new Error(HOME_MARKET_MESSAGES.fetchFailed);
         }
 
         const weatherData = await weatherRes.json();
@@ -105,7 +89,7 @@ export default function HomeScreen() {
         }
       } catch (error) {
         if (isMounted) {
-          setMarketError("Unable to load live updates.");
+          setMarketError(HOME_MARKET_MESSAGES.loadFailed);
         }
       } finally {
         if (isMounted) {

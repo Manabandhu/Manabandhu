@@ -1,9 +1,15 @@
-import { API_BASE_URL } from "@/shared/constants/api";
-import { getAuthHeaders } from "@/services/auth";
+import { apiRequestJson, apiRequestNoContent } from "@/shared/api/api-request";
 import {
-  handleApiJsonResponse,
-  handleApiNoContentResponse,
-} from "@/shared/api/request-utils";
+  assertNonEmptyString,
+  assertNumberInRange,
+  assertPositiveNumber,
+} from "@/shared/api/validation-utils";
+import { API_PATHS } from "@/shared/constants/api-paths";
+import {
+  ROOM_API_CONSTRAINTS,
+  ROOM_API_ERROR_MESSAGES,
+  ROOM_API_SUCCESS_MESSAGES,
+} from "@/shared/constants/api-messages";
 import {
   RoomListing,
   RoomListingActivity,
@@ -34,359 +40,289 @@ const buildQuery = (filters: RoomFilters & { status?: ListingStatus[] }) => {
   return params.toString();
 };
 
+const withQuery = (path: string, query?: string): string => {
+  if (!query?.trim()) {
+    return path;
+  }
+  return `${path}?${query}`;
+};
+
+const assertListingId = (id: string): void => {
+  assertNonEmptyString(id, ROOM_API_ERROR_MESSAGES.listingIdRequired);
+};
+
+const assertReviewId = (reviewId: string): void => {
+  assertNonEmptyString(reviewId, ROOM_API_ERROR_MESSAGES.reviewIdRequired);
+};
+
+const assertAlertId = (alertId: string): void => {
+  assertNonEmptyString(alertId, ROOM_API_ERROR_MESSAGES.alertIdRequired);
+};
+
+const assertReviewRating = (rating: number): void => {
+  assertNumberInRange(
+    rating,
+    ROOM_API_CONSTRAINTS.minReviewRating,
+    ROOM_API_CONSTRAINTS.maxReviewRating,
+    ROOM_API_ERROR_MESSAGES.ratingRange
+  );
+};
+
+const validateCreateListingPayload = (payload: Partial<RoomListing>): void => {
+  assertNonEmptyString(payload.title, ROOM_API_ERROR_MESSAGES.titleRequired);
+  assertPositiveNumber(payload.rentMonthly, ROOM_API_ERROR_MESSAGES.validRentRequired);
+
+  const hasLocation =
+    typeof payload.latApprox === "number" &&
+    Number.isFinite(payload.latApprox) &&
+    typeof payload.lngApprox === "number" &&
+    Number.isFinite(payload.lngApprox);
+
+  if (!hasLocation) {
+    throw new Error(ROOM_API_ERROR_MESSAGES.locationRequired);
+  }
+
+  assertNonEmptyString(payload.approxAreaLabel, ROOM_API_ERROR_MESSAGES.areaLabelRequired);
+
+  if (!payload.listingFor) {
+    throw new Error(ROOM_API_ERROR_MESSAGES.listingTypeRequired);
+  }
+  if (!payload.roomType) {
+    throw new Error(ROOM_API_ERROR_MESSAGES.roomTypeRequired);
+  }
+  if (!payload.visitType) {
+    throw new Error(ROOM_API_ERROR_MESSAGES.visitTypeRequired);
+  }
+};
+
 export const roomsApi = {
   async getListings(filters: RoomFilters & { status?: ListingStatus[] } = {}) {
-    try {
-      const query = buildQuery(filters);
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings${query ? `?${query}` : ""}`,
-        { headers: await getAuthHeaders() }
-      );
-      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    const query = buildQuery(filters);
+    return apiRequestJson<{ content: RoomListingSummary[] }>(
+      withQuery(API_PATHS.rooms.listings, query)
+    );
   },
 
   async getMyListings() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/me`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    return apiRequestJson<{ content: RoomListingSummary[] }>(API_PATHS.rooms.myListings);
   },
 
   async getListing(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<RoomListing>(response);
-    } catch (error) {
-      throw error;
-    }
+    assertListingId(id);
+    return apiRequestJson<RoomListing>(API_PATHS.rooms.listing(id));
   },
 
   async createListing(payload: Partial<RoomListing>) {
-    try {
-      // Validate required fields
-      if (!payload.title?.trim()) {
-        throw new Error('Title is required');
-      }
-      if (!payload.rentMonthly || payload.rentMonthly <= 0) {
-        throw new Error('Valid rent amount is required');
-      }
-      if (!payload.latApprox || !payload.lngApprox) {
-        throw new Error('Location is required');
-      }
-      if (!payload.approxAreaLabel?.trim()) {
-        throw new Error('Area label is required');
-      }
-      if (!payload.listingFor) {
-        throw new Error('Listing type is required');
-      }
-      if (!payload.roomType) {
-        throw new Error('Room type is required');
-      }
-      if (!payload.visitType) {
-        throw new Error('Visit type is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings`, {
+    validateCreateListingPayload(payload);
+
+    return apiRequestJson<RoomListing>(
+      API_PATHS.rooms.listings,
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
-      });
-      
-      return await handleApiJsonResponse<RoomListing>(response, "Room listing created successfully!");
-    } catch (error) {
-      // Re-throw with better error message
-      if (error instanceof Error) {
-        throw error;
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingCreated,
+        fallbackErrorMessage: ROOM_API_ERROR_MESSAGES.unexpectedCreateListing,
       }
-      throw new Error('An unexpected error occurred while creating the listing');
-    }
+    );
   },
 
   async updateListing(id: string, payload: Partial<RoomListing>) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
+    assertListingId(id);
+
+    return apiRequestJson<RoomListing>(
+      API_PATHS.rooms.listing(id),
+      {
         method: "PUT",
-        headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
-      });
-      return await handleApiJsonResponse<RoomListing>(response, "Room listing updated successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingUpdated,
+      }
+    );
   },
 
   async deleteListing(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}`, {
+    assertListingId(id);
+
+    await apiRequestNoContent(
+      API_PATHS.rooms.listing(id),
+      {
         method: "DELETE",
-        headers: await getAuthHeaders(),
-      });
-      await handleApiNoContentResponse(response, "Room listing deleted successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingDeleted,
+      }
+    );
   },
 
   async repostListing(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/repost`, {
+    assertListingId(id);
+
+    return apiRequestJson<RoomListing>(
+      API_PATHS.rooms.repostListing(id),
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<RoomListing>(response, "Room listing reposted successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingReposted,
+      }
+    );
   },
 
   async updateStatus(id: string, status: ListingStatus) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      if (!status) {
-        throw new Error('Status is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/status`, {
-        method: "POST",
-        headers: await getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
-      return await handleApiJsonResponse<RoomListing>(response, "Listing status updated successfully!");
-    } catch (error) {
-      throw error;
+    assertListingId(id);
+    if (!status) {
+      throw new Error(ROOM_API_ERROR_MESSAGES.statusRequired);
     }
+
+    return apiRequestJson<RoomListing>(
+      API_PATHS.rooms.updateListingStatus(id),
+      {
+        method: "POST",
+        body: JSON.stringify({ status }),
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingStatusUpdated,
+      }
+    );
   },
 
   async startChat(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/chat/start`, {
+    assertListingId(id);
+
+    return apiRequestJson<{ chatThreadId: string }>(
+      API_PATHS.rooms.startListingChat(id),
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ chatThreadId: string }>(response, "Chat started successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.chatStarted,
+      }
+    );
   },
 
   async heartbeat(chatThreadId: string) {
-    try {
-      if (!chatThreadId?.trim()) {
-        throw new Error('Chat thread ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/chats/${chatThreadId}/heartbeat`, {
-        method: "POST",
-        headers: await getAuthHeaders(),
-      });
-      await handleApiNoContentResponse(response);
-    } catch (error) {
-      // Don't show error toast for heartbeat failures
-      throw error;
-    }
+    assertNonEmptyString(chatThreadId, ROOM_API_ERROR_MESSAGES.chatThreadIdRequired);
+
+    await apiRequestNoContent(API_PATHS.rooms.chatHeartbeat(chatThreadId), {
+      method: "POST",
+    });
   },
 
   async getReviews(listingId: string) {
-    try {
-      if (!listingId?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<RoomReview[]>(response);
-    } catch (error) {
-      throw error;
-    }
+    assertListingId(listingId);
+    return apiRequestJson<RoomReview[]>(API_PATHS.rooms.listingReviews(listingId));
   },
 
-  async createReview(listingId: string, payload: { type: ReviewType; rating: number; tags?: string[]; comment?: string }) {
-    try {
-      if (!listingId?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
-        throw new Error('Rating must be between 1 and 5');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews`, {
+  async createReview(
+    listingId: string,
+    payload: { type: ReviewType; rating: number; tags?: string[]; comment?: string }
+  ) {
+    assertListingId(listingId);
+    assertReviewRating(payload.rating);
+
+    return apiRequestJson<RoomReview>(
+      API_PATHS.rooms.listingReviews(listingId),
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
-      });
-      return await handleApiJsonResponse<RoomReview>(response, "Review submitted successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.reviewSubmitted,
+      }
+    );
   },
 
   async updateReview(reviewId: string, payload: { rating: number; tags?: string[]; comment?: string }) {
-    try {
-      if (!reviewId?.trim()) {
-        throw new Error('Review ID is required');
-      }
-      if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
-        throw new Error('Rating must be between 1 and 5');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}`, {
+    assertReviewId(reviewId);
+    assertReviewRating(payload.rating);
+
+    return apiRequestJson<RoomReview>(
+      API_PATHS.rooms.review(reviewId),
+      {
         method: "PUT",
-        headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
-      });
-      return await handleApiJsonResponse<RoomReview>(response, "Review updated successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.reviewUpdated,
+      }
+    );
   },
 
   async flagReview(reviewId: string) {
-    try {
-      if (!reviewId?.trim()) {
-        throw new Error('Review ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/reviews/${reviewId}/flag`, {
+    assertReviewId(reviewId);
+
+    return apiRequestJson<RoomReview>(
+      API_PATHS.rooms.flagReview(reviewId),
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<RoomReview>(response, "Review flagged successfully!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.reviewFlagged,
+      }
+    );
   },
 
   async getReviewEligibility(listingId: string) {
-    try {
-      if (!listingId?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${listingId}/reviews/eligibility`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<ReviewEligibility>(response);
-    } catch (error) {
-      throw error;
-    }
+    assertListingId(listingId);
+    return apiRequestJson<ReviewEligibility>(API_PATHS.rooms.reviewEligibility(listingId));
   },
 
   async getHomeActivities() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms/activities/home`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ content: RoomListingActivity[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    return apiRequestJson<{ content: RoomListingActivity[] }>(API_PATHS.rooms.homeActivities);
   },
 
   async getMyActivities() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms/activities/me`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ content: RoomListingActivity[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    return apiRequestJson<{ content: RoomListingActivity[] }>(API_PATHS.rooms.myActivities);
   },
 
-  // Saved Listings
   async saveListing(id: string, notes?: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      const url = notes 
-        ? `${API_BASE_URL}/api/rooms/listings/${id}/save?notes=${encodeURIComponent(notes)}`
-        : `${API_BASE_URL}/api/rooms/listings/${id}/save`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ saved: boolean }>(response, "Listing saved!");
-    } catch (error) {
-      throw error;
+    assertListingId(id);
+
+    const query = new URLSearchParams();
+    if (notes?.trim()) {
+      query.append("notes", notes);
     }
+
+    return apiRequestJson<{ saved: boolean }>(
+      withQuery(API_PATHS.rooms.saveListing(id), query.toString()),
+      {
+        method: "POST",
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingSaved,
+      }
+    );
   },
 
   async unsaveListing(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/save`, {
+    assertListingId(id);
+
+    return apiRequestJson<{ saved: boolean }>(
+      API_PATHS.rooms.saveListing(id),
+      {
         method: "DELETE",
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ saved: boolean }>(
-        response,
-        "Listing removed from saved"
-      );
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingUnsaved,
+      }
+    );
   },
 
   async isSaved(id: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/saved`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ saved: boolean }>(response);
-    } catch (error) {
-      throw error;
-    }
+    assertListingId(id);
+    return apiRequestJson<{ saved: boolean }>(API_PATHS.rooms.listingSavedStatus(id));
   },
 
   async getSavedListings(filters: RoomFilters = {}) {
-    try {
-      const query = buildQuery(filters);
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/saved${query ? `?${query}` : ""}`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ content: RoomListingSummary[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    const query = buildQuery(filters);
+    return apiRequestJson<{ content: RoomListingSummary[] }>(
+      withQuery(API_PATHS.rooms.savedListings, query)
+    );
   },
 
-  // Price Alerts
   async createPriceAlert(payload: {
     minRent?: number;
     maxRent?: number;
@@ -400,64 +336,49 @@ export const roomsApi = {
     areaLabel?: string;
     availableBy?: string;
   }) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts`, {
+    return apiRequestJson<{ id: string }>(
+      API_PATHS.rooms.alerts,
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
         body: JSON.stringify(payload),
-      });
-      return await handleApiJsonResponse<{ id: string }>(response, "Price alert created!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.priceAlertCreated,
+      }
+    );
   },
 
   async getPriceAlerts() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts`, {
-        headers: await getAuthHeaders(),
-      });
-      return await handleApiJsonResponse<{ content: any[] }>(response);
-    } catch (error) {
-      throw error;
-    }
+    return apiRequestJson<{ content: unknown[] }>(API_PATHS.rooms.alerts);
   },
 
   async deletePriceAlert(alertId: string) {
-    try {
-      if (!alertId?.trim()) {
-        throw new Error('Alert ID is required');
-      }
-      const response = await fetch(`${API_BASE_URL}/api/rooms/alerts/${alertId}`, {
+    assertAlertId(alertId);
+
+    await apiRequestNoContent(
+      API_PATHS.rooms.alert(alertId),
+      {
         method: "DELETE",
-        headers: await getAuthHeaders(),
-      });
-      await handleApiNoContentResponse(response, "Price alert deleted!");
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.priceAlertDeleted,
+      }
+    );
   },
 
-  // Reporting
   async reportListing(id: string, reason: string, description?: string) {
-    try {
-      if (!id?.trim()) {
-        throw new Error('Listing ID is required');
-      }
-      if (!reason) {
-        throw new Error('Report reason is required');
-      }
-      const response = await fetch(`${API_BASE_URL}/api/rooms/listings/${id}/report`, {
+    assertListingId(id);
+    assertNonEmptyString(reason, ROOM_API_ERROR_MESSAGES.reportReasonRequired);
+
+    return apiRequestJson<{ reported: boolean }>(
+      API_PATHS.rooms.reportListing(id),
+      {
         method: "POST",
-        headers: await getAuthHeaders(),
         body: JSON.stringify({ reason, description }),
-      });
-      return await handleApiJsonResponse<{ reported: boolean }>(
-        response,
-        "Thank you for reporting. We will review this listing."
-      );
-    } catch (error) {
-      throw error;
-    }
+      },
+      {
+        successMessage: ROOM_API_SUCCESS_MESSAGES.listingReported,
+      }
+    );
   },
 };

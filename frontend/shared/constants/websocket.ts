@@ -1,0 +1,3 @@
+export const WS_MAX_RECONNECT_ATTEMPTS = 5;
+export const WS_RECONNECT_DELAY_MS = 1000;
+export const WS_HEARTBEAT_INTERVAL_MS = 4000;

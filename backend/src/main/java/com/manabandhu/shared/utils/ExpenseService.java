@@ -4,6 +4,7 @@ import com.manabandhu.modules.finance.expenses.components.dto.ExpenseRequest;
 import com.manabandhu.modules.finance.expenses.components.dto.ExpenseResponse;
 import com.manabandhu.core.exception.ResourceNotFoundException;
 import com.manabandhu.shared.utils.User;
+import com.manabandhu.shared.constants.ExpenseMessages;
 import com.manabandhu.modules.finance.expenses.components.model.Expense;
 import com.manabandhu.repository.ExpenseRepository;
 import com.manabandhu.repository.UserRepository;
@@ -42,10 +43,10 @@ public class ExpenseService {
     public ExpenseResponse updateExpense(Long id, ExpenseRequest request) {
         User currentUser = getCurrentUser();
         Expense expense = expenseRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+            .orElseThrow(() -> new ResourceNotFoundException(ExpenseMessages.EXPENSE_NOT_FOUND));
         
         if (!expense.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Not authorized to update this expense");
+            throw new RuntimeException(ExpenseMessages.UPDATE_NOT_AUTHORIZED);
         }
         
         expense.setTitle(request.getTitle());
@@ -61,10 +62,10 @@ public class ExpenseService {
     public void deleteExpense(Long id) {
         User currentUser = getCurrentUser();
         Expense expense = expenseRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+            .orElseThrow(() -> new ResourceNotFoundException(ExpenseMessages.EXPENSE_NOT_FOUND));
         
         if (!expense.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Not authorized to delete this expense");
+            throw new RuntimeException(ExpenseMessages.DELETE_NOT_AUTHORIZED);
         }
         
         expenseRepository.delete(expense);
@@ -72,7 +73,7 @@ public class ExpenseService {
 
     public ExpenseResponse getExpense(Long id) {
         Expense expense = expenseRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+            .orElseThrow(() -> new ResourceNotFoundException(ExpenseMessages.EXPENSE_NOT_FOUND));
         return new ExpenseResponse(expense);
     }
 
@@ -108,7 +109,6 @@ public class ExpenseService {
     private User getCurrentUser() {
         String authUserId = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByAuthUserId(authUserId)
-            .orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
+            .orElseThrow(() -> new RuntimeException(ExpenseMessages.USER_NOT_FOUND_PREFIX + authUserId));
     }
 }
-

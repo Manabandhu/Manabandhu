@@ -1,6 +1,9 @@
 import { toast } from "@/lib/toast";
 
-const extractErrorMessage = async (response: Response): Promise<string> => {
+const extractErrorMessage = async (
+  response: Response,
+  fallbackErrorMessage?: string
+): Promise<string> => {
   const errorData = await response.json().catch(() => ({}));
   if (typeof errorData?.message === "string" && errorData.message.trim()) {
     return errorData.message;
@@ -8,15 +11,19 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   if (typeof errorData?.error === "string" && errorData.error.trim()) {
     return errorData.error;
   }
+  if (fallbackErrorMessage?.trim()) {
+    return fallbackErrorMessage;
+  }
   return `HTTP ${response.status}`;
 };
 
 export const handleApiJsonResponse = async <T>(
   response: Response,
-  successMessage?: string
+  successMessage?: string,
+  fallbackErrorMessage?: string
 ): Promise<T> => {
   if (!response.ok) {
-    throw new Error(await extractErrorMessage(response));
+    throw new Error(await extractErrorMessage(response, fallbackErrorMessage));
   }
 
   if (successMessage) {
@@ -28,10 +35,11 @@ export const handleApiJsonResponse = async <T>(
 
 export const handleApiNoContentResponse = async (
   response: Response,
-  successMessage?: string
+  successMessage?: string,
+  fallbackErrorMessage?: string
 ): Promise<void> => {
   if (!response.ok) {
-    throw new Error(await extractErrorMessage(response));
+    throw new Error(await extractErrorMessage(response, fallbackErrorMessage));
   }
 
   if (successMessage) {

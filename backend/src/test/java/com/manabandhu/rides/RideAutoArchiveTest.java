@@ -14,13 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @SpringBootTest
-@TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:h2:mem:ridearchive;DB_CLOSE_DELAY=-1",
-        "spring.datasource.driverClassName=org.h2.Driver",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.jpa.show-sql=false",
-        "spring.flyway.enabled=false"
-})
+@TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:ridearchive;DB_CLOSE_DELAY=-1")
 class RideAutoArchiveTest {
 
     @Autowired

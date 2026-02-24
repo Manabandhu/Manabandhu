@@ -1,5 +1,7 @@
-import { API_BASE_URL } from "@/shared/constants/api";
-import { getAuthHeaders } from "@/services/auth";
+import { apiRequestJson, apiRequestNoContent } from "@/shared/api/api-request";
+import { assertNonEmptyString } from "@/shared/api/validation-utils";
+import { API_PATHS } from "@/shared/constants/api-paths";
+import { RIDE_API_ERROR_MESSAGES } from "@/shared/constants/api-messages";
 import {
   RideFilters,
   RidePost,
@@ -29,163 +31,205 @@ const buildQuery = (filters: RideFilters = {}) => {
   return params.toString();
 };
 
+const withQuery = (path: string, query?: string): string => {
+  if (!query?.trim()) {
+    return path;
+  }
+  return `${path}?${query}`;
+};
+
+const assertRideId = (id: string): void => {
+  assertNonEmptyString(id, RIDE_API_ERROR_MESSAGES.rideIdRequired);
+};
+
 export const ridesApi = {
   async getPosts(filters: RideFilters = {}) {
     const query = buildQuery(filters);
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts${query ? `?${query}` : ""}`,
-      { headers: await getAuthHeaders() }
+    return apiRequestJson<{ content: RidePostSummary[] }>(
+      withQuery(API_PATHS.rides.posts, query),
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchRides }
     );
-    if (!response.ok) throw new Error("Failed to fetch rides");
-    return response.json() as Promise<{ content: RidePostSummary[] }>;
   },
 
   async getMyPosts() {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/me`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch rides");
-    return response.json() as Promise<{ content: RidePostSummary[] }>;
+    return apiRequestJson<{ content: RidePostSummary[] }>(
+      API_PATHS.rides.myPosts,
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchRides }
+    );
   },
 
   async getPost(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch ride");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.post(id),
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchRide }
+    );
   },
 
   async createPost(payload: Partial<RidePost>) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to create ride");
-    return response.json() as Promise<RidePostUpsertResponse>;
+    return apiRequestJson<RidePostUpsertResponse>(
+      API_PATHS.rides.posts,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.createRide }
+    );
   },
 
   async updatePost(id: string, payload: Partial<RidePost>) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}`, {
-      method: "PUT",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Failed to update ride");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.post(id),
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.updateRide }
+    );
   },
 
   async cancelPost(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/cancel`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to cancel ride");
+    assertRideId(id);
+    await apiRequestNoContent(
+      API_PATHS.rides.cancelPost(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.cancelRide }
+    );
   },
 
   async repostPost(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/repost`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to repost ride");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.repostPost(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.repostRide }
+    );
   },
 
   async rebookPost(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/rebook`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to rebook ride");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.rebookPost(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.rebookRide }
+    );
   },
 
   async updateStatus(id: string, status: RideStatus) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/status`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    if (!response.ok) throw new Error("Failed to update status");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    if (!status) {
+      throw new Error(RIDE_API_ERROR_MESSAGES.statusRequired);
+    }
+
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.updatePostStatus(id),
+      {
+        method: "POST",
+        body: JSON.stringify({ status }),
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.updateRideStatus }
+    );
   },
 
   async startChat(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/chat/start`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to start chat");
-    return response.json() as Promise<{ chatThreadId: string }>;
+    assertRideId(id);
+    return apiRequestJson<{ chatThreadId: string }>(
+      API_PATHS.rides.startPostChat(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.startRideChat }
+    );
   },
 
   async heartbeat(chatThreadId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/chats/${chatThreadId}/heartbeat`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to record heartbeat");
+    assertNonEmptyString(chatThreadId, RIDE_API_ERROR_MESSAGES.chatThreadIdRequired);
+    await apiRequestNoContent(
+      API_PATHS.rides.chatHeartbeat(chatThreadId),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.recordRideHeartbeat }
+    );
   },
 
   async bookPost(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/book`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to book ride");
-    return response.json() as Promise<RidePost>;
+    assertRideId(id);
+    return apiRequestJson<RidePost>(
+      API_PATHS.rides.bookPost(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.bookRide }
+    );
   },
 
   async startTracking(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/tracking/start`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to start tracking");
-    return response.json() as Promise<RideTrackingSession>;
+    assertRideId(id);
+    return apiRequestJson<RideTrackingSession>(
+      API_PATHS.rides.startTracking(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.startTracking }
+    );
   },
 
   async updateLocation(id: string, lat: number, lng: number) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/tracking/location`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-      body: JSON.stringify({ lat, lng }),
-    });
-    if (!response.ok) throw new Error("Failed to update location");
-    return response.json() as Promise<RideTrackingSession>;
+    assertRideId(id);
+    return apiRequestJson<RideTrackingSession>(
+      API_PATHS.rides.updateTrackingLocation(id),
+      {
+        method: "POST",
+        body: JSON.stringify({ lat, lng }),
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.updateTrackingLocation }
+    );
   },
 
   async getTracking(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/tracking`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch tracking");
-    return response.json() as Promise<RideTrackingSession>;
+    assertRideId(id);
+    return apiRequestJson<RideTrackingSession>(
+      API_PATHS.rides.getTracking(id),
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchTracking }
+    );
   },
 
   async endTracking(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/rides/posts/${id}/tracking/end`, {
-      method: "POST",
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to end tracking");
-    return response.json() as Promise<RideTrackingSession>;
+    assertRideId(id);
+    return apiRequestJson<RideTrackingSession>(
+      API_PATHS.rides.endTracking(id),
+      {
+        method: "POST",
+      },
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.endTracking }
+    );
   },
 
   async getHomeActivities() {
-    const response = await fetch(`${API_BASE_URL}/api/rides/activities/home`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch activities");
-    return response.json() as Promise<{ content: RidePostActivity[] }>;
+    return apiRequestJson<{ content: RidePostActivity[] }>(
+      API_PATHS.rides.homeActivities,
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchRideActivities }
+    );
   },
 
   async getMyActivities() {
-    const response = await fetch(`${API_BASE_URL}/api/rides/activities/me`, {
-      headers: await getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch activities");
-    return response.json() as Promise<{ content: RidePostActivity[] }>;
+    return apiRequestJson<{ content: RidePostActivity[] }>(
+      API_PATHS.rides.myActivities,
+      {},
+      { fallbackErrorMessage: RIDE_API_ERROR_MESSAGES.fetchRideActivities }
+    );
   },
 };

@@ -9,6 +9,8 @@ import com.manabandhu.modules.messaging.chat.components.model.Message;
 import com.manabandhu.repository.ChatRepository;
 import com.manabandhu.repository.MessageRepository;
 import com.manabandhu.repository.UserRepository;
+import com.manabandhu.shared.constants.ChatNotificationConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class ChatService {
 
     @Autowired
@@ -142,7 +145,9 @@ public class ChatService {
         try {
             // Get sender's name
             Optional<User> senderOpt = userRepository.findByAuthUserId(senderId);
-            String senderName = senderOpt.map(User::getName).orElse("Someone");
+            String senderName = senderOpt
+                    .map(User::getName)
+                    .orElse(ChatNotificationConstants.DEFAULT_SENDER_NAME);
             
             // Get recipient user IDs (all participants except sender)
             List<String> recipientIds = chat.getParticipants().stream()
@@ -160,16 +165,22 @@ public class ChatService {
             if (chat.getType() == Chat.ChatType.DIRECT) {
                 // Direct chat: Just show the message
                 title = senderName;
-                body = content.length() > 100 ? content.substring(0, 100) + "..." : content;
+                body = trimMessage(
+                        content,
+                        ChatNotificationConstants.DIRECT_MESSAGE_PREVIEW_MAX_LENGTH
+                );
             } else {
                 // Group chat: Show sender name + message
                 title = chat.getName();
-                body = senderName + ": " + (content.length() > 80 ? content.substring(0, 80) + "..." : content);
+                body = senderName + ": " + trimMessage(
+                        content,
+                        ChatNotificationConstants.GROUP_MESSAGE_PREVIEW_MAX_LENGTH
+                );
             }
             
             // Prepare notification data
             Map<String, Object> notificationData = new HashMap<>();
-            notificationData.put("type", "CHAT_MESSAGE");
+            notificationData.put("type", ChatNotificationConstants.CHAT_MESSAGE_TYPE);
             notificationData.put("chatId", chat.getId().toString());
             notificationData.put("messageId", messageDTO.getId().toString());
             notificationData.put("senderId", senderId);
@@ -182,9 +193,15 @@ public class ChatService {
             
         } catch (Exception e) {
             // Log error but don't fail message sending
-            System.err.println("Error sending chat push notifications: " + e.getMessage());
-            e.printStackTrace();
+            log.warn("Failed to send chat push notifications: {}", e.getMessage(), e);
         }
+    }
+
+    private String trimMessage(String content, int maxLength) {
+        if (content == null) {
+            return "";
+        }
+        return content.length() > maxLength ? content.substring(0, maxLength) + "..." : content;
     }
 
     public Page<MessageDTO> getChatMessages(Long chatId, int page, int size) {
