@@ -23,9 +23,9 @@ Spring Boot backend for ManaBandhu application.
 Copy `backend/.env.example` to `backend/.env` and update values:
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/manabandhu
-DATABASE_USERNAME=
-DATABASE_PASSWORD=
+DATABASE_URL=jdbc:postgresql://localhost:5432/manabandhu
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
 REDIS_URL=redis://localhost:6379
 REDIS_SSL_ENABLED=false
 JWT_SECRET=change-me-change-me-change-me-change-me
@@ -36,6 +36,14 @@ JWT_REFRESH_TTL_SECONDS=2592000
 `DATABASE_URL` accepts either:
 - `postgresql://user:password@host:5432/dbname`
 - `jdbc:postgresql://host:5432/dbname`
+
+If using Supabase, prefer the pooler endpoint (many local networks cannot use direct `db.<ref>.supabase.co:5432`):
+
+```env
+DATABASE_URL=jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_USERNAME=postgres.<project-ref>
+DATABASE_PASSWORD=<db-password>
+```
 
 ### 2. Auth Setup
 

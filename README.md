@@ -95,11 +95,21 @@ NEXT_PUBLIC_API_URL=http://localhost:9090
 ### Backend
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/manabandhu
+DATABASE_URL=jdbc:postgresql://localhost:5432/manabandhu
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgres
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=change-me-change-me-change-me-change-me
 JWT_ACCESS_TTL_SECONDS=3600
 JWT_REFRESH_TTL_SECONDS=2592000
+```
+
+If using Supabase, prefer the pooler connection string:
+
+```env
+DATABASE_URL=jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_USERNAME=postgres.<project-ref>
+DATABASE_PASSWORD=<db-password>
 ```
 
 ## Development
