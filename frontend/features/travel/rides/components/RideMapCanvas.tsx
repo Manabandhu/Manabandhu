@@ -8,7 +8,7 @@ import { useCurrency } from "@/lib/currency";
 import RideStatusBadge from "./RideStatusBadge";
 // Platform-specific imports - Metro will resolve .native.ts or .web.ts automatically
 // @ts-ignore - Platform-specific file resolution
-import { MapView, Marker, PROVIDER_GOOGLE } from "../rooms/MapComponents";
+import { MapView, Marker, PROVIDER_GOOGLE } from "../../rooms/components/MapComponents";
 
 interface RideMapCanvasProps {
   rides: RidePostSummary[];
