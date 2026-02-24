@@ -20,15 +20,22 @@ Spring Boot backend for ManaBandhu application.
 
 ## Setup
 
-Create `.env` in `backend/` with:
+Copy `backend/.env.example` to `backend/.env` and update values:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/manabandhu
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
 REDIS_URL=redis://localhost:6379
+REDIS_SSL_ENABLED=false
 JWT_SECRET=change-me-change-me-change-me-change-me
 JWT_ACCESS_TTL_SECONDS=3600
 JWT_REFRESH_TTL_SECONDS=2592000
 ```
+
+`DATABASE_URL` accepts either:
+- `postgresql://user:password@host:5432/dbname`
+- `jdbc:postgresql://host:5432/dbname`
 
 ### 2. Auth Setup
 
