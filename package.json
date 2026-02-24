@@ -11,7 +11,7 @@
     "mobile": "npm --workspace frontend run start",
     "web": "npm --workspace frontend-web run dev",
     "frontend": "npm run mobile",
-    "backend": "cd backend && ./mvnw spring-boot:run",
+    "backend": "cd backend && export $(cat .env | grep -v '^#' | xargs) && ./mvnw spring-boot:run",
     "dev": "concurrently \"npm run mobile\" \"npm run backend\"",
     "dev:all": "concurrently \"npm run mobile\" \"npm run web\" \"npm run backend\"",
     "build:frontend": "cd frontend && npm run build",

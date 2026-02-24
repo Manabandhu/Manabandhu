@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { toast } from '../../lib/toast';
-import { tokenStorage, signOut } from '@/services/auth';
+import { tokenStorage } from '@/services/auth';
 import { API_ERROR_MESSAGES } from '@/shared/constants/messages';
 import {
   API_BASE_URL,
@@ -45,6 +45,7 @@ apiClient.interceptors.response.use((response) => response, async (error) => {
           return apiClient(original);
         }
       } catch {
+        const { signOut } = await import('@/services/auth');
         await signOut();
       } finally {
         isRefreshing = false;

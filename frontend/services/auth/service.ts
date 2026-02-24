@@ -14,11 +14,15 @@ export const signInWithEmail = async (email: string, password: string) => {
 export const signUpWithEmail = signInWithEmail;
 
 export const signInWithGoogle = async () => {
-  throw new Error("Google login is not enabled.");
+  // Google OAuth is handled by backend/Supabase
+  // For now, redirect users to use email login
+  throw new Error("Please use email login. Google sign-in coming soon.");
 };
 
 export const signInWithApple = async () => {
-  throw new Error("Apple login is not enabled.");
+  // Apple OAuth is handled by backend/Supabase
+  // For now, redirect users to use email login
+  throw new Error("Please use email login. Apple sign-in coming soon.");
 };
 
 export const sendOTP = async (_phoneNumber: string) => "000000";
