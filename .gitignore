@@ -155,3 +155,4 @@ docker-compose.override.yml
 
 # Redis
 dump.rdb
+.env
